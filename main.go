@@ -1,5 +1,7 @@
 package main
 
+//go:generate ./util/update_unicode
+
 import (
 	"os"
 

@@ -1,0 +1,43 @@
+#!/bin/sh -eu
+
+# This should not be in shell, should move to go, but for now, be fast to write
+
+datafile=unicode/UnicodeData.txt
+generated=unicode/generated_data.go
+
+if [ ".${SKIP_FETCH:-}" = "." ]; then
+	if [ ".${UNICODE_DATA_FILE:-}" != "." ]; then
+		cp -v -- "$UNICODE_DATA_FILE" "$datafile"
+	else
+		curl -L -o "$datafile" http://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+	fi
+fi
+
+git add -- "$datafile"
+
+ApproxCount=$(wc -l < $datafile | xargs)
+
+rm -vf "$generated"
+
+exec 3>&1
+exec > "$generated"
+
+cat <<'EOHEADER'
+package unicode;
+
+var rawData = []byte(`
+EOHEADER
+
+sed 's/`/`+"`"+`/g' < "$datafile"
+
+cat <<'EOFOOTER'
+`)
+EOFOOTER
+
+exec >&3
+exec 3>&-
+
+go fmt "$generated"
+git add -- "$generated"
+
+echo Done
