@@ -14,6 +14,7 @@ type selector int
 const (
 	ITEM selector = iota
 	ERROR
+	DIVIDER
 )
 
 type printItem int
@@ -22,6 +23,7 @@ const (
 	PRINT_RUNE printItem = iota
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX
+	PRINT_RUNE_UTF8ENC
 	PRINT_NAME
 )
 
@@ -39,7 +41,7 @@ type resultSet struct {
 func New(sizeHint int) *resultSet {
 	return &resultSet{
 		items:  make([]unicode.CharInfo, 0, sizeHint),
-		errors: make([]errorItem, 0, sizeHint),
+		errors: make([]errorItem, 0, 3),
 		which:  make([]selector, 0, sizeHint),
 	}
 }
@@ -52,6 +54,10 @@ func (rs *resultSet) AddError(input string, e error) {
 func (rs *resultSet) AddCharInfo(ci unicode.CharInfo) {
 	rs.items = append(rs.items, ci)
 	rs.which = append(rs.which, ITEM)
+}
+
+func (rs *resultSet) AddDivider() {
+	rs.which = append(rs.which, DIVIDER)
 }
 
 func (rs *resultSet) ErrorCount() int {
@@ -69,6 +75,10 @@ func (rs *resultSet) PrintPlain(what printItem) {
 		case ERROR:
 			fmt.Fprintf(os.Stderr, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei += 1
+		case DIVIDER:
+			fmt.Print()
+		default:
+			fmt.Fprintf(os.Stderr, "internal error, unhandled item to print, of type %v", s)
 		}
 	}
 }
@@ -81,6 +91,13 @@ func renderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 		return strconv.FormatUint(uint64(ci.Number), 16)
 	case PRINT_RUNE_DEC:
 		return strconv.FormatUint(uint64(ci.Number), 10)
+	case PRINT_RUNE_UTF8ENC:
+		bb := []byte(string(ci.Number))
+		var s string
+		for i := range bb {
+			s += fmt.Sprintf("%%%X", bb[i])
+		}
+		return s
 	case PRINT_NAME:
 		return ci.Name
 	default:
@@ -92,8 +109,20 @@ func (rs *resultSet) PrintTables() {
 	if len(rs.items) > 0 {
 		t := table.New()
 		t.AddHeaders(detailsHeaders()...)
-		for _, ci := range rs.items {
-			t.AddRow(detailsFor(ci)...)
+		ii := 0
+		for _, s := range rs.which {
+			switch s {
+			case ITEM:
+				t.AddRow(detailsFor(rs.items[ii])...)
+				ii += 1
+			case ERROR:
+				// skip, print in separate table below
+			case DIVIDER:
+				t.AddSeparator()
+			}
+		}
+		for _, align := range detailsColumnAlignments {
+			t.AlignColumn(align.column, align.where)
 		}
 		fmt.Print(t.Render())
 	}
@@ -109,8 +138,17 @@ func (rs *resultSet) PrintTables() {
 
 func detailsHeaders() []interface{} {
 	return []interface{}{
-		"C", "Name", "Hex", "Dec", "Block", "Info", "Vim", "HTML", "XHTML",
+		"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Info", "Vim", "HTML", "XHTML",
 	}
+}
+
+var detailsColumnAlignments = []struct {
+	column int // 1-based
+	where  table.Alignment
+}{
+	{3, table.RIGHT},
+	{4, table.RIGHT},
+	{5, table.RIGHT},
 }
 
 func detailsFor(ci unicode.CharInfo) []interface{} {
@@ -119,6 +157,7 @@ func detailsFor(ci unicode.CharInfo) []interface{} {
 		renderCharInfoItem(ci, PRINT_NAME),
 		renderCharInfoItem(ci, PRINT_RUNE_HEX),
 		renderCharInfoItem(ci, PRINT_RUNE_DEC),
+		renderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
 		// FIXME:
 		"b?", "i?", "v?", "h?", "x?",
 	}
