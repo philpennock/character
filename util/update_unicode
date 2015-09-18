@@ -30,9 +30,11 @@ EOHEADER
 
 sed 's/`/`+"`"+`/g' < "$datafile"
 
-cat <<'EOFOOTER'
-`)
-EOFOOTER
+echo '`)'
+echo
+echo "const rawLineCount = $ApproxCount"
+echo
+echo "// EOF"
 
 exec >&3
 exec 3>&-

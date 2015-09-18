@@ -3,8 +3,10 @@ package named
 // FIXME: use cmd.Out() ?  what about non-error?
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -20,11 +22,27 @@ var flags struct {
 	verbose   bool
 }
 
+// FIXME: make dedicated type, embed search info
+var ErrUnknownCharacterName = errors.New("unknown character name")
+
+// XXX
+// should move unicode into a DataSources, to handle vim/xhtml/html/etc
+// should have a ResultsSet system, move table/display logic into that
+type Sources struct {
+	unicode unicode.Unicode
+}
+
+func Sources__New() Sources {
+	return Sources{
+		unicode: unicode.Load(),
+	}
+}
+
 var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
 	Short: "shows character with given name",
 	Run: func(cmd *cobra.Command, args []string) {
-		u := unicode.Load()
+		sources := Sources__New()
 		var t *table.Table
 		var errTable *table.Table
 		if flags.verbose {
@@ -34,7 +52,7 @@ var namedCmd = &cobra.Command{
 		}
 
 		for _, arg := range args {
-			c, err := findChar(u, arg)
+			c, err := sources.findCharByName(arg)
 			if err != nil {
 				root.Errored()
 			}
@@ -50,7 +68,7 @@ var namedCmd = &cobra.Command{
 				errTable.AddRow(arg, err)
 				continue
 			}
-			t.AddRow(detailsFor(c)...)
+			t.AddRow(sources.detailsFor(c)...)
 		}
 
 		if !flags.verbose {
@@ -73,9 +91,15 @@ func init() {
 	root.AddCommand(namedCmd)
 }
 
-func findChar(u unicode.Unicode, needle string) (rune, error) {
-	// FIXME
-	return 'c', nil
+func (s Sources) findCharByName(needle string) (rune, error) {
+	n := strings.ToUpper(needle)
+	for k := range s.unicode.ByName {
+		if k == n {
+			return s.unicode.ByName[k].Number, nil
+		}
+	}
+
+	return 0, ErrUnknownCharacterName
 }
 
 func detailsHeaders() []interface{} {
@@ -87,11 +111,11 @@ func detailsHeaders() []interface{} {
 	}
 }
 
-func detailsFor(c rune) []interface{} {
+func (s Sources) detailsFor(r rune) []interface{} {
 	return []interface{}{
-		"c",
-		"dummy character c",
-		"some metadata",
-		"oops",
+		string(r),
+		s.unicode.ByRune[r].Name,
+		"todo",
+		"todo",
 	}
 }
