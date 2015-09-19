@@ -14,6 +14,7 @@ import (
 )
 
 var flags struct {
+	join      bool
 	search    bool
 	substring bool
 	verbose   bool
@@ -22,16 +23,16 @@ var flags struct {
 // FIXME: make dedicated type, embed search info
 var ErrUnknownCharacterName = errors.New("unknown character name")
 
-// XXX
-// should move unicode into a DataSources, to handle vim/xhtml/html/etc
-// should have a ResultsSet system, move table/display logic into that
-
 var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
 	Short: "shows character with given name",
 	Run: func(cmd *cobra.Command, args []string) {
 		srcs := sources.NewAll()
 		results := resultset.New(srcs, len(args))
+
+		if flags.join {
+			args = []string{strings.Join(args, " ")}
+		}
 
 		for _, arg := range args {
 			ci, err := findCharInfoByName(srcs.Unicode, arg)
@@ -52,6 +53,7 @@ var namedCmd = &cobra.Command{
 }
 
 func init() {
+	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.substring, "substring", "s", false, "search for substrings, not words")
 	namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
