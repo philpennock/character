@@ -2,44 +2,55 @@
 
 # This should not be in shell, should move to go, but for now, be fast to write
 
-datafile=unicode/UnicodeData.txt
-generated=unicode/generated_data.go
+URLBASE='http://www.unicode.org/Public/UCD/latest/ucd/'
 
-if [ ".${SKIP_FETCH:-}" = "." ]; then
-	if [ ".${UNICODE_DATA_FILE:-}" != "." ]; then
-		cp -v -- "$UNICODE_DATA_FILE" "$datafile"
-	else
-		curl -L -o "$datafile" http://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+update() {
+	local input="$1"
+	local output="$2"
+	local origin_override="$3"
+	local datavarname="$4"
+	local datalenvarname="$5"
+
+	local datafile="unicode/$input"
+	local generated="unicode/$output"
+
+	if [ ".${SKIP_FETCH:-}" = "." ]; then
+		if [ ".${origin_override}" != "." ]; then
+			cp -v -- "$origin_override" "$datafile"
+		else
+			curl -L -o "$datafile" "${URLBASE}${input}"
+		fi
 	fi
-fi
 
-git add -- "$datafile"
+	git add -- "$datafile"
 
-ApproxCount=$(wc -l < $datafile | xargs)
+	ApproxCount=$(wc -l < $datafile | xargs)
 
-rm -vf "$generated"
+	rm -vf "$generated"
 
-exec 3>&1
-exec > "$generated"
+	exec 3>&1
+	exec > "$generated"
 
-cat <<'EOHEADER'
-package unicode;
+	echo "package unicode;"
+	echo
+	echo "var ${datavarname} = []byte(\`"
 
-var rawData = []byte(`
-EOHEADER
+	sed 's/`/`+"`"+`/g' < "$datafile"
 
-sed 's/`/`+"`"+`/g' < "$datafile"
+	echo '`)'
+	echo
+	echo "const ${datalenvarname} = $ApproxCount"
+	echo
+	echo "// EOF"
 
-echo '`)'
-echo
-echo "const rawLineCount = $ApproxCount"
-echo
-echo "// EOF"
+	exec >&3
+	exec 3>&-
 
-exec >&3
-exec 3>&-
+	go fmt "$generated"
+	git add -- "$generated"
+}
 
-go fmt "$generated"
-git add -- "$generated"
+update UnicodeData.txt generated_data.go "${UNICODE_DATA_FILE:-}" rawData rawLineCount
+update Blocks.txt generated_blocks.go "" rawBlocks rawBlocksLineCount
 
 echo Done
