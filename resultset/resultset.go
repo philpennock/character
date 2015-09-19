@@ -79,7 +79,7 @@ func (rs *resultSet) PrintPlain(what printItem) {
 			fmt.Fprintf(os.Stderr, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei += 1
 		case DIVIDER:
-			fmt.Print()
+			fmt.Println()
 		default:
 			fmt.Fprintf(os.Stderr, "internal error, unhandled item to print, of type %v", s)
 		}
