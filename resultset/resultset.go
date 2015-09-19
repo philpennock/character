@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/table"
 	"github.com/philpennock/character/unicode"
 )
@@ -33,16 +34,18 @@ type errorItem struct {
 }
 
 type resultSet struct {
-	items  []unicode.CharInfo
-	errors []errorItem
-	which  []selector
+	sources *sources.Sources
+	items   []unicode.CharInfo
+	errors  []errorItem
+	which   []selector
 }
 
-func New(sizeHint int) *resultSet {
+func New(s *sources.Sources, sizeHint int) *resultSet {
 	return &resultSet{
-		items:  make([]unicode.CharInfo, 0, sizeHint),
-		errors: make([]errorItem, 0, 3),
-		which:  make([]selector, 0, sizeHint),
+		sources: s,
+		items:   make([]unicode.CharInfo, 0, sizeHint),
+		errors:  make([]errorItem, 0, 3),
+		which:   make([]selector, 0, sizeHint),
 	}
 }
 
@@ -113,7 +116,7 @@ func (rs *resultSet) PrintTables() {
 		for _, s := range rs.which {
 			switch s {
 			case ITEM:
-				t.AddRow(detailsFor(rs.items[ii])...)
+				t.AddRow(rs.detailsFor(rs.items[ii])...)
 				ii += 1
 			case ERROR:
 				// skip, print in separate table below
@@ -151,7 +154,7 @@ var detailsColumnAlignments = []struct {
 	{5, table.RIGHT},
 }
 
-func detailsFor(ci unicode.CharInfo) []interface{} {
+func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 	return []interface{}{
 		renderCharInfoItem(ci, PRINT_RUNE),
 		renderCharInfoItem(ci, PRINT_NAME),
@@ -159,6 +162,8 @@ func detailsFor(ci unicode.CharInfo) []interface{} {
 		renderCharInfoItem(ci, PRINT_RUNE_DEC),
 		renderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
 		// FIXME:
-		"b?", "i?", "v?", "h?", "x?",
+		"b?", "i?",
+		rs.sources.Vim.DigraphsFor(ci.Number),
+		"h?", "x?",
 	}
 }

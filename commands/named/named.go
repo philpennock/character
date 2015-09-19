@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/philpennock/character/resultset"
+	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"
 
 	"github.com/philpennock/character/commands/root"
@@ -29,11 +30,11 @@ var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
 	Short: "shows character with given name",
 	Run: func(cmd *cobra.Command, args []string) {
-		u := unicode.Load()
-		results := resultset.New(len(args))
+		srcs := sources.NewAll()
+		results := resultset.New(srcs, len(args))
 
 		for _, arg := range args {
-			ci, err := findCharInfoByName(u, arg)
+			ci, err := findCharInfoByName(srcs.Unicode, arg)
 			if err != nil {
 				root.Errored()
 				results.AddError(arg, err)
