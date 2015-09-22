@@ -1,5 +1,6 @@
 package main
 
+//go:generate ./util/update_entities
 //go:generate ./util/update_unicode
 
 import (
@@ -9,6 +10,7 @@ import (
 
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
+	_ "github.com/philpennock/character/commands/version"
 )
 
 func main() {
