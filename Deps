@@ -1,0 +1,36 @@
+{
+	"ImportPath": "github.com/philpennock/character",
+	"GoVersion": "go1.5.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/apcera/termtables",
+			"Rev": "9a23ecfb6dfd961b00084dc84f4ffb41abd0df91"
+		},
+		{
+			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
+			"Comment": "v1.0.4",
+			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
+		},
+		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/russross/blackfriday",
+			"Comment": "v1.2-80-g8cec3a8",
+			"Rev": "8cec3a854e68dba10faabbe31c089abf4a3e57a6"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
+			"Rev": "244f5ac324cb97e1987ef901a0081a77bfd8e845"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "53d96508f5c9311f5dade714e1de7bd6a9d2af4a"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "5a13a75b13d132dc7d07dd19fd260257cd9c0290"
+		}
+	]
+}
