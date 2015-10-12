@@ -4,7 +4,27 @@ character
 This is a tool for various manipulations on characters, as characters rather
 than full strings, to show names, encodings and more.
 
-Patches welcome
+The tool is structured as a top-level command, options, and sub-commands which
+can do different things.  Many sub-commands will take a `-v` verbose option,
+which gives more detail in a pretty-printed table.
+
+```console
+$ character help
+[...]
+$ character version
+[...]
+$ character name ✓
+CHECK MARK
+$ character named -h
+[...]
+$ character named 'CHECK MARK'
+✓
+$ character named -j CHECK MARK
+✓
+```
+
+[Licensed](./LICENSE.txt) under a MIT-style license.  
+Patches welcome.
 
 
 Building
@@ -35,4 +55,22 @@ That should work for most people; assumes GNU make.  In more detail:
   * `go build` -- idiomatic Go, should always work
   * `make` or `gmake` -- using GNU Make, should do extra steps such as embed
     version identifiers
+
+The `Deps` file used by `deppy` should be considered to be akin to a
+`foo.lock` file in Ruby's ecosystem, but where the required files are not
+listed in `foo` but instead taken straight from the imports of the Go code.
+
+
+Optional Tools
+--------------
+
+If you're just installing, you don't need these.  If you're developing, you
+might.
+
+* `go get -v github.com/kisielk/godepgraph`  
+   Dependency graphing tool
+* `go get -v github.com/golang/lint/golint`  
+  Linter for Go
+* `go get -v github.com/hamfist/deppy`  
+  Dependency version manager; _can_ just use `go get -d`
 
