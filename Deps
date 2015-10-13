@@ -7,6 +7,10 @@
 			"Rev": "9a23ecfb6dfd961b00084dc84f4ffb41abd0df91"
 		},
 		{
+			"ImportPath": "github.com/argusdusty/Ferret",
+			"Rev": "94b330b64bf5982fb7f5a03e93685d8ea5688db4"
+		},
+		{
 			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
 			"Comment": "v1.0.4",
 			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io"
 	"sync"
+
+	"github.com/argusdusty/Ferret"
 )
 
 // CharInfo is the basic set of information about one Unicode character.
@@ -18,16 +20,23 @@ type CharInfo struct {
 type Unicode struct {
 	ByRune map[rune]CharInfo
 	ByName map[string]CharInfo
+	Search *ferret.InvertedSuffix
 
-	// should also add an inverted index by word, etc
+	// these will be blanked once setup is complete
+	linearNames   []string
+	linearIfaceCI []interface{}
 }
 
 var global Unicode
-var parseUnicodeOnce sync.Once
+var once struct {
+	parseUnicode sync.Once
+	loadSearch   sync.Once
+}
 
 // Load gives us all the Unicode-spec derived data which we have.
 func Load() Unicode {
-	parseUnicodeOnce.Do(parseRaw)
+	once.parseUnicode.Do(parseRaw)
+	once.loadSearch.Do(addSearch)
 	return global
 }
 
@@ -36,6 +45,8 @@ func parseRaw() {
 
 	byRune := make(map[rune]CharInfo, rawLineCount)
 	byName := make(map[string]CharInfo, rawLineCount)
+	linearNames := make([]string, 0, rawLineCount)
+	linearIfaceCI := make([]interface{}, 0, rawLineCount)
 
 	lineNum := 0
 	for {
@@ -69,11 +80,15 @@ func parseRaw() {
 		}
 		byRune[r] = ci
 		byName[name] = ci
+		linearNames = append(linearNames, name)
+		linearIfaceCI = append(linearIfaceCI, ci)
 	}
 
 	global = Unicode{
-		ByRune: byRune,
-		ByName: byName,
+		ByRune:        byRune,
+		ByName:        byName,
+		linearNames:   linearNames,
+		linearIfaceCI: linearIfaceCI,
 	}
 }
 
@@ -93,4 +108,15 @@ func runeFromHexField(bb []byte) rune {
 		}
 	}
 	return r
+}
+
+func addSearch() {
+	global.Search = ferret.New(
+		global.linearNames,
+		global.linearNames,
+		global.linearIfaceCI,
+		ferret.UnicodeToLowerASCII)
+
+	global.linearNames = nil
+	global.linearIfaceCI = nil
 }

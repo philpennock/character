@@ -14,14 +14,18 @@ import (
 )
 
 var flags struct {
-	join      bool
-	search    bool
-	substring bool
-	verbose   bool
+	join    bool
+	search  bool
+	verbose bool
 }
 
 // FIXME: make dedicated type, embed search info
+
+// ErrUnknownCharacterName means the specified character does not exist
 var ErrUnknownCharacterName = errors.New("unknown character name")
+
+// ErrNoSearchResults means you're unlucky
+var ErrNoSearchResults = errors.New("no search results")
 
 var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
@@ -35,6 +39,21 @@ var namedCmd = &cobra.Command{
 		}
 
 		for _, arg := range args {
+			if flags.search {
+				// documentation says -1 for no limit, but that causes a
+				// runtime panic; source analysis suggests 0 will work (but is
+				// not guaranteed by documented API contract)
+				_, found := srcs.Unicode.Search.Query(arg, 0)
+				if len(found) == 0 {
+					root.Errored()
+					results.AddError(arg, ErrNoSearchResults)
+					continue
+				}
+				for _, cii := range found {
+					results.AddCharInfo(cii.(unicode.CharInfo))
+				}
+				continue
+			}
 			ci, err := findCharInfoByName(srcs.Unicode, arg)
 			if err != nil {
 				root.Errored()
@@ -55,7 +74,6 @@ var namedCmd = &cobra.Command{
 func init() {
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
-	namedCmd.Flags().BoolVarP(&flags.substring, "substring", "s", false, "search for substrings, not words")
 	if resultset.CanTable() {
 		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
