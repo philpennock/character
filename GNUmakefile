@@ -6,7 +6,7 @@
 
 REPO_PATH=	github.com/philpennock/character
 
-SOURCES=	main.go
+SOURCES=	$(shell find . -type f -name '*.go')
 BINARIES=	character
 CRUFT=		dependency-graph.png
 
@@ -78,7 +78,8 @@ vet:
 	@echo done vet
 
 lint:
-	@echo If golint is not installed: go get -v github.com/golang/lint/golint
+	@echo "If golint is not installed: go get -v github.com/golang/lint/golint"
+	@echo "We do not follow all style suggestions; in particular, consts are ALL_CAPS"
 	@golint ./...
 	@echo done lint
 

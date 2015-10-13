@@ -50,6 +50,10 @@ var nameCmd = &cobra.Command{
 }
 
 func init() {
-	nameCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
+	if resultset.CanTable() {
+		nameCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
+	}
+	// FIXME: support verbose results without tables
+
 	root.AddCommand(nameCmd)
 }

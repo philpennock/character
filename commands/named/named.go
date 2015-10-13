@@ -56,7 +56,10 @@ func init() {
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.substring, "substring", "s", false, "search for substrings, not words")
-	namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
+	if resultset.CanTable() {
+		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
+	}
+	// FIXME: support verbose results without tables
 	root.AddCommand(namedCmd)
 }
 

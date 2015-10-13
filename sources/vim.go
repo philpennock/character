@@ -14,12 +14,16 @@ import (
 	"unicode/utf8"
 )
 
+// VimDigraph encapsulates a vim digraph sequence, which is an input tuple of
+// keypresses which together result in a rune.  After typing "Ctrl-K", you
+// might enter "Pd" to get "£".
 type VimDigraph struct {
 	Sequence  string
 	Result    rune
 	Codepoint int
 }
 
+// VimData is the set of all data we have retrieved about characters from vim.
 type VimData struct {
 	DigraphByRune map[rune][]VimDigraph
 }
@@ -85,7 +89,7 @@ func loadVimDigraphs() VimData {
 			for _, chunk := range digraphExtractor.FindAllSubmatch(segment, -1) {
 				i, err := strconv.Atoi(string(chunk[3]))
 				if err != nil {
-					broken += 1
+					broken++
 					continue
 				}
 				theRune, _ := utf8.DecodeRune(chunk[2])
@@ -112,6 +116,8 @@ func loadVimDigraphs() VimData {
 	return results
 }
 
+// DigraphsFor retrieves a string which is a space-separated list of the known
+// digraph sequences which will produce a given rune.
 func (v VimData) DigraphsFor(r rune) string {
 	items, ok := v.DigraphByRune[r]
 	if !ok {

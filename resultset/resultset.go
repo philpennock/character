@@ -10,16 +10,25 @@ import (
 	"github.com/philpennock/character/unicode"
 )
 
+// CanTable is the interface for the caller to determine if we have
+// table-support loaded at all.  It mostly just avoids propagating imports of
+// the table shim into every place which is already creating results.
+func CanTable() bool {
+	return table.Supported()
+}
+
 type selector int
 
+// These constants dictate what is being added to a resultSet.
 const (
-	ITEM selector = iota
-	ERROR
-	DIVIDER
+	_ITEM selector = iota
+	_ERROR
+	_DIVIDER
 )
 
 type printItem int
 
+// These constants dictate what attribute of a rune should be printed.
 const (
 	PRINT_RUNE printItem = iota
 	PRINT_RUNE_DEC
@@ -40,6 +49,10 @@ type resultSet struct {
 	which   []selector
 }
 
+// New creates a resultSet, which records items and errors encountered, and a
+// little structure, so that the results can be printed out in a variety of
+// styles later.  Just the character, or tables of attributes, are derived from
+// the recorded results.
 func New(s *sources.Sources, sizeHint int) *resultSet {
 	return &resultSet{
 		sources: s,
@@ -49,36 +62,42 @@ func New(s *sources.Sources, sizeHint int) *resultSet {
 	}
 }
 
+// AddError records, in-sequence, that we got an error at this point.
 func (rs *resultSet) AddError(input string, e error) {
 	rs.errors = append(rs.errors, errorItem{input, e})
-	rs.which = append(rs.which, ERROR)
+	rs.which = append(rs.which, _ERROR)
 }
 
+// AddCharInfo is used for recording character information as an item in the result set.
 func (rs *resultSet) AddCharInfo(ci unicode.CharInfo) {
 	rs.items = append(rs.items, ci)
-	rs.which = append(rs.which, ITEM)
+	rs.which = append(rs.which, _ITEM)
 }
 
+// AddDivider is use between words.
 func (rs *resultSet) AddDivider() {
-	rs.which = append(rs.which, DIVIDER)
+	rs.which = append(rs.which, _DIVIDER)
 }
 
+// ErrorCount sums the number of errors in the entire resultSet.
 func (rs *resultSet) ErrorCount() int {
 	return len(rs.errors)
 }
 
+// PrintPlain shows just characters, but with full errors interleaved too.
+// One character or error per line.
 func (rs *resultSet) PrintPlain(what printItem) {
 	var ii, ei int
 	var s selector
 	for _, s = range rs.which {
 		switch s {
-		case ITEM:
+		case _ITEM:
 			fmt.Printf("%s\n", renderCharInfoItem(rs.items[ii], what))
-			ii += 1
-		case ERROR:
+			ii++
+		case _ERROR:
 			fmt.Fprintf(os.Stderr, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
-			ei += 1
-		case DIVIDER:
+			ei++
+		case _DIVIDER:
 			fmt.Println()
 		default:
 			fmt.Fprintf(os.Stderr, "internal error, unhandled item to print, of type %v", s)
@@ -108,6 +127,8 @@ func renderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 	}
 }
 
+// PrintTables provides much more verbose details about the contents of
+// a resultSet, in a structured terminal table.
 func (rs *resultSet) PrintTables() {
 	if len(rs.items) > 0 {
 		t := table.New()
@@ -115,12 +136,12 @@ func (rs *resultSet) PrintTables() {
 		ii := 0
 		for _, s := range rs.which {
 			switch s {
-			case ITEM:
+			case _ITEM:
 				t.AddRow(rs.detailsFor(rs.items[ii])...)
-				ii += 1
-			case ERROR:
+				ii++
+			case _ERROR:
 				// skip, print in separate table below
-			case DIVIDER:
+			case _DIVIDER:
 				t.AddSeparator()
 			}
 		}
