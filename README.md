@@ -23,6 +23,8 @@ $ character named 'CHECK MARK'
 ✓
 $ character named -j CHECK MARK
 ✓
+$ character named -v/ check
+[... table of results of substring search ...]
 ```
 
 [Licensed](./LICENSE.txt) under a MIT-style license.  

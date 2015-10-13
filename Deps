@@ -8,7 +8,7 @@
 		},
 		{
 			"ImportPath": "github.com/argusdusty/Ferret",
-			"Rev": "94b330b64bf5982fb7f5a03e93685d8ea5688db4"
+			"Rev": "dd9e84ef70e3825921d1472aac879d4223a95e86"
 		},
 		{
 			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",

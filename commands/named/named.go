@@ -40,10 +40,10 @@ var namedCmd = &cobra.Command{
 
 		for _, arg := range args {
 			if flags.search {
-				// documentation says -1 for no limit, but that causes a
-				// runtime panic; source analysis suggests 0 will work (but is
-				// not guaranteed by documented API contract)
-				_, found := srcs.Unicode.Search.Query(arg, 0)
+				// works as of github.com/argusdusty/Ferret dd9e84e (2015-10-12)
+				// prior to that, could work around limit with 0, but when author
+				// made -1 work per contract, he made a 0 limit return 0 results
+				_, found := srcs.Unicode.Search.Query(arg, -1)
 				if len(found) == 0 {
 					root.Errored()
 					results.AddError(arg, ErrNoSearchResults)
