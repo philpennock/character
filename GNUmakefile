@@ -7,6 +7,7 @@
 REPO_PATH=	github.com/philpennock/character
 
 SOURCES=	$(shell find . -type f -name '*.go')
+TOP_SOURCE=	main.go
 BINARIES=	character
 CRUFT=		dependency-graph.png
 
@@ -25,7 +26,8 @@ BIN_DIR_TOP := $(firstword $(subst :, ,$(GOPATH)))/bin
 # Which platform are we on?
 PLATFORM := $(shell uname -s)
 
-.PHONY : all help devhelp short_help cleaninstall depends dependsgraph vet lint
+.PHONY : all install help devhelp short_help cleaninstall depends dependsgraph \
+	vet lint
 .DEFAULT_GOAL := helpful_all
 
 # first build target references hint to extra help
@@ -40,6 +42,7 @@ short_help:
 help:
 	@echo "The following targets are available:"
 	@echo " 'all': make all programs"
+	@echo " 'install': install, currently just program, via go install"
 	@echo " 'depends': fetch dependencies at locked versions"
 	@echo " 'help': you're looking at it"
 	@echo " 'clean': remove outputs in source dir"
@@ -51,13 +54,22 @@ devhelp:
 	@echo " 'vet': go vet"
 	@echo " 'lint': golint"
 
-$(BINARIES): $(SOURCES)
+$(BINARIES): $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
 	@echo "Missing a REPO_VERSION"
 	@false
 endif
 	@echo "Building version $(REPO_VERSION) ..."
 	$(GO_CMD) build -o $@ -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $<
+
+install: $(TOP_SOURCE) $(SOURCES)
+ifeq ($(REPO_VERSION),)
+	@echo "Missing a REPO_VERSION"
+	@false
+endif
+	@echo "Installing version $(REPO_VERSION) ..."
+	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
+	$(GO_CMD) install -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $(REPO_PATH)
 
 depends:
 	deppy get
