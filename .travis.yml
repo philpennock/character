@@ -1,0 +1,19 @@
+language: go
+
+go:
+  - 1.5.1
+  - tip
+
+# Need deppy to support test dependencies too, to lock testlib
+
+install:
+  - go get github.com/hamfist/deppy
+  - go get github.com/liquidgecka/testlib
+  - make depends
+
+script:
+  - make all
+  - make vet
+  - make test
+
+# vim: set sw=2 et :
