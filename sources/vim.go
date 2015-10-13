@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"unicode/utf8"
 )
@@ -26,6 +27,18 @@ type VimDigraph struct {
 // VimData is the set of all data we have retrieved about characters from vim.
 type VimData struct {
 	DigraphByRune map[rune][]VimDigraph
+}
+
+var cachedVimData struct {
+	sync.Once
+	d VimData
+}
+
+func loadVimDigraphsCached() VimData {
+	cachedVimData.Do(func() {
+		cachedVimData.d = loadVimDigraphs()
+	})
+	return cachedVimData.d
 }
 
 func loadVimDigraphs() VimData {

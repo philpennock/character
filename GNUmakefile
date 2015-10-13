@@ -53,6 +53,7 @@ devhelp:
 	@echo " 'dependsgraph': view dependencies"
 	@echo " 'vet': go vet"
 	@echo " 'lint': golint"
+	@echo " 'test': go test, unit-tests"
 
 $(BINARIES): $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
@@ -94,6 +95,9 @@ lint:
 	@echo "We do not follow all style suggestions; in particular, consts are ALL_CAPS"
 	@golint ./...
 	@echo done lint
+
+test:
+	@go test ./...
 
 clean:
 	rm -fv $(BINARIES) $(CRUFT)

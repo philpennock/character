@@ -25,6 +25,12 @@ func (s *Sources) LoadUnicode() *Sources {
 // by invoking vim.  Will handle vim not being installed (but will print
 // errors; we'll probably change this in the future).
 func (s *Sources) LoadVim() *Sources {
+	s.Vim = loadVimDigraphsCached()
+	return s
+}
+
+// LoadVimAgain avoids the cache so that data is loaded from Vim again
+func (s *Sources) LoadVimAgain() *Sources {
 	s.Vim = loadVimDigraphs()
 	return s
 }
