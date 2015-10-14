@@ -1,14 +1,39 @@
 package root
 
 import (
+	"os"
+	"runtime/pprof"
 	"sync"
 
 	"github.com/spf13/cobra"
 )
 
+var globalFlags struct {
+	profileCPUFile string
+}
+
 var characterCmd = &cobra.Command{
 	Use:   "character",
 	Short: "character performs character lookups and conversions",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if globalFlags.profileCPUFile != "" {
+			f, err := os.Create(globalFlags.profileCPUFile)
+			if err != nil {
+				return err
+			}
+			pprof.StartCPUProfile(f)
+		}
+		return nil
+	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if globalFlags.profileCPUFile != "" {
+			pprof.StopCPUProfile()
+		}
+	},
+}
+
+func init() {
+	characterCmd.PersistentFlags().StringVar(&globalFlags.profileCPUFile, "profile-cpu-file", "", "write CPU profile to file")
 }
 
 var errorCount struct {

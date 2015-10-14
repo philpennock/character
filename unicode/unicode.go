@@ -36,6 +36,13 @@ var once struct {
 // Load gives us all the Unicode-spec derived data which we have.
 func Load() Unicode {
 	once.parseUnicode.Do(parseRaw)
+	return global
+}
+
+// LoadSearch gives us all the Unicode data, with search too; the search
+// loading is slow, so we skip it by default.
+func LoadSearch() Unicode {
+	once.parseUnicode.Do(parseRaw)
 	once.loadSearch.Do(addSearch)
 	return global
 }

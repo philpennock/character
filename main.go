@@ -2,6 +2,7 @@ package main
 
 //go:generate ./util/update_entities
 //go:generate ./util/update_unicode
+//go:generate ./util/update_static_vim
 
 import (
 	"os"

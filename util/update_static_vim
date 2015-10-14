@@ -1,0 +1,29 @@
+#!/bin/sh -eu
+
+# This should not be in shell, should move to go, but for now, be fast to write
+
+generated="sources/generated_static_vim.go"
+
+exec 3>&1
+exec 1> "$generated"
+
+echo "package sources;"
+echo
+echo "var staticVimData = []byte(\`"
+
+# capture built-in digraphs, so skip any .vimrc additions
+vim -u /dev/null -e +digraphs +quit | \
+	perl -pe 's/\e\[[?0-9;]*[a-zA-Z]//g;  s/\e=//g; s/\e>//g' | \
+	sed 's/`/`+"`"+`/g'
+
+echo '`)'
+echo
+echo "// EOF"
+
+exec >&3
+exec 3>&-
+
+go fmt "$generated"
+git add -- "$generated"
+
+echo Done

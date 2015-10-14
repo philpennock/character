@@ -15,6 +15,7 @@ import (
 
 var flags struct {
 	join    bool
+	livevim bool
 	search  bool
 	verbose bool
 }
@@ -31,7 +32,13 @@ var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
 	Short: "shows character with given name",
 	Run: func(cmd *cobra.Command, args []string) {
-		srcs := sources.NewAll()
+		srcs := sources.NewFast()
+		if flags.search {
+			srcs.LoadUnicodeSearch()
+		}
+		if flags.verbose && flags.livevim {
+			srcs.LoadLiveVim()
+		}
 		results := resultset.New(srcs, len(args))
 
 		if flags.join {
@@ -73,6 +80,7 @@ var namedCmd = &cobra.Command{
 
 func init() {
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
+	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	if resultset.CanTable() {
 		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")

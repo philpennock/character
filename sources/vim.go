@@ -71,6 +71,10 @@ func loadVimDigraphs() VimData {
 		}
 	}
 
+	return loadVimDigraphsFromBuffer(b)
+}
+
+func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
 	approxDigraphCountEstimate := 1000
 
 	// Sample: Eu €  8364
@@ -127,6 +131,10 @@ func loadVimDigraphs() VimData {
 	//	len(results.DigraphByRune), broken)
 
 	return results
+}
+
+func loadStaticVimDigraphs() VimData {
+	return loadVimDigraphsFromBuffer(bytes.NewBuffer(staticVimData))
 }
 
 // DigraphsFor retrieves a string which is a space-separated list of the known

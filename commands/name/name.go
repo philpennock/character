@@ -12,6 +12,7 @@ import (
 )
 
 var flags struct {
+	livevim bool
 	verbose bool
 }
 
@@ -19,7 +20,10 @@ var nameCmd = &cobra.Command{
 	Use:   "name [char... [char...]]",
 	Short: "shows information about supplied characters",
 	Run: func(cmd *cobra.Command, args []string) {
-		srcs := sources.NewAll()
+		srcs := sources.NewFast()
+		if flags.verbose && flags.livevim {
+			srcs.LoadLiveVim()
+		}
 		approxCharCount := 0
 		for _, a := range args {
 			approxCharCount += len(a) + 1
@@ -51,6 +55,7 @@ var nameCmd = &cobra.Command{
 
 func init() {
 	if resultset.CanTable() {
+		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 		nameCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
 	// FIXME: support verbose results without tables

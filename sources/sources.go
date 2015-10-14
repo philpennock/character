@@ -21,22 +21,41 @@ func (s *Sources) LoadUnicode() *Sources {
 	return s
 }
 
-// LoadVim gives us dynamically-loaded data about vim digraphs, retrieved
+// LoadUnicodeSearch gives us static information about Unicode data sources,
+// but also gives us substring search capabilities.
+func (s *Sources) LoadUnicodeSearch() *Sources {
+	s.Unicode = unicode.Load()
+	return s
+}
+
+// LoadLiveVim gives us dynamically-loaded data about vim digraphs, retrieved
 // by invoking vim.  Will handle vim not being installed (but will print
 // errors; we'll probably change this in the future).
-func (s *Sources) LoadVim() *Sources {
+func (s *Sources) LoadLiveVim() *Sources {
 	s.Vim = loadVimDigraphsCached()
 	return s
 }
 
-// LoadVimAgain avoids the cache so that data is loaded from Vim again
-func (s *Sources) LoadVimAgain() *Sources {
+// LoadLiveVimAgain avoids the cache so that data is loaded from Vim again
+func (s *Sources) LoadLiveVimAgain() *Sources {
 	s.Vim = loadVimDigraphs()
 	return s
+}
+
+// LoadStaticVim gives us vim digraphs built into character, based upon
+// shipping digraphs as of some unspecified version of vim.
+func (s *Sources) LoadStaticVim() *Sources {
+	s.Vim = loadStaticVimDigraphs()
+	return s
+}
+
+// NewFast gives us a Sources item which has the fast data; no search, no live vim
+func NewFast() *Sources {
+	return NewEmpty().LoadUnicode().LoadStaticVim()
 }
 
 // NewAll gives us a Sources item which has had loaded all the data sources
 // that we know about.
 func NewAll() *Sources {
-	return NewEmpty().LoadUnicode().LoadVim()
+	return NewEmpty().LoadUnicodeSearch().LoadLiveVim()
 }
