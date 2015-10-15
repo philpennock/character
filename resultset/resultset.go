@@ -2,8 +2,10 @@ package resultset
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/table"
@@ -47,6 +49,9 @@ type resultSet struct {
 	items   []unicode.CharInfo
 	errors  []errorItem
 	which   []selector
+
+	outputstream io.Writer
+	errorstream  io.Writer
 }
 
 // New creates a resultSet, which records items and errors encountered, and a
@@ -84,25 +89,58 @@ func (rs *resultSet) ErrorCount() int {
 	return len(rs.errors)
 }
 
+func (rs *resultSet) fixStreams() {
+	if rs.outputstream == nil {
+		rs.outputstream = os.Stdout
+	}
+	if rs.errorstream == nil {
+		rs.errorstream = os.Stderr
+	}
+}
+
 // PrintPlain shows just characters, but with full errors interleaved too.
 // One character or error per line.
 func (rs *resultSet) PrintPlain(what printItem) {
+	rs.fixStreams()
 	var ii, ei int
 	var s selector
 	for _, s = range rs.which {
 		switch s {
 		case _ITEM:
-			fmt.Printf("%s\n", renderCharInfoItem(rs.items[ii], what))
+			fmt.Fprintf(rs.outputstream, "%s\n", renderCharInfoItem(rs.items[ii], what))
 			ii++
 		case _ERROR:
-			fmt.Fprintf(os.Stderr, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
+			fmt.Fprintf(rs.errorstream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei++
 		case _DIVIDER:
-			fmt.Println()
+			fmt.Fprintln(rs.outputstream)
 		default:
-			fmt.Fprintf(os.Stderr, "internal error, unhandled item to print, of type %v", s)
+			fmt.Fprintf(rs.errorstream, "internal error, unhandled item to print, of type %v", s)
 		}
 	}
+}
+
+// StringPlain returns the characters as chars in a word, dividers as a space.
+func (rs *resultSet) StringPlain(what printItem) string {
+	rs.fixStreams()
+	out := make([]string, 0, len(rs.which))
+	var ii, ei int
+	var s selector
+	for _, s = range rs.which {
+		switch s {
+		case _ITEM:
+			out = append(out, renderCharInfoItem(rs.items[ii], what))
+			ii++
+		case _ERROR:
+			fmt.Fprintf(rs.errorstream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
+			ei++
+		case _DIVIDER:
+			out = append(out, " ")
+		default:
+			fmt.Fprintf(rs.errorstream, "internal error, unhandled item to print, of type %v", s)
+		}
+	}
+	return strings.Join(out, "")
 }
 
 func renderCharInfoItem(ci unicode.CharInfo, what printItem) string {
@@ -130,6 +168,7 @@ func renderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 // PrintTables provides much more verbose details about the contents of
 // a resultSet, in a structured terminal table.
 func (rs *resultSet) PrintTables() {
+	rs.fixStreams()
 	if len(rs.items) > 0 {
 		t := table.New()
 		t.AddHeaders(detailsHeaders()...)
@@ -148,7 +187,7 @@ func (rs *resultSet) PrintTables() {
 		for _, align := range detailsColumnAlignments {
 			t.AlignColumn(align.column, align.where)
 		}
-		fmt.Print(t.Render())
+		fmt.Fprint(rs.outputstream, t.Render())
 	}
 	if len(rs.errors) > 0 {
 		t := table.New()
@@ -156,7 +195,7 @@ func (rs *resultSet) PrintTables() {
 		for _, ei := range rs.errors {
 			t.AddRow(ei.input, ei.err)
 		}
-		fmt.Fprint(os.Stderr, t.Render())
+		fmt.Fprint(rs.errorstream, t.Render())
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 
 	"github.com/philpennock/character/resultset"
@@ -14,10 +15,11 @@ import (
 )
 
 var flags struct {
-	join    bool
-	livevim bool
-	search  bool
-	verbose bool
+	clipboard bool
+	join      bool
+	livevim   bool
+	search    bool
+	verbose   bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -70,6 +72,14 @@ var namedCmd = &cobra.Command{
 			results.AddCharInfo(ci)
 		}
 
+		if flags.clipboard {
+			err := clipboard.WriteAll(results.StringPlain(resultset.PRINT_RUNE))
+			if err != nil {
+				root.Errored()
+				results.AddError("<clipboard>", err)
+			}
+		}
+
 		if flags.verbose {
 			results.PrintTables()
 		} else {
@@ -79,6 +89,7 @@ var namedCmd = &cobra.Command{
 }
 
 func init() {
+	namedCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")

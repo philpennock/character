@@ -11,6 +11,10 @@
 			"Rev": "dd9e84ef70e3825921d1472aac879d4223a95e86"
 		},
 		{
+			"ImportPath": "github.com/atotto/clipboard",
+			"Rev": "7ea6bd46ec9699603347157b5d98cfe5fb2e6938"
+		},
+		{
 			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
 			"Comment": "v1.0.4",
 			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
