@@ -1,14 +1,12 @@
 package resultset
 
 import (
+	"bytes"
 	"errors"
+	"testing"
+
 	// make the current module available under same namespace callers would use:
 	resultset "."
-
-	"io"
-	"io/ioutil"
-	"os"
-	"testing"
 
 	"github.com/liquidgecka/testlib"
 
@@ -42,33 +40,17 @@ func TestResultSetBasics(t *testing.T) {
 		Name:   "CHECK MARK",
 	}
 
-	realStdout := os.Stdout
-	defer func() { os.Stdout = realStdout }()
-	f, err := ioutil.TempFile("", "testStdout")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { os.Remove(f.Name()) }()
-	os.Stdout = f
-	getContents := func() ([]byte, error) {
-		contents := make([]byte, 2048)
-		l, err := f.ReadAt(contents, 0)
-		if err != nil && err == io.EOF {
-			return contents[:l], nil
-		}
-		return contents[:l], err
-	}
+	b := new(bytes.Buffer)
+	rs.OutputStream = b
+	rs.ErrorStream = b
 
 	shouldBe := func(desired, msg string, reset bool) {
 		if reset {
-			T.ExpectSuccess(f.Truncate(0), "truncating existing output tempfile")
-			_, err := f.Seek(0, 0)
-			T.ExpectSuccess(err, "seeking existing output tempfile")
+			b.Reset()
 		}
 		rs.PrintPlain(resultset.PRINT_RUNE)
-		c, err := getContents()
-		T.ExpectSuccess(err, "getting contents of temp file")
-		T.Equal(string(c), desired, msg)
+		have := b.String()
+		T.Equal(have, desired, msg)
 	}
 
 	rs.AddCharInfo(ci)
@@ -84,8 +66,5 @@ func TestResultSetBasics(t *testing.T) {
 
 	rs.AddError("dummy", errors.New("pseudo-error goes here"))
 	rs.AddCharInfo(ci)
-	realStderr := os.Stderr
-	os.Stderr = f
-	defer func() { os.Stderr = realStderr }()
 	shouldBe("✓\n✓\n✓\n\n✓\nlooking up \"dummy\": pseudo-error goes here\n✓\n", "printed some check-marks and an error", true)
 }

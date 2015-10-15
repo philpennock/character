@@ -50,8 +50,8 @@ type resultSet struct {
 	errors  []errorItem
 	which   []selector
 
-	outputstream io.Writer
-	errorstream  io.Writer
+	OutputStream io.Writer
+	ErrorStream  io.Writer
 }
 
 // New creates a resultSet, which records items and errors encountered, and a
@@ -90,11 +90,11 @@ func (rs *resultSet) ErrorCount() int {
 }
 
 func (rs *resultSet) fixStreams() {
-	if rs.outputstream == nil {
-		rs.outputstream = os.Stdout
+	if rs.OutputStream == nil {
+		rs.OutputStream = os.Stdout
 	}
-	if rs.errorstream == nil {
-		rs.errorstream = os.Stderr
+	if rs.ErrorStream == nil {
+		rs.ErrorStream = os.Stderr
 	}
 }
 
@@ -107,15 +107,15 @@ func (rs *resultSet) PrintPlain(what printItem) {
 	for _, s = range rs.which {
 		switch s {
 		case _ITEM:
-			fmt.Fprintf(rs.outputstream, "%s\n", renderCharInfoItem(rs.items[ii], what))
+			fmt.Fprintf(rs.OutputStream, "%s\n", renderCharInfoItem(rs.items[ii], what))
 			ii++
 		case _ERROR:
-			fmt.Fprintf(rs.errorstream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
+			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei++
 		case _DIVIDER:
-			fmt.Fprintln(rs.outputstream)
+			fmt.Fprintln(rs.OutputStream)
 		default:
-			fmt.Fprintf(rs.errorstream, "internal error, unhandled item to print, of type %v", s)
+			fmt.Fprintf(rs.ErrorStream, "internal error, unhandled item to print, of type %v", s)
 		}
 	}
 }
@@ -132,12 +132,12 @@ func (rs *resultSet) StringPlain(what printItem) string {
 			out = append(out, renderCharInfoItem(rs.items[ii], what))
 			ii++
 		case _ERROR:
-			fmt.Fprintf(rs.errorstream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
+			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei++
 		case _DIVIDER:
 			out = append(out, " ")
 		default:
-			fmt.Fprintf(rs.errorstream, "internal error, unhandled item to print, of type %v", s)
+			fmt.Fprintf(rs.ErrorStream, "internal error, unhandled item to print, of type %v", s)
 		}
 	}
 	return strings.Join(out, "")
@@ -187,7 +187,7 @@ func (rs *resultSet) PrintTables() {
 		for _, align := range detailsColumnAlignments {
 			t.AlignColumn(align.column, align.where)
 		}
-		fmt.Fprint(rs.outputstream, t.Render())
+		fmt.Fprint(rs.OutputStream, t.Render())
 	}
 	if len(rs.errors) > 0 {
 		t := table.New()
@@ -195,7 +195,7 @@ func (rs *resultSet) PrintTables() {
 		for _, ei := range rs.errors {
 			t.AddRow(ei.input, ei.err)
 		}
-		fmt.Fprint(rs.errorstream, t.Render())
+		fmt.Fprint(rs.ErrorStream, t.Render())
 	}
 }
 
