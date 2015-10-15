@@ -24,7 +24,7 @@ func (s *Sources) LoadUnicode() *Sources {
 // LoadUnicodeSearch gives us static information about Unicode data sources,
 // but also gives us substring search capabilities.
 func (s *Sources) LoadUnicodeSearch() *Sources {
-	s.Unicode = unicode.Load()
+	s.Unicode = unicode.LoadSearch()
 	return s
 }
 
