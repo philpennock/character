@@ -86,6 +86,9 @@ dependency-graph.png:
 	@echo If godepgraph is not installed: go get github.com/kisielk/godepgraph
 	godepgraph -s . | dot -Tpng -o$@
 
+list-depends-all-go:
+	@go list -f '{{range .Deps}}{{printf "%s\n" .}}{{end}}' .
+
 vet:
 	@go vet ./...
 	@echo done vet

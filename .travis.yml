@@ -1,5 +1,9 @@
 language: go
 
+# Be explicit about not needing sudo, so that Travis will use container-based
+# infrastructure for our jobs, always, fewer heuristics.
+sudo: false
+
 go:
   - 1.5.1
   - tip
