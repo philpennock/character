@@ -19,7 +19,10 @@ import (
 	"github.com/philpennock/character/unicode"
 )
 
-func Test000LoadDataExternal(*testing.T) {
+// We currently don't want to test external data loading for resultsets, we can
+// test that elsewhere.  So skip to .NewFast().  If we change our minds,
+// then rename this back to start with Test.
+func SkipMeTest000LoadDataExternal(*testing.T) {
 	// just load data once so that times for other tests are sane
 	_ = sources.NewAll()
 }
@@ -34,8 +37,8 @@ func TestResultSetBasics(t *testing.T) {
 	T := testlib.NewT(t)
 	defer T.Finish()
 
-	srcs := sources.NewAll()
-	rs := resultset.New(srcs, 5)
+	srcs := sources.NewFast()
+	rs := resultset.New(srcs, 10)
 
 	T.Equal(rs.ErrorCount(), 0, "no errors in fresh resultset")
 
@@ -71,4 +74,30 @@ func TestResultSetBasics(t *testing.T) {
 	rs.AddError("dummy", errors.New("pseudo-error goes here"))
 	rs.AddCharInfo(ci)
 	shouldBe("✓\n✓\n✓\n\n✓\nlooking up \"dummy\": pseudo-error goes here\n✓\n", "printed some check-marks and an error", true)
+}
+
+func TestBlockNames(t *testing.T) {
+	T := testlib.NewT(t)
+	defer T.Finish()
+	srcs := sources.NewFast()
+	rs := resultset.New(srcs, 10)
+
+	for _, pair := range []struct {
+		r  rune
+		bn string
+	}{
+		{'£', "Latin-1 Supplement"},
+		{'€', "Currency Symbols"},
+		{'→', "Arrows"},
+		{'♡', "Miscellaneous Symbols"},
+		{'τ', "Greek and Coptic"},
+		{'÷', "Latin-1 Supplement"},
+		{'†', "General Punctuation"},
+		{'🌸', "Miscellaneous Symbols and Pictographs"},
+		{'x', "Basic Latin"},
+	} {
+		ci := unicode.CharInfo{Number: pair.r}
+		have := rs.RenderCharInfoItem(ci, resultset.PRINT_BLOCK)
+		T.Equal(have, pair.bn, "block lookup of known char should be known")
+	}
 }

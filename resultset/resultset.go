@@ -41,6 +41,7 @@ const (
 	PRINT_RUNE_HEX
 	PRINT_RUNE_UTF8ENC
 	PRINT_NAME
+	PRINT_BLOCK
 )
 
 type errorItem struct {
@@ -111,7 +112,7 @@ func (rs *resultSet) PrintPlain(what printItem) {
 	for _, s = range rs.which {
 		switch s {
 		case _ITEM:
-			fmt.Fprintf(rs.OutputStream, "%s\n", renderCharInfoItem(rs.items[ii], what))
+			fmt.Fprintf(rs.OutputStream, "%s\n", rs.RenderCharInfoItem(rs.items[ii], what))
 			ii++
 		case _ERROR:
 			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
@@ -133,7 +134,7 @@ func (rs *resultSet) StringPlain(what printItem) string {
 	for _, s = range rs.which {
 		switch s {
 		case _ITEM:
-			out = append(out, renderCharInfoItem(rs.items[ii], what))
+			out = append(out, rs.RenderCharInfoItem(rs.items[ii], what))
 			ii++
 		case _ERROR:
 			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
@@ -147,7 +148,8 @@ func (rs *resultSet) StringPlain(what printItem) string {
 	return strings.Join(out, "")
 }
 
-func renderCharInfoItem(ci unicode.CharInfo, what printItem) string {
+// RenderCharInfoItem converts a unicode.CharInfo and an attribute selector into a string
+func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 	switch what {
 	case PRINT_RUNE:
 		return string(ci.Number)
@@ -164,6 +166,8 @@ func renderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 		return s
 	case PRINT_NAME:
 		return ci.Name
+	case PRINT_BLOCK:
+		return rs.sources.UBlocks.Lookup(ci.Number)
 	default:
 		panic(fmt.Sprintf("unhandled item to print: %v", what))
 	}
@@ -220,13 +224,14 @@ var detailsColumnAlignments = []struct {
 
 func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 	return []interface{}{
-		renderCharInfoItem(ci, PRINT_RUNE),
-		renderCharInfoItem(ci, PRINT_NAME),
-		renderCharInfoItem(ci, PRINT_RUNE_HEX),
-		renderCharInfoItem(ci, PRINT_RUNE_DEC),
-		renderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
+		rs.RenderCharInfoItem(ci, PRINT_RUNE),
+		rs.RenderCharInfoItem(ci, PRINT_NAME),
+		rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
+		rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
+		rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
+		rs.RenderCharInfoItem(ci, PRINT_BLOCK),
 		// FIXME:
-		"b?", "i?",
+		"i?",
 		rs.sources.Vim.DigraphsFor(ci.Number),
 		"h?", "x?",
 	}

@@ -11,6 +11,7 @@ import (
 // Sources encapsulates all the sources of data we use for various lookups.
 type Sources struct {
 	Unicode unicode.Unicode
+	UBlocks unicode.Blocks
 	Vim     VimData
 }
 
@@ -29,6 +30,12 @@ func (s *Sources) LoadUnicode() *Sources {
 // but also gives us substring search capabilities.
 func (s *Sources) LoadUnicodeSearch() *Sources {
 	s.Unicode = unicode.LoadSearch()
+	return s
+}
+
+// LoadUnicodeBlocks makes available Unicode block information
+func (s *Sources) LoadUnicodeBlocks() *Sources {
+	s.UBlocks = unicode.LoadBlocks()
 	return s
 }
 
@@ -55,7 +62,7 @@ func (s *Sources) LoadStaticVim() *Sources {
 
 // NewFast gives us a Sources item which has the fast data; no search, no live vim
 func NewFast() *Sources {
-	return NewEmpty().LoadUnicode().LoadStaticVim()
+	return NewEmpty().LoadUnicode().LoadUnicodeBlocks().LoadStaticVim()
 }
 
 // NewAll gives us a Sources item which has had loaded all the data sources

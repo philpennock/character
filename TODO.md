@@ -2,6 +2,9 @@
 * Implement missing features:
   + other lookup sources
 * Full strings of characters, and transformations?  Eg punycode?
+* `character browse` to pull up an augmented UnicodeData.txt with chars in?
+* `make licenses` to have `character license`, pulling in all licenses
+  recursively
 
 ### Known Issues
 
