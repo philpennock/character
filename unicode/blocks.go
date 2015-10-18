@@ -12,9 +12,9 @@ import (
 	"sync"
 )
 
-// What we need is a RangeMap, such that lookup of a key matches an entry
+// What we need is a SegmentTreeMap, such that lookup of a key matches an entry
 // where the matcher is a range.
-// FIXME: look again for an existing implementation of RangeMap, or write one.
+// FIXME: look again for an existing implementation of SegmentTreeMap, or write one.
 //
 // In the meantime, we know the static data which we're feeding in, and that
 // it's less than 300 entries and pre-sorted.  Linear scan will get us working.
