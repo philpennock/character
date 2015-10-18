@@ -1,3 +1,7 @@
+// Copyright © 2015 Phil Pennock.
+// All rights reserved, except as granted under license.
+// Licensed per file LICENSE.txt
+
 package root
 
 import (

@@ -1,3 +1,7 @@
+// Copyright © 2015 Phil Pennock.
+// All rights reserved, except as granted under license.
+// Licensed per file LICENSE.txt
+
 /*
 Package table is the internal shim for providing table support for laying out
 content prettily.
