@@ -2,9 +2,9 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-package main
-
 // +build ignore
+
+package main
 
 import (
 	"bufio"
@@ -141,7 +141,7 @@ var setOfEntities = []struct {
 }{
 	{
 		"entities/generated_html.go",
-		"HtmlEntities",
+		"HTMLEntities",
 		[]string{
 			"/usr/local/share/sgml/html/4.01",
 			"/opt/local/share/OpenSP",                                                              // MacOS(MacPorts)
@@ -152,7 +152,7 @@ var setOfEntities = []struct {
 	},
 	{
 		"entities/generated_xml.go",
-		"XmlEntities",
+		"XMLEntities",
 		[]string{
 			"/usr/local/share/xml/xmlcharent",
 			"/opt/local/share/xml/docbook/*/ent",                 // MacOS(MacPorts)

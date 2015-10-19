@@ -1,6 +1,6 @@
 package entities
 
-var XmlEntities = map[string]rune{
+var XMLEntities = map[string]rune{
 	"AElig":    198,
 	"Aacgr":    902,
 	"Aacute":   193,
@@ -960,7 +960,7 @@ var XmlEntities = map[string]rune{
 	"zhcy":     1078,
 }
 
-var XmlEntitiesReverse = map[rune][]string{
+var XMLEntitiesReverse = map[rune][]string{
 	33:     []string{"excl"},
 	34:     []string{"quot"},
 	35:     []string{"num"},

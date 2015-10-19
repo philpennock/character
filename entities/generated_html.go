@@ -1,6 +1,6 @@
 package entities
 
-var HtmlEntities = map[string]rune{
+var HTMLEntities = map[string]rune{
 	"AElig":    198,
 	"Aacute":   193,
 	"Acirc":    194,
@@ -254,7 +254,7 @@ var HtmlEntities = map[string]rune{
 	"zwnj":     8204,
 }
 
-var HtmlEntitiesReverse = map[rune][]string{
+var HTMLEntitiesReverse = map[rune][]string{
 	34:   []string{"quot"},
 	39:   []string{"apos"},
 	62:   []string{"gt"},

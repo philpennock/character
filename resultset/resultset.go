@@ -172,13 +172,13 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 	case PRINT_BLOCK:
 		return rs.sources.UBlocks.Lookup(ci.Number)
 	case PRINT_HTML_ENTITIES:
-		eList, ok := entities.HtmlEntitiesReverse[ci.Number]
+		eList, ok := entities.HTMLEntitiesReverse[ci.Number]
 		if !ok {
 			return ""
 		}
 		return "&" + strings.Join(eList, "; &") + ";"
 	case PRINT_XML_ENTITIES:
-		eList, ok := entities.XmlEntitiesReverse[ci.Number]
+		eList, ok := entities.XMLEntitiesReverse[ci.Number]
 		if !ok {
 			return ""
 		}
