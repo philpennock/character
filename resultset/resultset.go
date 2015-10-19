@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/philpennock/character/entities"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/table"
 	"github.com/philpennock/character/unicode"
@@ -42,6 +43,7 @@ const (
 	PRINT_RUNE_UTF8ENC
 	PRINT_NAME
 	PRINT_BLOCK
+	PRINT_XML_ENTITIES
 )
 
 type errorItem struct {
@@ -168,6 +170,12 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 		return ci.Name
 	case PRINT_BLOCK:
 		return rs.sources.UBlocks.Lookup(ci.Number)
+	case PRINT_XML_ENTITIES:
+		eList, ok := entities.XmlEntitiesReverse[ci.Number]
+		if !ok {
+			return ""
+		}
+		return "&" + strings.Join(eList, "; &") + ";"
 	default:
 		panic(fmt.Sprintf("unhandled item to print: %v", what))
 	}
@@ -209,7 +217,7 @@ func (rs *resultSet) PrintTables() {
 
 func detailsHeaders() []interface{} {
 	return []interface{}{
-		"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Info", "Vim", "HTML", "XHTML",
+		"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Info", "Vim", "HTML", "XML",
 	}
 }
 
@@ -233,6 +241,7 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 		// FIXME:
 		"i?",
 		rs.sources.Vim.DigraphsFor(ci.Number),
-		"h?", "x?",
+		"h?",
+		rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
 	}
 }

@@ -4,7 +4,7 @@
 
 package main
 
-//go:generate ./util/update_entities
+//go:generate go run ./util/update_entities.go
 //go:generate ./util/update_unicode
 //go:generate ./util/update_static_vim
 

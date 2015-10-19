@@ -10,6 +10,8 @@ import (
 	"io"
 	"regexp"
 	"sync"
+
+	"github.com/philpennock/character/aux"
 )
 
 // What we need is a SegmentTreeMap, such that lookup of a key matches an entry
@@ -104,8 +106,8 @@ func parseRawBlocks() Blocks {
 		}
 
 		bi := BlockInfo{
-			Min:  runeFromHexField(got[1]),
-			Max:  runeFromHexField(got[2]),
+			Min:  aux.RuneFromHexField(got[1]),
+			Max:  aux.RuneFromHexField(got[2]),
 			Name: string(got[3]),
 		}
 		if bi.Max < blocks.maxKnownBlockRune {
