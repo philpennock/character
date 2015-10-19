@@ -37,9 +37,15 @@ var browseCmd = &cobra.Command{
 		}
 
 		if flags.blockname != "" {
-			begin, end := srcs.UBlocks.FindByName(flags.blockname)
+			begin, end, candidates := srcs.UBlocks.FindByName(flags.blockname)
 			if end == 0 {
 				fmt.Fprintf(os.Stderr, "unknown blockname %q\n", flags.blockname)
+				if candidates != nil {
+					fmt.Fprintf(os.Stderr, "there are %d possibilities:\n", len(candidates))
+					for _, c := range candidates {
+						fmt.Fprintf(os.Stderr, "\t%q\n", c)
+					}
+				}
 				root.Errored()
 				return
 			}

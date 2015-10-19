@@ -56,23 +56,30 @@ func (b Blocks) Lookup(r rune) (blockname string) {
 
 // FindByName returns the extent of the given block, with start and end runes;
 // the block name needs to be "sufficiently unique".
-// Returns 0,0 if not found.
-func (b Blocks) FindByName(name string) (min, max rune) {
+// Returns 0,0,nil if not found.
+// The candidateNames []string will be empty unless we hit "insufficiently unique"
+func (b Blocks) FindByName(name string) (min, max rune, candidateNames []string) {
 	uc := strings.ToUpper(name)
 	candidates := make([]BlockInfo, 0, 10)
 	for _, block := range b.ordered {
 		thisName := strings.ToUpper(block.Name)
 		if uc == thisName {
-			return block.Min, block.Max
+			return block.Min, block.Max, nil
 		}
 		if strings.Contains(thisName, uc) {
 			candidates = append(candidates, block)
 		}
 	}
 	if len(candidates) == 1 {
-		return candidates[0].Min, candidates[0].Max
+		return candidates[0].Min, candidates[0].Max, nil
+	} else if len(candidates) > 1 {
+		candidateNames = make([]string, len(candidates))
+		for i := range candidates {
+			candidateNames[i] = candidates[i].Name
+		}
+		return 0, 0, candidateNames
 	}
-	return 0, 0
+	return 0, 0, nil
 }
 
 var oneBlocks struct {
