@@ -43,6 +43,7 @@ const (
 	PRINT_RUNE_UTF8ENC
 	PRINT_NAME
 	PRINT_BLOCK
+	PRINT_HTML_ENTITIES
 	PRINT_XML_ENTITIES
 )
 
@@ -170,6 +171,12 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 		return ci.Name
 	case PRINT_BLOCK:
 		return rs.sources.UBlocks.Lookup(ci.Number)
+	case PRINT_HTML_ENTITIES:
+		eList, ok := entities.HtmlEntitiesReverse[ci.Number]
+		if !ok {
+			return ""
+		}
+		return "&" + strings.Join(eList, "; &") + ";"
 	case PRINT_XML_ENTITIES:
 		eList, ok := entities.XmlEntitiesReverse[ci.Number]
 		if !ok {
@@ -241,7 +248,7 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 		// FIXME:
 		"i?",
 		rs.sources.Vim.DigraphsFor(ci.Number),
-		"h?",
+		rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
 		rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
 	}
 }

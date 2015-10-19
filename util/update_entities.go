@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/philpennock/character/aux"
@@ -24,7 +25,7 @@ func processEntityDirTo(entityFiles []string, outfile string, pkg, mapName strin
 	runes := make(map[rune][]string)
 
 	matcher := regexp.MustCompile(strings.Replace(
-		`^\s* \<\!ENTITY \s+ (\S+) \s+ (?:CDATA \s+)? "\&\#(?:[Xx]?)([0-9a-fA-F]+);"`,
+		`^\s* \<\!ENTITY \s+ (\S+) \s+ (?:CDATA \s+)? "\&\#([Xx]?)([0-9a-fA-F]+);"`,
 		" ", "", -1))
 
 	var lastErr error
@@ -43,7 +44,17 @@ func processEntityDirTo(entityFiles []string, outfile string, pkg, mapName strin
 				continue
 			}
 			entity := string(got[1])
-			r := aux.RuneFromHexField(got[2])
+			var r rune
+			if len(got[2]) > 0 {
+				r = aux.RuneFromHexField(got[3])
+			} else {
+				i64, err := strconv.ParseInt(string(got[3]), 10, 32)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "parsing entity %q failed to parse int: %s\n", entity, err)
+					continue
+				}
+				r = rune(i64)
+			}
 			if have, ok := entities[entity]; ok {
 				if have != r {
 					fmt.Fprintf(os.Stderr, "duplicate entity definition; %q have %x so ignoring %x\n", entity, have, r)
@@ -133,8 +144,10 @@ var setOfEntities = []struct {
 		"HtmlEntities",
 		[]string{
 			"/usr/local/share/sgml/html/4.01",
-			"/opt/local/share/OpenSP",       // MacOS(MacPorts)
-			"/usr/share/sgml/html/entities", // Debian/Ubuntu
+			"/opt/local/share/OpenSP",                                                              // MacOS(MacPorts)
+			"/usr/share/sgml/html/entities",                                                        // Debian/Ubuntu
+			"/System/Library/PrivateFrameworks/CoreProfile.framework/Versions/A/Resources/Devices", // MacOS
+			// note that the files are copyright ISO, not Apple property, so okay to parse them for making our derived code
 		},
 	},
 	{
@@ -184,8 +197,7 @@ func main() {
 		entityFiles := findExistingCandidate(s.inDirCandidates)
 		if entityFiles == nil {
 			fmt.Fprintf(os.Stderr, "unable to find an input dir for %s\n", s.mapName)
-			continue
-			//os.Exit(1)
+			os.Exit(1)
 		}
 		if err := processEntityDirTo(entityFiles, s.outfile, "entities", s.mapName); err != nil {
 			fmt.Fprintf(os.Stderr, "making %s: %s\n", s.mapName, err)
