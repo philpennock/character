@@ -38,6 +38,7 @@ type printItem int
 // These constants dictate what attribute of a rune should be printed.
 const (
 	PRINT_RUNE printItem = iota
+	PRINT_RUNE_ISOLATED
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX
 	PRINT_RUNE_UTF8ENC
@@ -151,11 +152,31 @@ func (rs *resultSet) StringPlain(what printItem) string {
 	return strings.Join(out, "")
 }
 
+// LenTotalCount yields how many rows are in the resultset, including dividers and errors
+func (rs *resultSet) LenTotalCount() int {
+	return len(rs.which)
+}
+
+// LenItemCount yields how many successful items are in the table
+func (rs *resultSet) LenItemCount() int {
+	return len(rs.items)
+}
+
 // RenderCharInfoItem converts a unicode.CharInfo and an attribute selector into a string
 func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 	switch what {
 	case PRINT_RUNE:
 		return string(ci.Number)
+	case PRINT_RUNE_ISOLATED: // BROKEN
+		// FIXME: None of these are actually working
+		return fmt.Sprintf("%c%c%c",
+			0x202A, // LEFT-TO-RIGHT EMBEDDING
+			// 0x202D, // LEFT-TO-RIGHT OVERRIDE
+			// 0x2066, // LEFT-TO-RIGHT ISOLATE
+			ci.Number,
+			// 0x2069, // POP DIRECTIONAL ISOLATE
+			0x202C, // POP DIRECTIONAL FORMATTING
+		)
 	case PRINT_RUNE_HEX:
 		return strconv.FormatUint(uint64(ci.Number), 16)
 	case PRINT_RUNE_DEC:
@@ -239,7 +260,7 @@ var detailsColumnAlignments = []struct {
 
 func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 	return []interface{}{
-		rs.RenderCharInfoItem(ci, PRINT_RUNE),
+		rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
 		rs.RenderCharInfoItem(ci, PRINT_NAME),
 		rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 		rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),

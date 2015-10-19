@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/philpennock/character/aux"
@@ -51,6 +52,27 @@ func (b Blocks) Lookup(r rune) (blockname string) {
 		return "<gap>"
 	}
 	return ""
+}
+
+// FindByName returns the extent of the given block, with start and end runes;
+// the block name needs to be "sufficiently unique".
+// Returns 0,0 if not found.
+func (b Blocks) FindByName(name string) (min, max rune) {
+	uc := strings.ToUpper(name)
+	candidates := make([]BlockInfo, 0, 10)
+	for _, block := range b.ordered {
+		thisName := strings.ToUpper(block.Name)
+		if uc == thisName {
+			return block.Min, block.Max
+		}
+		if strings.Contains(thisName, uc) {
+			candidates = append(candidates, block)
+		}
+	}
+	if len(candidates) == 1 {
+		return candidates[0].Min, candidates[0].Max
+	}
+	return 0, 0
 }
 
 var oneBlocks struct {

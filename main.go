@@ -13,6 +13,7 @@ import (
 
 	"github.com/philpennock/character/commands/root"
 
+	_ "github.com/philpennock/character/commands/browse"
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
 	_ "github.com/philpennock/character/commands/version"

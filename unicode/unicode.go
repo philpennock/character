@@ -25,9 +25,10 @@ type CharInfo struct {
 // Unicode is the set of all data about all characters which we've retrieved
 // from formal Unicode specifications.
 type Unicode struct {
-	ByRune map[rune]CharInfo
-	ByName map[string]CharInfo
-	Search *ferret.InvertedSuffix
+	ByRune  map[rune]CharInfo
+	ByName  map[string]CharInfo
+	Search  *ferret.InvertedSuffix
+	MaxRune rune
 
 	// these will be blanked once setup is complete
 	linearNames   []string
@@ -61,6 +62,7 @@ func parseRaw() {
 	byName := make(map[string]CharInfo, rawLineCount)
 	linearNames := make([]string, 0, rawLineCount)
 	linearIfaceCI := make([]interface{}, 0, rawLineCount)
+	var max rune
 
 	lineNum := 0
 	for {
@@ -96,11 +98,15 @@ func parseRaw() {
 		byName[name] = ci
 		linearNames = append(linearNames, name)
 		linearIfaceCI = append(linearIfaceCI, ci)
+		if r > max {
+			max = r
+		}
 	}
 
 	global = Unicode{
 		ByRune:        byRune,
 		ByName:        byName,
+		MaxRune:       max,
 		linearNames:   linearNames,
 		linearIfaceCI: linearIfaceCI,
 	}
