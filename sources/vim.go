@@ -113,7 +113,11 @@ func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
 					broken++
 					continue
 				}
-				theRune, _ := utf8.DecodeRune(chunk[2])
+				theRune, consumes := utf8.DecodeRune(chunk[2])
+				if consumes != len(chunk[2]) {
+					// We don't care about ^A or <80> or other such entries, only entire runes on their own
+					continue
+				}
 				vd := VimDigraph{
 					Sequence:  string(chunk[1]),
 					Result:    theRune,
