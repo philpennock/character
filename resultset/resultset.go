@@ -245,7 +245,7 @@ func (rs *resultSet) PrintTables() {
 
 func detailsHeaders() []interface{} {
 	return []interface{}{
-		"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Info", "Vim", "HTML", "XML",
+		"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Vim", "HTML", "XML",
 	}
 }
 
@@ -266,8 +266,7 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 		rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
 		rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
 		rs.RenderCharInfoItem(ci, PRINT_BLOCK),
-		// FIXME:
-		"i?",
+		// We might put Info in here, to match old Perl script behaviour
 		rs.sources.Vim.DigraphsFor(ci.Number),
 		rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
 		rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
