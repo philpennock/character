@@ -100,6 +100,13 @@ func init() {
 	if resultset.CanTable() {
 		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
+	if clipboard.Unsupported {
+		// We don't want to only register the flag if clipboard is supported,
+		// because that makes client portability more problematic.  Instead, we
+		// just hide it to avoid offering something we can't honour, even
+		// though we'll accept the option (and show an error) if given.
+		namedCmd.Flags().MarkHidden("clipboard")
+	}
 	// FIXME: support verbose results without tables
 	root.AddCommand(namedCmd)
 }
