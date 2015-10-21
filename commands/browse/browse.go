@@ -12,15 +12,17 @@ import (
 
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
+	"github.com/philpennock/character/unicode"
 
 	"github.com/philpennock/character/commands/root"
 )
 
 var flags struct {
-	livevim   bool
-	blockname string
-	startrune int
-	stoprune  int
+	livevim    bool
+	blockname  string
+	startrune  int
+	stoprune   int
+	limitAbort int
 }
 
 var browseCmd = &cobra.Command{
@@ -52,8 +54,13 @@ var browseCmd = &cobra.Command{
 			flags.startrune, flags.stoprune = int(begin), int(end)
 		}
 
+		// We don't do limitAbort here, because there are gaps in the codepoint
+		// assigments, and these lookups are fast.  The slowness (reason for
+		// the limit) comes in termtables rendering.
+
 		results := resultset.New(srcs, int(flags.stoprune-flags.startrune)+100)
 		lastBlock := ""
+		var firstCI, lastCI unicode.CharInfo
 
 		stopAfter := rune(flags.stoprune)
 		for r := rune(flags.startrune); r <= stopAfter; r++ {
@@ -69,10 +76,31 @@ var browseCmd = &cobra.Command{
 					lastBlock = block
 				}
 				results.AddCharInfo(ci)
+				lastCI = ci
+				if firstCI.Number == 0 {
+					firstCI = ci
+				}
 			}
 		}
 
 		//fmt.Printf("\ngot all input, asking to print tables now (%d/%d entries) ...\n", results.LenItemCount(), results.LenTotalCount())
+		if results.LenItemCount() > flags.limitAbort {
+			tmp := resultset.New(srcs, 3)
+			tmp.OutputStream = os.Stderr
+			tmp.AddCharInfo(firstCI)
+			tmp.AddDivider()
+			tmp.AddCharInfo(lastCI)
+
+			fmt.Fprintf(os.Stderr,
+				("that would show %d characters, more than %d limit\n" +
+					"declining to proceed without -A override (gets slow)\n" +
+					"Range covers start-end:\n"),
+				results.LenItemCount(), flags.limitAbort)
+			tmp.PrintTables()
+			root.Errored()
+			return
+		}
+
 		results.PrintTables()
 	},
 }
@@ -85,5 +113,6 @@ func init() {
 	browseCmd.Flags().StringVarP(&flags.blockname, "block", "b", "", "only show this block")
 	browseCmd.Flags().IntVarP(&flags.startrune, "from", "f", 0, "show range starting at this value")
 	browseCmd.Flags().IntVarP(&flags.stoprune, "to", "t", 0, "show range ending at this value")
+	browseCmd.Flags().IntVarP(&flags.limitAbort, "limit-abort", "A", 3000, "abort if would show more than this many entries")
 	root.AddCommand(browseCmd)
 }
