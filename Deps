@@ -12,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/atotto/clipboard",
-			"Rev": "7ea6bd46ec9699603347157b5d98cfe5fb2e6938"
+			"Rev": "d35a4e46333237c6543ed5ef8804f7e922b30544"
 		},
 		{
 			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
