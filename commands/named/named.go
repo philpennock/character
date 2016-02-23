@@ -23,6 +23,7 @@ var flags struct {
 	join      bool
 	livevim   bool
 	search    bool
+	unsorted  bool
 	verbose   bool
 }
 
@@ -62,8 +63,26 @@ var namedCmd = &cobra.Command{
 					results.AddError(arg, ErrNoSearchResults)
 					continue
 				}
-				for _, cii := range found {
-					results.AddCharInfo(cii.(unicode.CharInfo))
+				// The results are not sorted; we have []interface{}
+				// To sort, we need to either create a way to have a results
+				// set have sorting over sub-ranges, or work with a temporary
+				// buffer.  Let's assume that for most cases, the number of
+				// characters is small and sorting with temporary buffers is
+				// sane, and provide an `unsorted` option for the caller for
+				// the expected-to-be-unusual cases.
+				if flags.unsorted {
+					for _, cii := range found {
+						results.AddCharInfo(cii.(unicode.CharInfo))
+					}
+				} else {
+					tempCharInfoList := make(unicode.CharInfoList, len(found))
+					for index, cii := range found {
+						tempCharInfoList[index] = cii.(unicode.CharInfo)
+					}
+					tempCharInfoList.Sort()
+					for _, ci := range tempCharInfoList {
+						results.AddCharInfo(ci)
+					}
 				}
 				continue
 			}
@@ -97,6 +116,7 @@ func init() {
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
+	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
 	if resultset.CanTable() {
 		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
