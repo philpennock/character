@@ -5,7 +5,8 @@ language: go
 sudo: false
 
 go:
-  - 1.5.1
+  - 1.6
+  - 1.5.3
   - tip
 
 # Need deppy to support test dependencies too, to lock testlib
