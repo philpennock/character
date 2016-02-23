@@ -16,13 +16,13 @@ func TestRuneMapping(t *testing.T) {
 
 	for _, pair := range []struct{ from, to rune }{
 		{'A', '𝔄'},
-		{'C', '𝕮'},
-		{'H', '𝕳'},
-		{'I', '𝕴'},
+		{'C', 'ℭ'},
+		{'H', 'ℌ'},
+		{'I', 'ℑ'},
 		{'J', '𝔍'},
-		{'R', '𝕽'},
+		{'R', 'ℜ'},
 		{'Y', '𝔜'},
-		{'Z', '𝖅'},
+		{'Z', 'ℨ'},
 		{'a', '𝔞'},
 		{'c', '𝔠'},
 		{'d', '𝔡'},
@@ -46,6 +46,11 @@ func TestRuneMapping(t *testing.T) {
 		{'𝖈', 'c'},
 		{'𝖉', 'd'},
 		{'𝖟', 'z'},
+		{'ℭ', 'C'},
+		{'ℌ', 'H'},
+		{'ℑ', 'I'},
+		{'ℜ', 'R'},
+		{'ℨ', 'Z'},
 	} {
 		T.Equal(toggleRune(pair.from), pair.to, fmt.Sprintf("fraktur rune mapping equality map(%c)->%c", pair.from, pair.to))
 	}
