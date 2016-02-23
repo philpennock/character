@@ -2,7 +2,7 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-package fraktur
+package transform
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/liquidgecka/testlib"
 )
 
-func TestRuneMapping(t *testing.T) {
+func TestFrakturRuneMapping(t *testing.T) {
 	T := testlib.NewT(t)
 
 	for _, pair := range []struct{ from, to rune }{
@@ -52,6 +52,6 @@ func TestRuneMapping(t *testing.T) {
 		{'ℜ', 'R'},
 		{'ℨ', 'Z'},
 	} {
-		T.Equal(toggleRune(pair.from), pair.to, fmt.Sprintf("fraktur rune mapping equality map(%c)->%c", pair.from, pair.to))
+		T.Equal(toggleFrakturRune(pair.from), pair.to, fmt.Sprintf("fraktur rune mapping equality map(%c)->%c", pair.from, pair.to))
 	}
 }

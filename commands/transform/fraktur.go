@@ -2,15 +2,10 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-package fraktur
+package transform
 
 import (
-	"fmt"
 	"strings"
-
-	"github.com/spf13/cobra"
-
-	"github.com/philpennock/character/commands/root"
 )
 
 // We rely upon Unicode being unchanging in codepoint assignments.
@@ -33,7 +28,7 @@ const (
 	frakturishCapitalZ  = 0x2128 // BLACK-LETTER CAPITAL Z
 )
 
-func toggleRune(r rune) rune {
+func toggleFrakturRune(r rune) rune {
 	switch r {
 	case 'C':
 		return frakturishCapitalC
@@ -76,21 +71,17 @@ func toggleRune(r rune) rune {
 	return r
 }
 
-var frakturCmd = &cobra.Command{
+var frakturSubcommand = transformCobraCommand{
 	Use:   "fraktur",
 	Short: "toggle characters between plain & Fraktur",
-	Run: func(cmd *cobra.Command, args []string) {
+	Transformer: func(args []string) (string, error) {
 		if len(args) == 0 {
-			return
+			return "", nil
 		}
 		output := make([]string, len(args))
 		for argI := range args {
-			output[argI] = strings.Map(toggleRune, args[argI])
+			output[argI] = strings.Map(toggleFrakturRune, args[argI])
 		}
-		_, _ = fmt.Println(strings.Join(output, " "))
+		return strings.Join(output, " "), nil
 	},
-}
-
-func init() {
-	root.AddCommand(frakturCmd)
 }

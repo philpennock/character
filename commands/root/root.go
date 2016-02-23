@@ -5,6 +5,7 @@
 package root
 
 import (
+	"fmt"
 	"os"
 	"runtime/pprof"
 	"sync"
@@ -69,5 +70,14 @@ func GetErrorCount() int {
 // Start is the entry-point used by main(), after all the sub-modules have
 // registered their availability via AddCommand calls in their init functions.
 func Start() {
-	characterCmd.Execute()
+	err := characterCmd.Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "command failed: %s\n", err)
+		Errored()
+	}
+}
+
+// Cobra exposes the root-level cobra object
+func Cobra() *cobra.Command {
+	return characterCmd
 }
