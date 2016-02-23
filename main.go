@@ -14,6 +14,7 @@ import (
 	"github.com/philpennock/character/commands/root"
 
 	_ "github.com/philpennock/character/commands/browse"
+	_ "github.com/philpennock/character/commands/code"
 	_ "github.com/philpennock/character/commands/fraktur"
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
