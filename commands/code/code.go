@@ -5,8 +5,12 @@
 package code
 
 import (
+	"encoding/hex"
 	"errors"
+	"regexp"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
@@ -21,6 +25,7 @@ import (
 var flags struct {
 	clipboard bool
 	livevim   bool
+	utf8hex   bool
 	verbose   bool
 }
 
@@ -28,6 +33,12 @@ var flags struct {
 
 // ErrUnknownCodepoint means the specified codepoint is not assigned
 var ErrUnknownCodepoint = errors.New("unknown character codepoint")
+
+// When decoding, we may encounter problems
+type deferredError struct {
+	arg string
+	err error
+}
 
 var codeCmd = &cobra.Command{
 	Use:   "code [codepoint ...]",
@@ -37,7 +48,72 @@ var codeCmd = &cobra.Command{
 		if flags.verbose && flags.livevim {
 			srcs.LoadLiveVim()
 		}
+
+		// If given utf8hex flag, then we need to pre-munge the parameters
+		deferredErrors := make([]deferredError, 0, 20)
+
+		if flags.utf8hex {
+			// WAG the capacity
+			newargs := make([]string, 0, len(args)*4)
+			matchHexPairSeq := regexp.MustCompile(`^(?:%[0-9A-Fa-f]{2})+`)
+
+			for _, arg := range args {
+				// If we have %-encoded, then take non-%-preceded entries as literal character
+				// If we don't, then assume that we just have hex strings
+				if strings.ContainsRune(arg, '%') {
+					for len(arg) > 0 {
+						nextPercent := strings.IndexByte(arg, '%')
+						if nextPercent < 0 {
+							for _, c := range arg {
+								newargs = append(newargs, strconv.Itoa(int(c)))
+							}
+							arg = ""
+							continue
+						}
+						if nextPercent > 0 {
+							for _, c := range arg[:nextPercent] {
+								newargs = append(newargs, strconv.Itoa(int(c)))
+							}
+							arg = arg[nextPercent:]
+							// do not 'continue', handle inline immediately next
+						}
+						matches := matchHexPairSeq.FindStringSubmatch(arg)
+						if matches == nil {
+							deferredErrors = append(deferredErrors, deferredError{arg: arg, err: errors.New("malformed %hex seq")})
+							arg = ""
+							continue
+						}
+						got := matches[0]
+						arg = arg[len(got):]
+						got = strings.Replace(got, "%", "", -1)
+
+						toAdd, defErr := codepointsFromHexString(got)
+						if toAdd != nil {
+							newargs = append(newargs, toAdd...)
+						}
+						if defErr != nil {
+							deferredErrors = append(deferredErrors, *defErr)
+							continue
+						}
+					}
+				} else {
+					toAdd, defErr := codepointsFromHexString(arg)
+					if toAdd != nil {
+						newargs = append(newargs, toAdd...)
+					}
+					if defErr != nil {
+						deferredErrors = append(deferredErrors, *defErr)
+						continue
+					}
+				}
+			}
+			args = newargs
+		}
+
 		results := resultset.New(srcs, len(args))
+		for _, e := range deferredErrors {
+			results.AddError(e.arg, e.err)
+		}
 
 		for _, arg := range args {
 			ci, err := findCharInfoByCodepoint(srcs.Unicode, arg)
@@ -68,6 +144,7 @@ var codeCmd = &cobra.Command{
 func init() {
 	codeCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	codeCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
+	codeCmd.Flags().BoolVarP(&flags.utf8hex, "utf8hex", "H", false, "take UTF-8 Hex-encoded codepoint")
 	if resultset.CanTable() {
 		codeCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
@@ -93,4 +170,26 @@ func findCharInfoByCodepoint(u unicode.Unicode, needle string) (unicode.CharInfo
 		return ci, nil
 	}
 	return unicode.CharInfo{}, ErrUnknownCodepoint
+}
+
+func codepointsFromHexString(hs string) ([]string, *deferredError) {
+	seq, err := hex.DecodeString(hs)
+	if err != nil {
+		return nil, &deferredError{arg: hs, err: err}
+	}
+	res := make([]string, 0, len(seq))
+	errorOffset := 0
+	for len(seq) > 0 {
+		r, sz := utf8.DecodeRune(seq)
+		if r == utf8.RuneError && (sz == 0 || sz == 1) {
+			return res, &deferredError{arg: hs[errorOffset*2:], err: errors.New("invalid rune")}
+		}
+		if sz == 0 {
+			return res, &deferredError{arg: hs[errorOffset*2:], err: errors.New("API broken (rune size 0)")}
+		}
+		seq = seq[sz:]
+		errorOffset += sz
+		res = append(res, strconv.Itoa(int(r)))
+	}
+	return res, nil
 }
