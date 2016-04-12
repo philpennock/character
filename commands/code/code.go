@@ -23,6 +23,7 @@ import (
 )
 
 var flags struct {
+	base      intconvBase
 	clipboard bool
 	livevim   bool
 	utf8hex   bool
@@ -145,6 +146,7 @@ func init() {
 	codeCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	codeCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	codeCmd.Flags().BoolVarP(&flags.utf8hex, "utf8hex", "H", false, "take UTF-8 Hex-encoded codepoint")
+	codeCmd.Flags().VarP(&flags.base, "base", "b", "numeric base for code-ponts [default: usual parse rules]")
 	if resultset.CanTable() {
 		codeCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
@@ -160,7 +162,7 @@ func init() {
 }
 
 func findCharInfoByCodepoint(u unicode.Unicode, needle string) (unicode.CharInfo, error) {
-	n32, err := strconv.ParseInt(needle, 0, 32)
+	n32, err := strconv.ParseInt(needle, flags.base.Int(), 32)
 	if err != nil {
 		return unicode.CharInfo{}, err
 	}
