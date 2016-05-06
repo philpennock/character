@@ -18,6 +18,7 @@ import (
 	_ "github.com/philpennock/character/commands/fraktur"
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
+	_ "github.com/philpennock/character/commands/turn"
 	_ "github.com/philpennock/character/commands/version"
 )
 
