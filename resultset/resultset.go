@@ -164,6 +164,10 @@ func (rs *resultSet) LenItemCount() int {
 
 // RenderCharInfoItem converts a unicode.CharInfo and an attribute selector into a string
 func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) string {
+	// we use 0 as a special-case for things like combinations, where there's only a name
+	if ci.Number == 0 && what != PRINT_NAME {
+		return " "
+	}
 	switch what {
 	case PRINT_RUNE:
 		return string(ci.Number)

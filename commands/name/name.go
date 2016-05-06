@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/philpennock/character/metadata"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
 
@@ -34,13 +35,29 @@ var nameCmd = &cobra.Command{
 		}
 		results := resultset.New(srcs, approxCharCount)
 
+		var pairedCodepoint rune = 0
+
 		for i, arg := range args {
 			if i > 0 {
 				results.AddDivider()
 			}
+			pairedCodepoint = 0
 			for _, r := range arg {
 				if ci, ok := srcs.Unicode.ByRune[r]; ok {
 					results.AddCharInfo(ci)
+					// Ancilliary extra data if warranted
+					if metadata.IsPairCode(ci.Number) {
+						if pairedCodepoint != 0 {
+							if ci2, ok := metadata.PairCharInfo(pairedCodepoint, ci.Number); ok {
+								results.AddCharInfo(ci2)
+							} else {
+								results.AddError("", fmt.Errorf("unknown codepair %x-%x", pairedCodepoint, ci.Number))
+							}
+							pairedCodepoint = 0
+						} else {
+							pairedCodepoint = ci.Number
+						}
+					}
 				} else {
 					root.Errored()
 					// FIXME: proper error type
