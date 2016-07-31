@@ -38,6 +38,7 @@ type printItem int
 // These constants dictate what attribute of a rune should be printed.
 const (
 	PRINT_RUNE printItem = iota
+	PRINT_RUNE_SPACECOMBINED
 	PRINT_RUNE_ISOLATED
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX
@@ -171,6 +172,12 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 	switch what {
 	case PRINT_RUNE:
 		return string(ci.Number)
+	case PRINT_RUNE_SPACECOMBINED:
+		if ci.TerminalCellWidth() < 1 {
+			return " " + string(ci.Number)
+		} else {
+			return string(ci.Number)
+		}
 	case PRINT_RUNE_ISOLATED: // BROKEN
 		// FIXME: None of these are actually working
 		return fmt.Sprintf("%c%c%c",
@@ -221,10 +228,15 @@ func (rs *resultSet) PrintTables() {
 		t := table.New()
 		t.AddHeaders(detailsHeaders()...)
 		ii := 0
+		width := len(detailsHeaders())
 		for _, s := range rs.which {
 			switch s {
 			case _ITEM:
-				t.AddRow(rs.detailsFor(rs.items[ii])...)
+				r := table.NewRow(width)
+				r.AddCells(rs.detailsFor(rs.items[ii])...)
+				// handle combining chars, etc; this lets us add space too
+				r.SetCellWidth(0, rs.runeRenderWidth(rs.items[ii]))
+				t.AddManualRow(r)
 				ii++
 			case _ERROR:
 				// skip, print in separate table below
@@ -264,7 +276,8 @@ var detailsColumnAlignments = []struct {
 
 func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 	return []interface{}{
-		rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+		//rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+		rs.RenderCharInfoItem(ci, PRINT_RUNE_SPACECOMBINED),
 		rs.RenderCharInfoItem(ci, PRINT_NAME),
 		rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 		rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
@@ -275,4 +288,15 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 		rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
 		rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
 	}
+}
+
+// runeRenderWidth says how many terminal character cells should be used for displaying
+// one rune; this is either 1 or 2.  If the character is a combining character, we should
+// have inserted a space in the rendering (PRINE_RUNE_SPACECOMBINED) so 0->1.
+func (rs *resultSet) runeRenderWidth(ci unicode.CharInfo) int {
+	w := ci.TerminalCellWidth()
+	if w == 0 {
+		w = 1
+	}
+	return w
 }

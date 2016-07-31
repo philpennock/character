@@ -16,10 +16,25 @@ import (
 
 // CharInfo is the basic set of information about one Unicode character.
 // We record the codepoint (as a Go rune) and the formal Name.
+// We also store property data to let us know the display width.
 type CharInfo struct {
 	_      struct{}
 	Number rune
 	Name   string
+	width  int
+}
+
+// TerminalCellWidth is how wide a character is when displayed in a cell grid.
+// Unfortunately, full-width characters do not have this encoded as a property
+// in a column; instead the Character Decomposition Mapping starts `<wide>`.
+// This is a "tag".
+//
+// So we need to look at multiple columns from the source data, so might as well
+// collect it in one parse.
+// FIXME: This should move into generation-time analysis instead of storing the
+// raw unicode-data.
+func (ci CharInfo) TerminalCellWidth() int {
+	return ci.width
 }
 
 // Unicode is the set of all data about all characters which we've retrieved
@@ -93,6 +108,21 @@ func parseRaw() {
 		ci := CharInfo{
 			Number: r,
 			Name:   name,
+			width:  1,
+		}
+		if len(fields[2]) == 2 && fields[2][0] == 'M' {
+			if fields[2][1] == 'n' || fields[2][1] == 'c' {
+				// Mn or Mc for General Category
+				ci.width = 0
+			}
+		}
+		if ci.width == 1 {
+			if bytes.HasPrefix(fields[5], []byte("<wide>")) {
+				ci.width = 2
+			} else if bytes.HasPrefix(fields[5], []byte("<vertical>")) {
+				// XXX: is this normal or just how it is for my terminal/font?
+				ci.width = 2
+			}
 		}
 		byRune[r] = ci
 		byName[name] = ci

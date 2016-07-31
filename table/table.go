@@ -29,6 +29,16 @@ type Table struct {
 	rowCount int
 }
 
+// A Row is one row to be added, where we want to be able to manipulate cells
+// explicitly before they go into the underlying table.
+type Row struct {
+	// we shouldn't hide this, except that we really don't want the underlying
+	// API to be exposed to our callers except through us; ironic, given that
+	// one of the termtables problems is that the Cells are not exposed to the
+	// caller, to be able to manipulate them.
+	cells []*termtables.Cell
+}
+
 // New gives us a new empty table, configured for our basic requirements.
 func New() *Table {
 	t := termtables.CreateTable()
@@ -46,6 +56,42 @@ func (t *Table) AddHeaders(headers ...interface{}) {
 func (t *Table) AddRow(cells ...interface{}) {
 	t.t.AddRow(cells...)
 	t.rowCount++
+}
+
+// NewRow lets us construct a row more carefully; this lets us get to the
+// individual cells, which leaks through the API of the underlying library.
+// We could wrap/hide the underly
+func NewRow(widthHint int) *Row {
+	if widthHint == 0 {
+		widthHint = 10 // magic WAG for optimisation of pre-alloc since we have to give _something_
+	}
+	return &Row{
+		cells: make([]*termtables.Cell, 0, widthHint),
+	}
+}
+
+// AddManualRow takes a Row and adds that, instead of the cells; cell/row
+// addition in termtables takes an `interface{}` but there's reflection-based
+// special handling for being given a pre-constructed Cell.
+func (t *Table) AddManualRow(r *Row) {
+	tmp := make([]interface{}, len(r.cells))
+	for i, c := range r.cells {
+		tmp[i] = interface{}(c)
+	}
+	t.AddRow(tmp...)
+}
+
+// AddCells adds cells to a row; the content of cells is, for us here, always
+// not already a termtables.Cell
+func (r *Row) AddCells(cells ...interface{}) {
+	for _, content := range cells {
+		r.cells = append(r.cells, termtables.CreateCell(content, nil))
+	}
+}
+
+// SetCellWidth lets us explicitly set the width of one cell in a row
+func (r *Row) SetCellWidth(column int, explicitWidth int) {
+	r.cells[column].SetWidth(explicitWidth)
 }
 
 // AddSeparator adds one row to the table, as a separator.
