@@ -45,7 +45,7 @@ var nameCmd = &cobra.Command{
 			for _, r := range arg {
 				if ci, ok := srcs.Unicode.ByRune[r]; ok {
 					results.AddCharInfo(ci)
-					// Ancilliary extra data if warranted
+					// Ancillary extra data if warranted
 					if metadata.IsPairCode(ci.Number) {
 						if pairedCodepoint != 0 {
 							if ci2, ok := metadata.PairCharInfo(pairedCodepoint, ci.Number); ok {
