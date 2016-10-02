@@ -102,6 +102,9 @@ lint:
 test:
 	@go test ./...
 
+versiontag:
+	git tag -s -m "Version $(TAGVERSION)" "v$(TAGVERSION)"
+
 clean:
 	rm -fv $(BINARIES) $(CRUFT)
 
