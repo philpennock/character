@@ -1,10 +1,10 @@
 {
 	"ImportPath": "github.com/philpennock/character",
-	"GoVersion": "go1.5.1",
+	"GoVersion": "go1.7.1",
 	"Deps": [
 		{
 			"ImportPath": "github.com/apcera/termtables",
-			"Rev": "9a23ecfb6dfd961b00084dc84f4ffb41abd0df91"
+			"Rev": "f484430c5459746e3b3a4ca0b006167ded6f75b0"
 		},
 		{
 			"ImportPath": "github.com/argusdusty/Ferret",
@@ -12,33 +12,15 @@
 		},
 		{
 			"ImportPath": "github.com/atotto/clipboard",
-			"Rev": "d35a4e46333237c6543ed5ef8804f7e922b30544"
-		},
-		{
-			"ImportPath": "github.com/cpuguy83/go-md2man/md2man",
-			"Comment": "v1.0.4",
-			"Rev": "71acacd42f85e5e82f70a55327789582a5200a90"
-		},
-		{
-			"ImportPath": "github.com/inconshreveable/mousetrap",
-			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
-		},
-		{
-			"ImportPath": "github.com/russross/blackfriday",
-			"Comment": "v1.2-80-g8cec3a8",
-			"Rev": "8cec3a854e68dba10faabbe31c089abf4a3e57a6"
-		},
-		{
-			"ImportPath": "github.com/shurcooL/sanitized_anchor_name",
-			"Rev": "244f5ac324cb97e1987ef901a0081a77bfd8e845"
+			"Rev": "bb272b845f1112e10117e3e45ce39f690c0001ad"
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "8b2293c74173adb0e12df6862c1ea36afac2401f"
+			"Rev": "9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "5a13a75b13d132dc7d07dd19fd260257cd9c0290"
+			"Rev": "c7e63cf4530bcd3ba943729cee0efeff2ebea63f"
 		}
 	]
 }
