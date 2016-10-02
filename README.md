@@ -39,7 +39,7 @@ Assuming that this repository is checked out into
 list of directories:
 
 ```console
-$ go get github.com/hamfist/deppy && deppy get && make
+$ go get github.com/hamfist/deppy && deppy restore && make
 ```
 
 That should work for most people; assumes GNU make.  In more detail:
@@ -54,7 +54,7 @@ That should work for most people; assumes GNU make.  In more detail:
     into this repository.  For now, I'm using `deppy`, which should be
     familiar to anyone who used the original form of `godep`:
     + `go get github.com/hamfist/deppy`
-    + `deppy get`
+    + `deppy restore`
 2. Build; two options:
   * `go build` -- idiomatic Go, should always work
   * `make` or `gmake` -- using GNU Make, should do extra steps such as embed

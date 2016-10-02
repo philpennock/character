@@ -73,7 +73,7 @@ endif
 	$(GO_CMD) install -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $(REPO_PATH)
 
 depends:
-	deppy get
+	deppy restore
 
 dependsgraph: dependency-graph.png
 ifeq ($(PLATFORM),Darwin)
