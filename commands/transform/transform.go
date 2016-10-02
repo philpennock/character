@@ -6,7 +6,6 @@ package transform
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
@@ -16,16 +15,19 @@ import (
 
 var flags struct {
 	clipboard     bool
+	list          bool
 	preserveOrder bool
 	target        string
 }
 
 type transformer func(args []string) (result string, err error)
+type lister func() []string
 
 type transformCobraCommand struct {
 	Use         string
 	Short       string
 	Transformer transformer
+	List        lister
 }
 
 var transformCmd = &cobra.Command{
@@ -33,7 +35,20 @@ var transformCmd = &cobra.Command{
 	Short: "transform characters back and forth",
 }
 
-func transformWrapper(cmd *cobra.Command, args []string, transformer transformer) {
+func transformWrapper(cmd *cobra.Command, args []string, transformer transformer, list lister) {
+	if flags.list {
+		if list != nil {
+			fmt.Printf("Available targets for %q:\n", cmd.Name())
+			for _, item := range list() {
+				fmt.Printf("  %q\n", item)
+			}
+		} else {
+			root.Errored()
+			cmd.Printf("%s: %s\n", cmd.Name(), "sorry, nothing to list for this")
+		}
+		return
+	}
+
 	result, err := transformer(args)
 	if err != nil {
 		root.Errored()
@@ -49,13 +64,14 @@ func transformWrapper(cmd *cobra.Command, args []string, transformer transformer
 		err := clipboard.WriteAll(result)
 		if err != nil {
 			root.Errored()
-			fmt.Fprintf(os.Stderr, "clipboard write failure: %s\n", err)
+			cmd.Printf("clipboard write failure: %s\n", err)
 		}
 	}
 }
 
 func init() {
 	transformCmd.PersistentFlags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
+	transformCmd.PersistentFlags().BoolVarP(&flags.list, "list", "l", false, "list target variants")
 	transformCmd.PersistentFlags().BoolVarP(&flags.preserveOrder, "preserve-order", "p", false, "keep characters in original order")
 	transformCmd.PersistentFlags().StringVarP(&flags.target, "target", "t", "", "map characters to this type")
 	if clipboard.Unsupported {
@@ -76,7 +92,7 @@ func init() {
 			Use:   c.Use,
 			Short: c.Short,
 			Run: func(cmd *cobra.Command, args []string) {
-				transformWrapper(cmd, args, c.Transformer)
+				transformWrapper(cmd, args, c.Transformer, c.List)
 			},
 		})
 	}

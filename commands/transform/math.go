@@ -6,6 +6,7 @@ package transform
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -209,5 +210,13 @@ var mathSubcommand = transformCobraCommand{
 			output[argI] = strings.Map(convert, args[argI])
 		}
 		return strings.Join(output, " "), nil
+	},
+	List: func() []string {
+		avail := make([]string, 0, len(conversions))
+		for k := range conversions {
+			avail = append(avail, k)
+		}
+		sort.Strings(avail)
+		return avail
 	},
 }
