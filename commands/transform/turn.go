@@ -9,8 +9,10 @@ package transform
 // pick appropriate near-matches otherwise, sometimes being the same letter
 // # character browse -b IPA
 
-const turnReplacementsA string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const turnReplacementsB string = "ɐqɔpə ᵷɥᴉ ʞꞁɯuodbɹsʇnʌʍxʎzⱯ      HI  ꞀƜ O   S  Ʌ X Z"
+// <http://www.upsidedowntext.com/unicode> has more ☺
+
+const turnReplacementsA string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!&()[]{}<>"
+const turnReplacementsB string = "ɐqɔpəɟᵷɥᴉɾʞꞁɯuodbɹsʇnʌʍxʎzⱯ Ɔ ƎℲפHIſ ꞀƜNOԀ  S┴∩Ʌ X⅄Z0     9 86¿¡⅋)(][}{><"
 
 var turnTable map[rune]rune
 
