@@ -2,16 +2,11 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-/*
-Package table is the internal shim for providing table support for laying out
-content prettily.
+// We want `termtables` to activate us, and to be the default if no other
+// implementation is provided
 
-All interaction with the dependency which provides terminal-drawn tables
-should go through this module.  This provides a shim, giving us isolation.
-We know the exact subset of features which we rely upon, and can switch
-providers.  If desired, we can use multiple files with build-tags, to let the
-dependency be satisfied at build-time.
-*/
+// +build termtables !tablewriter
+
 package table
 
 import (
@@ -62,18 +57,6 @@ func (t *Table) Empty() bool {
 func (t *Table) Render() string {
 	return t.t.Render()
 }
-
-// Alignment indicates our table column alignments.  We only use per-column
-// alignment and do not pass through any per-cell alignments.
-type Alignment int
-
-// These constants define how a given column of the table should have each
-// cell aligned.
-const (
-	LEFT Alignment = iota
-	CENTER
-	RIGHT
-)
 
 // AlignColumn sets the alignment of one column in a given table.  It counts
 // columns starting from 1.

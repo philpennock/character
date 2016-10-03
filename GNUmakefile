@@ -6,6 +6,9 @@
 
 REPO_PATH=	github.com/philpennock/character
 
+# Set this via the cmdline to change the tables backend
+TABLES=		apcera
+
 SOURCES=	$(shell find . -type f -name '*.go')
 TOP_SOURCE=	main.go
 BINARIES=	character
@@ -25,6 +28,16 @@ BIN_DIR_TOP := $(firstword $(subst :, ,$(GOPATH)))/bin
 
 # Which platform are we on?
 PLATFORM := $(shell uname -s)
+
+# Collect the build-tags we want
+BUILD_TAGS:=
+ifeq ($(TABLES),apcera)
+BUILD_TAGS+= termtables
+else ifeq ($(TABLES),termtables)
+BUILD_TAGS+= termtables
+else ifeq ($(TABLES),tablewriter)
+BUILD_TAGS+= tablewriter
+endif
 
 .PHONY : all install help devhelp short_help cleaninstall depends dependsgraph \
 	vet lint
@@ -61,7 +74,7 @@ ifeq ($(REPO_VERSION),)
 	@false
 endif
 	@echo "Building version $(REPO_VERSION) ..."
-	$(GO_CMD) build -o $@ -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $<
+	$(GO_CMD) build -o $@ -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $<
 
 install: $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
@@ -70,7 +83,7 @@ ifeq ($(REPO_VERSION),)
 endif
 	@echo "Installing version $(REPO_VERSION) ..."
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
-	$(GO_CMD) install -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $(REPO_PATH)
+	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $(REPO_PATH)
 
 depends:
 	deppy restore
