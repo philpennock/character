@@ -6,9 +6,12 @@ package transform
 
 import (
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/philpennock/character/table"
 )
 
 // This file would be less repetitive, albeit more complex, if it used Reflection to handle the fields
@@ -183,6 +186,40 @@ func init() {
 	conversions["doublestruck"] = toDoubleStruck
 }
 
+func mathListCommands(w io.Writer, verbose bool, args []string) error {
+	avail := make([]string, 0, len(conversions))
+	for k := range conversions {
+		avail = append(avail, k)
+	}
+	sort.Strings(avail)
+	if !verbose || !table.Supported() {
+		for _, item := range avail {
+			fmt.Fprintf(w, "  %q\n", item)
+		}
+		return nil
+	}
+	t := table.New()
+	columns := make([]interface{}, 0, 3)
+	columns = append(columns, "Name", "Rendered Name")
+	var exemplar string
+	if len(args) > 0 {
+		columns = append(columns, "Exemplar")
+		exemplar = strings.Join(args, " ")
+	}
+	t.AddHeaders(columns...)
+	for _, item := range avail {
+		row := make([]interface{}, 2, 3)
+		row[0] = item
+		row[1] = strings.Map(conversions[item], item)
+		if exemplar != "" {
+			row = append(row, strings.Map(conversions[item], exemplar))
+		}
+		t.AddRow(row...)
+	}
+	_, err := fmt.Fprintf(w, t.Render())
+	return err
+}
+
 var mathSubcommand = transformCobraCommand{
 	Use:   "math",
 	Short: "map characters between math variants",
@@ -211,12 +248,5 @@ var mathSubcommand = transformCobraCommand{
 		}
 		return strings.Join(output, " "), nil
 	},
-	List: func() []string {
-		avail := make([]string, 0, len(conversions))
-		for k := range conversions {
-			avail = append(avail, k)
-		}
-		sort.Strings(avail)
-		return avail
-	},
+	List: mathListCommands,
 }

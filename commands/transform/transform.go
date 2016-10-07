@@ -6,6 +6,7 @@ package transform
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
@@ -18,10 +19,11 @@ var flags struct {
 	list          bool
 	preserveOrder bool
 	target        string
+	verbose       bool
 }
 
 type transformer func(args []string) (result string, err error)
-type lister func() []string
+type lister func(w io.Writer, verbose bool, args []string) error
 
 type transformCobraCommand struct {
 	Use         string
@@ -39,8 +41,9 @@ func transformWrapper(cmd *cobra.Command, args []string, transformer transformer
 	if flags.list {
 		if list != nil {
 			fmt.Printf("Available targets for %q:\n", cmd.Name())
-			for _, item := range list() {
-				fmt.Printf("  %q\n", item)
+			if err := list(cmd.OutOrStdout(), flags.verbose, args); err != nil {
+				root.Errored()
+				cmd.Printf("%s: listing failed: %s\n", cmd.Name(), err)
 			}
 		} else {
 			root.Errored()
@@ -71,9 +74,10 @@ func transformWrapper(cmd *cobra.Command, args []string, transformer transformer
 
 func init() {
 	transformCmd.PersistentFlags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
-	transformCmd.PersistentFlags().BoolVarP(&flags.list, "list", "l", false, "list target variants")
+	transformCmd.PersistentFlags().BoolVarP(&flags.list, "list", "l", false, "list target variants; -v for table, args for exemplar")
 	transformCmd.PersistentFlags().BoolVarP(&flags.preserveOrder, "preserve-order", "p", false, "keep characters in original order")
 	transformCmd.PersistentFlags().StringVarP(&flags.target, "target", "t", "", "map characters to this type")
+	transformCmd.PersistentFlags().BoolVarP(&flags.verbose, "verbose", "v", false, "show more details, in a table")
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
 		// because that makes client portability more problematic.  Instead, we
