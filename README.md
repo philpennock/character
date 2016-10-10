@@ -118,6 +118,7 @@ And then build.
 Deppy is a simple vendor-locking tool for recording which versions are
 known-good and making it easy to check those back out.  It's a fork from
 `godep`, preserving its original working model.
+Deppy plays well with Travis CI.
 
 The `Deps` file used by `deppy` should be considered to be akin to a
 `foo.lock` file in Ruby's ecosystem, but where the required files are not
@@ -128,11 +129,24 @@ Assuming that this repository is checked out into
 list of directories:
 
 ```console
-$ go get github.com/hamfist/deppy && deppy restore
+$ go get github.com/hamfist/deppy
+$ deppy restore
 ```
 
 That should work for most people; assumes GNU make.  Without `make`, just
 use `go build` and accept the loss of version information.
+
+
+### govendor
+
+govendor is a more sophisticated tool for managing locking and vendoring.
+This is the tooling approach used for the `make shuffle-and-build` target.
+
+```console
+$ make gvsync
+  OR
+$ govendor sync +vendor +missing
+```
 
 
 ### Another dependency version manager
