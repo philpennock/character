@@ -143,6 +143,10 @@ govendor is a more sophisticated tool for managing locking and vendoring.
 This is the tooling approach used for the `make shuffle-and-build` target.
 
 ```console
+$ go get -v github.com/kardianos/govendor
+
+  ... AND THEN ONE OF: ...
+
 $ make gvsync
   OR
 $ govendor sync +vendor +missing
