@@ -19,6 +19,7 @@ var VersionString string
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
+	// TODO: add verbose flag, list versions of dependencies when verbose
 	Run: func(cmd *cobra.Command, args []string) {
 		if VersionString == "" {
 			VersionString = "<unknown>"

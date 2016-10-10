@@ -4,12 +4,21 @@
 # If need to support non-GNU make too, use a Makefile.common file and move
 # logic around as needed.
 
+# Use CANONICAL_CHARACTER_REPO in environ to override where this is checked out
+# You'll probably also need to bulk-edit the Go src.
+# The GOPATH-less shuffle logic will get upset at you if you fork to a new repo
+# and don't set this environment variable.
+
+ifdef CANONICAL_CHARACTER_REPO
+REPO_PATH=	$(CANONICAL_CHARACTER_REPO)
+else
 REPO_PATH=	github.com/philpennock/character
+endif
 
 # Set this via the cmdline to change the tables backend
 TABLES=		apcera
 
-SOURCES=	$(shell find . -type f -name '*.go')
+SOURCES=	$(shell find . -name vendor -prune -o -type f -name '*.go')
 TOP_SOURCE=	main.go
 BINARIES=	character
 CRUFT=		dependency-graph.png
@@ -17,7 +26,7 @@ CRUFT=		dependency-graph.png
 # The go binary to use; you might override on the command-line to be 'gotip'
 GO_CMD ?= go
 
-VERSION_VAR := github.com/philpennock/character/commands/version.VersionString
+VERSION_VAR := $(REPO_PATH)/commands/version.VersionString
 ifndef REPO_VERSION
 REPO_VERSION := $(shell git describe --always --dirty --tags)
 endif
@@ -39,8 +48,9 @@ else ifeq ($(TABLES),tablewriter)
 BUILD_TAGS+= tablewriter
 endif
 
-.PHONY : all install help devhelp short_help cleaninstall depends dependsgraph \
-	vet lint
+.PHONY : all install help devhelp short_help cleaninstall gvsync depends \
+	dependsgraph vet lint \
+	perform-shuffle check-no-GOPATH shuffle-and-build setgo-and-build
 .DEFAULT_GOAL := helpful_all
 
 # first build target references hint to extra help
@@ -56,7 +66,9 @@ help:
 	@echo "The following targets are available:"
 	@echo " 'all': make all programs"
 	@echo " 'install': install, currently just program, via go install"
-	@echo " 'depends': fetch dependencies at locked versions"
+	@echo " 'gvsync': fetch dependencies at locked versions (govendor)"
+	@echo " 'depends': fetch dependencies at locked versions (deppy)"
+	@echo " 'shuffle-and-build': build without a GOPATH setup"
 	@echo " 'help': you're looking at it"
 	@echo " 'clean': remove outputs in source dir"
 	@echo " 'cleaninstall': try to remove installed locations"
@@ -67,6 +79,8 @@ devhelp:
 	@echo " 'vet': go vet"
 	@echo " 'lint': golint"
 	@echo " 'test': go test, unit-tests"
+	@echo " 'gopathupdate': update dependencies in non-vendored GOPATH"
+	@echo " 'depsync': sync various dependency files"
 
 $(BINARIES): $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
@@ -84,6 +98,9 @@ endif
 	@echo "Installing version $(REPO_VERSION) ..."
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
 	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $(REPO_PATH)
+
+gvsync:
+	govendor sync +vendor +missing
 
 depends:
 	deppy restore
@@ -129,6 +146,44 @@ else
 	@false
 endif
 
+# govendor has nicer tooling, let's treat that as authoritative
+
+depsync: LICENSES_all.txt Deps
+	@true
+
+LICENSES_all.txt: LICENSE.txt vendor/vendor.json
+	@# `govendor license` picks up the empty (freshly-truncated) file. If
+	@# not truncated, would recurse. So just nuke the file before generation
+	@# and ensure during-generation the filename doesn't match license-based
+	@# naming
+	rm -f ./LICENSES_all.txt
+	govendor license > ./tmplic
+	mv ./tmplic ./LICENSES_all.txt
+
+Deps: vendor/vendor.json
+	mv vendor vendor.-
+	deppy save
+	mv vendor.- vendor
+
+vendor/vendor.json: $(SOURCES)
+	govendor update +vendor
+
+gopathupdate:
+	mv vendor vendor.-
+	go get -d -u -v
+	mv vendor.- vendor
+
+check-no-GOPATH:
+	@if test -n "$(GOPATH)"; then echo >&2 "make: GOPATH is set, can't use this target"; exit 1; fi
+
+perform-shuffle: check-no-GOPATH
+	sh -x ./.shuffle-gopath
+
+setgo-and-build:
+	sh ./.shuffle-env-run make gvsync all
+
+shuffle-and-build: perform-shuffle setgo-and-build
+
 # Where BSD lets you `make -V VARNAME` to print the value of a variable instead
 # of building a target, this gives GNU make a target `print-VARNAME` to print
 # the value.  I have so missed this when using GNU make.
@@ -137,3 +192,11 @@ endif
 #   <http://blog.jgc.org/2015/04/the-one-line-you-should-add-to-every.html>
 # where the commenter provided the shell meta-character-safe version.
 print-%: ; @echo '$(subst ','\'',$*=$($*))'
+
+
+# NOTE WELL:
+# When I move to making tarball releases available, remember that I have
+# committed in the README to copying a vendored source tree into the tarballs,
+# for purposes of reproducible builds.
+# Should probably also hard-code the version number in a generated .go file
+# as part of that flow.

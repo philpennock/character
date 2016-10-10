@@ -1,0 +1,77 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Vl727YOwdLlwifcARReSKCIBiYg=",
+			"path": "github.com/apcera/termtables",
+			"revision": "f484430c5459746e3b3a4ca0b006167ded6f75b0",
+			"revisionTime": "2016-06-01T20:56:16Z"
+		},
+		{
+			"checksumSHA1": "ZEGkitRS8y3n2+hrIM5OSUxvqbw=",
+			"path": "github.com/apcera/termtables/locale",
+			"revision": "f484430c5459746e3b3a4ca0b006167ded6f75b0",
+			"revisionTime": "2016-06-01T20:56:16Z"
+		},
+		{
+			"checksumSHA1": "YoQtMVsekKL5ijF+ghj52ff6cKc=",
+			"path": "github.com/apcera/termtables/term",
+			"revision": "f484430c5459746e3b3a4ca0b006167ded6f75b0",
+			"revisionTime": "2016-06-01T20:56:16Z"
+		},
+		{
+			"checksumSHA1": "LmryoycYpABhEGIsSyNR+vaoIi4=",
+			"path": "github.com/argusdusty/Ferret",
+			"revision": "dd9e84ef70e3825921d1472aac879d4223a95e86",
+			"revisionTime": "2015-10-13T03:57:24Z"
+		},
+		{
+			"checksumSHA1": "SNSgdp5ShDZ57VZqBkQ0PXJCJIM=",
+			"path": "github.com/atotto/clipboard",
+			"revision": "bb272b845f1112e10117e3e45ce39f690c0001ad",
+			"revisionTime": "2016-02-19T03:44:21Z"
+		},
+		{
+			"checksumSHA1": "40vJyUB4ezQSn/NSadsKEOrudMc=",
+			"path": "github.com/inconshreveable/mousetrap",
+			"revision": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75",
+			"revisionTime": "2014-10-17T20:07:13Z"
+		},
+		{
+			"checksumSHA1": "smWxoY1kw+tbLgGax7BHi6n7iik=",
+			"path": "github.com/liquidgecka/testlib",
+			"revision": "2d09120381c4cc100142dc1a9a0795972764c346",
+			"revisionTime": "2015-12-02T17:48:16Z"
+		},
+		{
+			"checksumSHA1": "DdH3xAkzAWJ4B/LGYJyCeRsly2I=",
+			"path": "github.com/mattn/go-runewidth",
+			"revision": "d6bea18f789704b5f83375793155289da36a3c7f",
+			"revisionTime": "2016-03-15T04:07:12Z"
+		},
+		{
+			"checksumSHA1": "HB6MvfJv0flQn+viiwDzUGKj5gw=",
+			"path": "github.com/olekukonko/tablewriter",
+			"revision": "daf2955e742cf123959884fdff4685aa79b63135",
+			"revisionTime": "2016-06-21T09:30:29Z"
+		},
+		{
+			"path": "github.com/philpennock/character",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "BqUqNg3UuaPTse8Vg+xR/zW6tKw=",
+			"path": "github.com/spf13/cobra",
+			"revision": "ec2fe7859914a5106dcab4e7901633d959bfc2f4",
+			"revisionTime": "2016-10-10T15:14:18Z"
+		},
+		{
+			"checksumSHA1": "UVxLV6wxC8kPxlhShSfwWchKYJQ=",
+			"path": "github.com/spf13/pflag",
+			"revision": "b83537d79690b75cac5e021b036ae16792bf0f20",
+			"revisionTime": "2016-10-06T16:53:40Z"
+		}
+	],
+	"rootPath": "github.com/philpennock/character"
+}
