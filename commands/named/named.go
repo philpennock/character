@@ -6,6 +6,7 @@ package named
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/atotto/clipboard"
@@ -22,6 +23,7 @@ var flags struct {
 	clipboard bool
 	join      bool
 	livevim   bool
+	oneline   bool
 	search    bool
 	unsorted  bool
 	verbose   bool
@@ -105,6 +107,8 @@ var namedCmd = &cobra.Command{
 
 		if flags.verbose {
 			results.PrintTables()
+		} else if flags.oneline {
+			fmt.Println(results.StringPlain(resultset.PRINT_RUNE))
 		} else {
 			results.PrintPlain(resultset.PRINT_RUNE)
 		}
@@ -115,6 +119,7 @@ func init() {
 	namedCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
+	namedCmd.Flags().BoolVarP(&flags.oneline, "oneline", "1", false, "multiple chars on one line")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
 	if resultset.CanTable() {

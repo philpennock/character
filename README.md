@@ -12,7 +12,7 @@ which gives more detail in a pretty-printed table.
 
 ```console
 $ character help
-[...]
+[... lists all available sub-commands ...]
 $ character version
 [...]
 $ character name ✓
@@ -25,9 +25,22 @@ $ character named -j CHECK MARK
 ✓
 $ character named -v/ check
 [... table of results of substring search ...]
+$ character browse -b 'Alchemical Symbols'
+[... table of results; browse is always a table ...]
 $ character transform fraktur Hello world
 ℌ𝔢𝔩𝔩𝔬 𝔴𝔬𝔯𝔩𝔡
+$ character named -1c 'INFORMATION DESK PERSON' \
+    'EMOJI MODIFIER FITZPATRICK TYPE-5'
+💁🏾
 ```
+
+In the last example, note that `-c` copies to clipboard; using `-vc` shows the
+results in a table but copies only the characters to the clipboard.  Without
+`--oneline` (`-1`) each non-verbose character is shown on its own line.  In
+this example we're using an emoji modifier which needs to immediately follow
+the modified character, so `-1c` _should_ show you the same thing that is
+copied to the clipboard where `-c` on its own would show you the individual
+parts while copying the modified/combined whole to the clipboard.
 
 [Licensed](./LICENSE.txt) under a MIT-style license.  
 [Accumulated licenses of all dependencies](./LICENSES_all.txt) are available
