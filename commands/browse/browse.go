@@ -7,22 +7,26 @@ package browse
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
+	"github.com/philpennock/character/table"
 	"github.com/philpennock/character/unicode"
 
 	"github.com/philpennock/character/commands/root"
 )
 
 var flags struct {
-	livevim    bool
 	blockname  string
+	limitAbort int
+	listblocks bool
+	livevim    bool
 	startrune  int
 	stoprune   int
-	limitAbort int
+	verbose    bool
 }
 
 var browseCmd = &cobra.Command{
@@ -36,6 +40,11 @@ var browseCmd = &cobra.Command{
 
 		if flags.stoprune == 0 {
 			flags.stoprune = int(srcs.Unicode.MaxRune)
+		}
+
+		if flags.listblocks {
+			showBlocks(srcs)
+			return
 		}
 
 		if flags.blockname != "" {
@@ -105,14 +114,43 @@ var browseCmd = &cobra.Command{
 	},
 }
 
+func showBlocks(srcs *sources.Sources) {
+	if !flags.verbose {
+		for _, blockInfo := range srcs.UBlocks.ListBlocks() {
+			fmt.Printf("%s\n", blockInfo.Name)
+		}
+		return
+	}
+	// At time of writing, this is the only place outside of resultset
+	// which is directly generating tables.  Probably still the right
+	// thing to do.
+	if !table.Supported() {
+		fmt.Fprintf(os.Stderr, "sorry, this build is missing table support??\n")
+		root.Errored()
+		return
+	}
+	t := table.New()
+	t.AddHeaders("Name", "From", "To")
+	for _, blockInfo := range srcs.UBlocks.ListBlocks() {
+		t.AddRow(
+			blockInfo.Name,
+			strconv.FormatUint(uint64(blockInfo.Min), 16),
+			strconv.FormatUint(uint64(blockInfo.Max), 16),
+		)
+	}
+	fmt.Print(t.Render())
+}
+
 func init() {
 	if !resultset.CanTable() {
 		return
 	}
-	browseCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	browseCmd.Flags().StringVarP(&flags.blockname, "block", "b", "", "only show this block")
+	browseCmd.Flags().IntVarP(&flags.limitAbort, "limit-abort", "A", 3000, "abort if would show more than this many entries")
+	browseCmd.Flags().BoolVarP(&flags.listblocks, "list-blocks", "B", false, "list all available block names")
+	browseCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data")
 	browseCmd.Flags().IntVarP(&flags.startrune, "from", "f", 0, "show range starting at this value")
 	browseCmd.Flags().IntVarP(&flags.stoprune, "to", "t", 0, "show range ending at this value")
-	browseCmd.Flags().IntVarP(&flags.limitAbort, "limit-abort", "A", 3000, "abort if would show more than this many entries")
+	browseCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about block-names (for list-blocks)")
 	root.AddCommand(browseCmd)
 }

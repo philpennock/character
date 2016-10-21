@@ -82,6 +82,10 @@ func (b Blocks) FindByName(name string) (min, max rune, candidateNames []string)
 	return 0, 0, nil
 }
 
+func (b Blocks) ListBlocks() []BlockInfo {
+	return b.ordered
+}
+
 var oneBlocks struct {
 	sync.Once
 	b Blocks
@@ -91,6 +95,8 @@ var oneBlocks struct {
 func LoadBlocks() Blocks {
 	oneBlocks.Do(func() {
 		oneBlocks.b = parseRawBlocks()
+		// NB: at this time, the sorting is done at parse-time with a panic
+		// if out-of-order.
 	})
 	return oneBlocks.b
 }
