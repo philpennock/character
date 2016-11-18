@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/philpennock/character",
-	"GoVersion": "go1.7.1",
+	"GoVersion": "go1.7.3",
 	"Deps": [
 		{
 			"ImportPath": "github.com/apcera/termtables",
@@ -16,11 +16,11 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "ec2fe7859914a5106dcab4e7901633d959bfc2f4"
+			"Rev": "9495bc009a56819bdb0ddbc1a373e29c140bc674"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "b83537d79690b75cac5e021b036ae16792bf0f20"
+			"Rev": "5ccb023bc27df288a957c5e994cd44fd19619465"
 		}
 	]
 }

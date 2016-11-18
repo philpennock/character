@@ -39,10 +39,10 @@
 			"revisionTime": "2014-10-17T20:07:13Z"
 		},
 		{
-			"checksumSHA1": "smWxoY1kw+tbLgGax7BHi6n7iik=",
+			"checksumSHA1": "yQiQ4kP+RSEHCcWyDDHpK7qdhxA=",
 			"path": "github.com/liquidgecka/testlib",
-			"revision": "2d09120381c4cc100142dc1a9a0795972764c346",
-			"revisionTime": "2015-12-02T17:48:16Z"
+			"revision": "aa5f957ef9ae3ff932ac1737791242040f66c370",
+			"revisionTime": "2016-11-18T05:21:14Z"
 		},
 		{
 			"checksumSHA1": "DdH3xAkzAWJ4B/LGYJyCeRsly2I=",
@@ -61,16 +61,16 @@
 			"revision": ""
 		},
 		{
-			"checksumSHA1": "BqUqNg3UuaPTse8Vg+xR/zW6tKw=",
+			"checksumSHA1": "FZ0r4TzEy9UxXLkFVXFygApni4M=",
 			"path": "github.com/spf13/cobra",
-			"revision": "ec2fe7859914a5106dcab4e7901633d959bfc2f4",
-			"revisionTime": "2016-10-10T15:14:18Z"
+			"revision": "9495bc009a56819bdb0ddbc1a373e29c140bc674",
+			"revisionTime": "2016-11-16T13:20:53Z"
 		},
 		{
-			"checksumSHA1": "UVxLV6wxC8kPxlhShSfwWchKYJQ=",
+			"checksumSHA1": "GxPD7A0NjMDom1xte0mghkpzr0E=",
 			"path": "github.com/spf13/pflag",
-			"revision": "b83537d79690b75cac5e021b036ae16792bf0f20",
-			"revisionTime": "2016-10-06T16:53:40Z"
+			"revision": "5ccb023bc27df288a957c5e994cd44fd19619465",
+			"revisionTime": "2016-10-24T13:13:51Z"
 		}
 	],
 	"rootPath": "github.com/philpennock/character"
