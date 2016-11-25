@@ -16,7 +16,7 @@ REPO_PATH=	github.com/philpennock/character
 endif
 
 # Set this via the cmdline to change the tables backend
-TABLES=		apcera
+TABLES=		tabular
 
 SOURCES=	$(shell find . -name vendor -prune -o -type f -name '*.go')
 TOP_SOURCE=	main.go
@@ -28,7 +28,7 @@ GO_CMD ?= go
 
 VERSION_VAR := $(REPO_PATH)/commands/version.VersionString
 ifndef REPO_VERSION
-REPO_VERSION := $(shell git describe --always --dirty --tags)
+REPO_VERSION := $(shell ./.version)
 endif
 
 # Where various files are installed
@@ -40,12 +40,22 @@ PLATFORM := $(shell uname -s)
 
 # Collect the build-tags we want
 BUILD_TAGS:=
+LDFLAGS_EXTRA:=
 ifeq ($(TABLES),apcera)
 BUILD_TAGS+= termtables
 else ifeq ($(TABLES),termtables)
 BUILD_TAGS+= termtables
 else ifeq ($(TABLES),tablewriter)
 BUILD_TAGS+= tablewriter
+else ifeq ($(TABLES),tabular)
+BUILD_TAGS+= tabular
+# FIXME: beware future change of GH owner
+ifneq "$(wildcard vendor/github.com/PennockTech/tabular )" ""
+TABULAR_DIR=vendor/github.com/PennockTech/tabular
+else
+TABULAR_DIR=../../PennockTech/tabular
+endif
+LDFLAGS_EXTRA+= -X github.com/PennockTech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
 endif
 
 .PHONY : all install help devhelp short_help cleaninstall gvsync depends \
@@ -88,7 +98,7 @@ ifeq ($(REPO_VERSION),)
 	@false
 endif
 	@echo "Building version $(REPO_VERSION) ..."
-	$(GO_CMD) build -o $@ -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $<
+	$(GO_CMD) build -o $@ -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION) $(LDFLAGS_EXTRA)" -v $<
 
 install: $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
@@ -97,7 +107,7 @@ ifeq ($(REPO_VERSION),)
 endif
 	@echo "Installing version $(REPO_VERSION) ..."
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
-	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION)" -v $(REPO_PATH)
+	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION) $(LDFLAGS_EXTRA)" -v $(REPO_PATH)
 
 gvsync:
 	govendor sync +vendor +missing

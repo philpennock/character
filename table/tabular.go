@@ -1,34 +1,42 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2016 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-// We want `termtables` to activate us, and to be the default if no other
-// implementation is provided
+// +build tabular !tablewriter,!termtables
 
-// +build termtables
+// See also version command's tabular.go and replicate build tag constraints there.
 
+/*
+This implementation uses tabular for layout.
+
+Known current limitations:
+
+* No columnar alignment
+*/
 package table
 
 import (
-	"github.com/apcera/termtables"
+	"github.com/PennockTech/tabular/texttable"
 )
 
 // Supported indicates that we have a terminal table provider loaded.
-// This exists in anticipation of multiple providers and tables being optional
-// if not supported at all.
 func Supported() bool { return true }
 
 // A Table encapsulates our terminal table object from the dependency.
 type Table struct {
-	t        *termtables.Table
+	t        *texttable.TextTable
 	rowCount int
 }
 
 // New gives us a new empty table, configured for our basic requirements.
 func New() *Table {
-	t := termtables.CreateTable()
-	t.UTF8Box()
-	return &Table{t: t}
+	ours := &Table{
+		t: texttable.New(),
+	}
+	// Move to this after updating tests:
+	//ours.t.SetDecorationNamed("utf8-heavy")
+	ours.t.SetDecorationNamed("utf8-light-curved")
+	return ours
 }
 
 // AddHeaders takes a sequence of header-names for each column, and configures
@@ -39,7 +47,7 @@ func (t *Table) AddHeaders(headers ...interface{}) {
 
 // AddRow takes a sequence of cells for one table body row.
 func (t *Table) AddRow(cells ...interface{}) {
-	t.t.AddRow(cells...)
+	t.t.AddRowItems(cells...)
 	t.rowCount++
 }
 
@@ -54,22 +62,20 @@ func (t *Table) Empty() bool {
 }
 
 // Render gives us the full table as a string for display.
+// FIXME: why can't we return an error here?
 func (t *Table) Render() string {
-	return t.t.Render()
+	rendered, err := t.t.Render()
+	if err != nil {
+		rendered += "\n" + err.Error() + "\n"
+	}
+	return rendered
 }
 
 // AlignColumn sets the alignment of one column in a given table.  It counts
-// columns starting from 1.
+// columns starting from 1.  In this implementation, it has no effect because
+// tabular doesn't yet support alignment.
 func (t *Table) AlignColumn(column int, align Alignment) {
-	// private type, can't declare variable, so call func via switch
-	switch align {
-	case LEFT:
-		t.t.SetAlign(termtables.AlignLeft, column)
-	case CENTER:
-		t.t.SetAlign(termtables.AlignCenter, column)
-	case RIGHT:
-		t.t.SetAlign(termtables.AlignRight, column)
-	default:
-		panic("unhandled column alignment")
-	}
+	// IGNORED
+	_ = column
+	_ = align
 }

@@ -3,8 +3,8 @@
 	"GoVersion": "go1.7.3",
 	"Deps": [
 		{
-			"ImportPath": "github.com/apcera/termtables",
-			"Rev": "f484430c5459746e3b3a4ca0b006167ded6f75b0"
+			"ImportPath": "github.com/PennockTech/tabular",
+			"Rev": "6d68737d0185826575fa6e0a803edb4db0dbdb33"
 		},
 		{
 			"ImportPath": "github.com/argusdusty/Ferret",
@@ -13,6 +13,11 @@
 		{
 			"ImportPath": "github.com/atotto/clipboard",
 			"Rev": "bb272b845f1112e10117e3e45ce39f690c0001ad"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-runewidth",
+			"Comment": "v0.0.1-10-g737072b",
+			"Rev": "737072b4e32b7a5018b4a7125da8d12de90e8045"
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",

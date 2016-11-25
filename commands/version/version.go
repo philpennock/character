@@ -1,4 +1,4 @@
-// Copyright © 2015 Phil Pennock.
+// Copyright © 2015,2016 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -16,6 +16,21 @@ import (
 // for build
 var VersionString string
 
+// Library version functions should be defined in other files in this dir,
+// under appropriate build-tag constraints, and those files should use
+// the add function below in their init() routines.  Each function should
+// return a short library name, and any lines of output for versioning.
+// If the short library name is empty, then the library's name is assumed
+// to be embedded in the output lines already.
+var libraryVersionFuncs []func() (string, []string)
+
+func addLibraryVersionFunc(f func() (string, []string)) {
+	if libraryVersionFuncs == nil {
+		libraryVersionFuncs = make([]func() (string, []string), 0, 3)
+	}
+	libraryVersionFuncs = append(libraryVersionFuncs, f)
+}
+
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
@@ -25,6 +40,16 @@ var versionCmd = &cobra.Command{
 			VersionString = "<unknown>"
 		}
 		fmt.Printf("%s: version %s\n", cmd.Root().Name(), VersionString)
+		for _, f := range libraryVersionFuncs {
+			name, infoLines := f()
+			for _, l := range infoLines {
+				if name != "" {
+					fmt.Printf("%s: %s\n", name, l)
+				} else {
+					fmt.Printf("%s\n", l)
+				}
+			}
+		}
 	},
 }
 

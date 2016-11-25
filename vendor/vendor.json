@@ -3,6 +3,30 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "5HdIpDLcnFK35ZqXGSn/xCWU2hY=",
+			"path": "github.com/PennockTech/tabular",
+			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
+			"revisionTime": "2016-11-30T15:26:30Z"
+		},
+		{
+			"checksumSHA1": "xoP6HE+FZUowur3Fa+8qnYiVT/E=",
+			"path": "github.com/PennockTech/tabular/length",
+			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
+			"revisionTime": "2016-11-30T15:26:30Z"
+		},
+		{
+			"checksumSHA1": "KC24Pd/2Fy56/4JSO35rmoQXvDE=",
+			"path": "github.com/PennockTech/tabular/texttable",
+			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
+			"revisionTime": "2016-11-30T15:26:30Z"
+		},
+		{
+			"checksumSHA1": "7YY6I7WOBq8X+FEh66RsZdTenVU=",
+			"path": "github.com/PennockTech/tabular/texttable/decoration",
+			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
+			"revisionTime": "2016-11-30T15:26:30Z"
+		},
+		{
 			"checksumSHA1": "Vl727YOwdLlwifcARReSKCIBiYg=",
 			"path": "github.com/apcera/termtables",
 			"revision": "f484430c5459746e3b3a4ca0b006167ded6f75b0",
@@ -39,16 +63,16 @@
 			"revisionTime": "2014-10-17T20:07:13Z"
 		},
 		{
-			"checksumSHA1": "yQiQ4kP+RSEHCcWyDDHpK7qdhxA=",
+			"checksumSHA1": "hn8v9zAhmzSK0HWImxXONGTlb2c=",
 			"path": "github.com/liquidgecka/testlib",
-			"revision": "aa5f957ef9ae3ff932ac1737791242040f66c370",
-			"revisionTime": "2016-11-18T05:21:14Z"
+			"revision": "259ff64a0e1db012e31b1b629960105a17939595",
+			"revisionTime": "2016-11-19T23:48:48Z"
 		},
 		{
-			"checksumSHA1": "DdH3xAkzAWJ4B/LGYJyCeRsly2I=",
+			"checksumSHA1": "yf185lmVPcvXjLZuPT1s4JzxI18=",
 			"path": "github.com/mattn/go-runewidth",
-			"revision": "d6bea18f789704b5f83375793155289da36a3c7f",
-			"revisionTime": "2016-03-15T04:07:12Z"
+			"revision": "737072b4e32b7a5018b4a7125da8d12de90e8045",
+			"revisionTime": "2016-10-12T01:35:12Z"
 		},
 		{
 			"checksumSHA1": "HB6MvfJv0flQn+viiwDzUGKj5gw=",

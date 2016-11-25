@@ -1,0 +1,8 @@
+#!/bin/sh
+branch="$(git symbolic-ref --short HEAD)"
+if [ ".$branch" = ".master" ]; then
+	branch=""
+else
+	branch=",$branch"
+fi
+printf "%s%s\n" "$(git describe --always --dirty --tags)" "$branch"
