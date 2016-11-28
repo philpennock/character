@@ -1,12 +1,12 @@
 package unicode
 
 var rawBlocks = []byte(`
-# Blocks-8.0.0.txt
-# Date: 2014-11-10, 23:04:00 GMT [KW]
+# Blocks-9.0.0.txt
+# Date: 2016-02-05, 23:48:00 GMT [KW]
+# © 2016 Unicode®, Inc.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Unicode Character Database
-# Copyright (c) 1991-2014 Unicode, Inc.
-# For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 #
 # Format:
@@ -96,6 +96,7 @@ var rawBlocks = []byte(`
 1BC0..1BFF; Batak
 1C00..1C4F; Lepcha
 1C50..1C7F; Ol Chiki
+1C80..1C8F; Cyrillic Extended-C
 1CC0..1CCF; Sundanese Supplement
 1CD0..1CFF; Vedic Extensions
 1D00..1D7F; Phonetic Extensions
@@ -212,6 +213,7 @@ FFF0..FFFF; Specials
 10400..1044F; Deseret
 10450..1047F; Shavian
 10480..104AF; Osmanya
+104B0..104FF; Osage
 10500..1052F; Elbasan
 10530..1056F; Caucasian Albanian
 10600..1077F; Linear A
@@ -246,13 +248,17 @@ FFF0..FFFF; Specials
 11280..112AF; Multani
 112B0..112FF; Khudawadi
 11300..1137F; Grantha
+11400..1147F; Newa
 11480..114DF; Tirhuta
 11580..115FF; Siddham
 11600..1165F; Modi
+11660..1167F; Mongolian Supplement
 11680..116CF; Takri
 11700..1173F; Ahom
 118A0..118FF; Warang Citi
 11AC0..11AFF; Pau Cin Hau
+11C00..11C6F; Bhaiksuki
+11C70..11CBF; Marchen
 12000..123FF; Cuneiform
 12400..1247F; Cuneiform Numbers and Punctuation
 12480..1254F; Early Dynastic Cuneiform
@@ -263,6 +269,9 @@ FFF0..FFFF; Specials
 16AD0..16AFF; Bassa Vah
 16B00..16B8F; Pahawh Hmong
 16F00..16F9F; Miao
+16FE0..16FFF; Ideographic Symbols and Punctuation
+17000..187FF; Tangut
+18800..18AFF; Tangut Components
 1B000..1B0FF; Kana Supplement
 1BC00..1BC9F; Duployan
 1BCA0..1BCAF; Shorthand Format Controls
@@ -273,7 +282,9 @@ FFF0..FFFF; Specials
 1D360..1D37F; Counting Rod Numerals
 1D400..1D7FF; Mathematical Alphanumeric Symbols
 1D800..1DAAF; Sutton SignWriting
+1E000..1E02F; Glagolitic Supplement
 1E800..1E8DF; Mende Kikakui
+1E900..1E95F; Adlam
 1EE00..1EEFF; Arabic Mathematical Alphabetic Symbols
 1F000..1F02F; Mahjong Tiles
 1F030..1F09F; Domino Tiles
@@ -301,6 +312,6 @@ F0000..FFFFF; Supplementary Private Use Area-A
 # EOF
 `)
 
-const rawBlocksLineCount = 298
+const rawBlocksLineCount = 309
 
 // EOF
