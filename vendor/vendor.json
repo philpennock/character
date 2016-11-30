@@ -1,33 +1,33 @@
 {
 	"comment": "",
-	"ignore": "test",
+	"ignore": "",
 	"package": [
 		{
-			"checksumSHA1": "5HdIpDLcnFK35ZqXGSn/xCWU2hY=",
+			"checksumSHA1": "VeDr2LDxtCk/WNNYn3XpSE2nzq4=",
 			"path": "github.com/PennockTech/tabular",
-			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
-			"revisionTime": "2016-11-30T15:26:30Z"
+			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
+			"revisionTime": "2016-11-30T20:49:51Z"
 		},
 		{
-			"checksumSHA1": "xoP6HE+FZUowur3Fa+8qnYiVT/E=",
+			"checksumSHA1": "SHa1sFGOWgWQ2ehcOsGq5/lGkgU=",
 			"path": "github.com/PennockTech/tabular/length",
-			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
-			"revisionTime": "2016-11-30T15:26:30Z"
+			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
+			"revisionTime": "2016-11-30T20:49:51Z"
 		},
 		{
-			"checksumSHA1": "KC24Pd/2Fy56/4JSO35rmoQXvDE=",
+			"checksumSHA1": "D1qbe8Q7HTlBV23QCbTd7xk5l/s=",
 			"path": "github.com/PennockTech/tabular/texttable",
-			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
-			"revisionTime": "2016-11-30T15:26:30Z"
+			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
+			"revisionTime": "2016-11-30T20:49:51Z"
 		},
 		{
-			"checksumSHA1": "7YY6I7WOBq8X+FEh66RsZdTenVU=",
+			"checksumSHA1": "Mcw6miM52zeicpBuS3v1NZXyEOs=",
 			"path": "github.com/PennockTech/tabular/texttable/decoration",
-			"revision": "6d68737d0185826575fa6e0a803edb4db0dbdb33",
-			"revisionTime": "2016-11-30T15:26:30Z"
+			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
+			"revisionTime": "2016-11-30T20:49:51Z"
 		},
 		{
-			"checksumSHA1": "Vl727YOwdLlwifcARReSKCIBiYg=",
+			"checksumSHA1": "ScUJlhyF2WM67J0BwYuZhUmHvx0=",
 			"path": "github.com/apcera/termtables",
 			"revision": "f484430c5459746e3b3a4ca0b006167ded6f75b0",
 			"revisionTime": "2016-06-01T20:56:16Z"
@@ -51,7 +51,7 @@
 			"revisionTime": "2015-10-13T03:57:24Z"
 		},
 		{
-			"checksumSHA1": "SNSgdp5ShDZ57VZqBkQ0PXJCJIM=",
+			"checksumSHA1": "9iKvKiMPJRm2aQHFLaCrQIKMfS0=",
 			"path": "github.com/atotto/clipboard",
 			"revision": "bb272b845f1112e10117e3e45ce39f690c0001ad",
 			"revisionTime": "2016-02-19T03:44:21Z"
@@ -63,35 +63,31 @@
 			"revisionTime": "2014-10-17T20:07:13Z"
 		},
 		{
-			"checksumSHA1": "hn8v9zAhmzSK0HWImxXONGTlb2c=",
+			"checksumSHA1": "8+/oZmZLOYQctzVDsGauciQmrW4=",
 			"path": "github.com/liquidgecka/testlib",
-			"revision": "259ff64a0e1db012e31b1b629960105a17939595",
-			"revisionTime": "2016-11-19T23:48:48Z"
+			"revision": "be1f6d75697671a02d2ac88be69cbcdc24235c25",
+			"revisionTime": "2016-11-30T20:31:02Z"
 		},
 		{
-			"checksumSHA1": "yf185lmVPcvXjLZuPT1s4JzxI18=",
+			"checksumSHA1": "FrEVs94fg4VeD7Dm+c+KWSeD/Zw=",
 			"path": "github.com/mattn/go-runewidth",
 			"revision": "737072b4e32b7a5018b4a7125da8d12de90e8045",
 			"revisionTime": "2016-10-12T01:35:12Z"
 		},
 		{
-			"checksumSHA1": "HB6MvfJv0flQn+viiwDzUGKj5gw=",
+			"checksumSHA1": "l0m9YLviEoGIqGseU0tYLATzrEg=",
 			"path": "github.com/olekukonko/tablewriter",
 			"revision": "daf2955e742cf123959884fdff4685aa79b63135",
 			"revisionTime": "2016-06-21T09:30:29Z"
 		},
 		{
-			"path": "github.com/philpennock/character",
-			"revision": ""
-		},
-		{
-			"checksumSHA1": "FZ0r4TzEy9UxXLkFVXFygApni4M=",
+			"checksumSHA1": "m9wUpfYb3Th+p9rgMUI9lNkPGyU=",
 			"path": "github.com/spf13/cobra",
 			"revision": "9495bc009a56819bdb0ddbc1a373e29c140bc674",
 			"revisionTime": "2016-11-16T13:20:53Z"
 		},
 		{
-			"checksumSHA1": "GxPD7A0NjMDom1xte0mghkpzr0E=",
+			"checksumSHA1": "l4QsmKY0q7R3NH1fjvmxUGyCqYQ=",
 			"path": "github.com/spf13/pflag",
 			"revision": "5ccb023bc27df288a957c5e994cd44fd19619465",
 			"revisionTime": "2016-10-24T13:13:51Z"
