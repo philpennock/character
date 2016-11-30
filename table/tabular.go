@@ -33,9 +33,7 @@ func New() *Table {
 	ours := &Table{
 		t: texttable.New(),
 	}
-	// Move to this after updating tests:
-	//ours.t.SetDecorationNamed("utf8-heavy")
-	ours.t.SetDecorationNamed("utf8-light-curved")
+	ours.t.SetDecorationNamed("utf8-heavy")
 	return ours
 }
 

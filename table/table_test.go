@@ -22,19 +22,19 @@ func TestBasicTables(t *testing.T) {
 	T.Equal(tb.Empty(), true, "new table should be empty")
 
 	should := "" +
-		"╭╮\n" +
-		"╰╯\n" +
+		"┏┓\n" +
+		"┗┛\n" +
 		""
-	T.Equal(tb.Render(), should, "empty table renders XXX")
+	T.Equal(tb.Render(), should, "empty table renders")
 
 	tb = New()
 	should = "" +
-		"╭────────┬────────────┬──────╮\n" +
-		"│ foo    │ loquacious │ x    │\n" +
-		"├────────┼────────────┼──────┤\n" +
-		"│ 42     │ .          │ fred │\n" +
-		"│ snerty │ word       │ r    │\n" +
-		"╰────────┴────────────┴──────╯\n" +
+		"┏━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━┓\n" +
+		"┃ foo    ┃ loquacious ┃ x    ┃\n" +
+		"┣━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━┫\n" +
+		"┃ 42     │ .          │ fred ┃\n" +
+		"┃ snerty │ word       │ r    ┃\n" +
+		"┗━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━┛\n" +
 		""
 	tb.AddHeaders("foo", "loquacious", "x")
 	tb.AddRow(42, ".", "fred")
@@ -43,13 +43,13 @@ func TestBasicTables(t *testing.T) {
 
 	tb = New()
 	should = "" +
-		"╭────────┬────────────┬──────────╮\n" +
-		"│ foo    │ loquacious │ x        │\n" +
-		"├────────┼────────────┼──────────┤\n" +
-		"│ 42     │ .          │ frederic │\n" +
-		"├────────┼────────────┼──────────┤\n" +
-		"│ snerty │ word       │ 3        │\n" +
-		"╰────────┴────────────┴──────────╯\n" +
+		"┏━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┓\n" +
+		"┃ foo    ┃ loquacious ┃ x        ┃\n" +
+		"┣━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━┫\n" +
+		"┃ 42     │ .          │ frederic ┃\n" +
+		"┠────────┼────────────┼──────────┨\n" +
+		"┃ snerty │ word       │ 3        ┃\n" +
+		"┗━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━━━┛\n" +
 		""
 	tb.AddHeaders("foo", "loquacious", "x")
 	tb.AddRow(42, ".", "frederic")
@@ -61,12 +61,12 @@ func TestBasicTables(t *testing.T) {
 	// 1. make alignment actually work
 	tb = New()
 	should = "" +
-		"╭────────┬────────────┬──────────╮\n" +
-		"│ foo    │ loquacious │ x        │\n" +
-		"├────────┼────────────┼──────────┤\n" +
-		"│ 42     │ .          │ frederic │\n" +
-		"│ snerty │ word       │ 3        │\n" + // FIXME: this is wrong
-		"╰────────┴────────────┴──────────╯\n" +
+		"┏━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┓\n" +
+		"┃ foo    ┃ loquacious ┃ x        ┃\n" +
+		"┣━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━┫\n" +
+		"┃ 42     │ .          │ frederic ┃\n" +
+		"┃ snerty │ word       │ 3        ┃\n" + // FIXME: this is wrong
+		"┗━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━━━┛\n" +
 		""
 	tb.AddHeaders("foo", "loquacious", "x")
 	tb.AddRow(42, ".", "frederic")
