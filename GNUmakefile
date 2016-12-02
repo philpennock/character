@@ -25,11 +25,12 @@ CRUFT=		dependency-graph.png
 
 # The go binary to use; you might override on the command-line to be 'gotip'
 GO_CMD ?= go
+GO_LDFLAGS:=
 
-VERSION_VAR := $(REPO_PATH)/commands/version.VersionString
 ifndef REPO_VERSION
 REPO_VERSION := $(shell ./.version)
 endif
+GO_LDFLAGS+= -X $(REPO_PATH)/commands/version.VersionString=$(REPO_VERSION)
 
 # Where various files are installed
 PKG_DIR_TOP := $(firstword $(subst :, ,$(GOPATH)))/pkg/$(shell go env GOOS)_$(shell go env GOARCH)
@@ -40,7 +41,6 @@ PLATFORM := $(shell uname -s)
 
 # Collect the build-tags we want
 BUILD_TAGS:=
-LDFLAGS_EXTRA:=
 ifeq ($(TABLES),apcera)
 BUILD_TAGS+= termtables
 else ifeq ($(TABLES),termtables)
@@ -55,7 +55,7 @@ TABULAR_DIR=vendor/github.com/PennockTech/tabular
 else
 TABULAR_DIR=../../PennockTech/tabular
 endif
-LDFLAGS_EXTRA+= -X github.com/PennockTech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
+GO_LDFLAGS+= -X github.com/PennockTech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
 endif
 
 .PHONY : all install help devhelp short_help cleaninstall gvsync depends \
@@ -98,7 +98,7 @@ ifeq ($(REPO_VERSION),)
 	@false
 endif
 	@echo "Building version $(REPO_VERSION) ..."
-	$(GO_CMD) build -o $@ -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION) $(LDFLAGS_EXTRA)" -v $<
+	$(GO_CMD) build -o $@ -tags "$(BUILD_TAGS)" -ldflags "$(GO_LDFLAGS)" -v $<
 
 install: $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
@@ -107,7 +107,7 @@ ifeq ($(REPO_VERSION),)
 endif
 	@echo "Installing version $(REPO_VERSION) ..."
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
-	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "-X $(VERSION_VAR)=$(REPO_VERSION) $(LDFLAGS_EXTRA)" -v $(REPO_PATH)
+	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "$(GO_LDFLAGS)" -v $(REPO_PATH)
 
 gvsync:
 	govendor sync +vendor +missing

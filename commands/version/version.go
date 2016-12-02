@@ -6,6 +6,7 @@ package version
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/spf13/cobra"
 
@@ -40,6 +41,7 @@ var versionCmd = &cobra.Command{
 			VersionString = "<unknown>"
 		}
 		fmt.Printf("%s: version %s\n", cmd.Root().Name(), VersionString)
+		fmt.Printf("Golang: Runtime: %s\n", runtime.Version())
 		for _, f := range libraryVersionFuncs {
 			name, infoLines := f()
 			for _, l := range infoLines {
