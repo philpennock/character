@@ -38,7 +38,17 @@ var characterCmd = &cobra.Command{
 }
 
 func init() {
-	characterCmd.PersistentFlags().StringVar(&globalFlags.profileCPUFile, "profile-cpu-file", "", "write CPU profile to file")
+	// We want to work on flags which must be applied directly to this command,
+	// _before_ sub-commands.  Thus "character [--global-flags] subcmd [--cmd-flags]".
+	// I can't figure out how to do that with cobra, so for now we have the
+	// global-flags applying within sub-commands too.  This is subject to change in
+	// the future.
+	//
+	// If changing this, remember to check other *.go files in this directory
+	// for any init()-flag-setting there too.
+	flagSet := characterCmd.PersistentFlags()
+	flagSet.StringVar(&globalFlags.profileCPUFile, "profile-cpu-file", "", "write CPU profile to file")
+	characterCmd.MarkFlagFilename("profile-cpu-file")
 }
 
 var errorCount struct {

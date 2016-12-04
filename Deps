@@ -4,8 +4,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/PennockTech/tabular",
-			"Comment": "v1.0.1",
-			"Rev": "b307237dd3407d1722f84e5bc617d175767a4543"
+			"Rev": "931afa564a070410fdf0ce374d7787c6370bf790"
 		},
 		{
 			"ImportPath": "github.com/argusdusty/Ferret",

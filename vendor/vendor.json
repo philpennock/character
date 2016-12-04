@@ -3,28 +3,46 @@
 	"ignore": "",
 	"package": [
 		{
-			"checksumSHA1": "VeDr2LDxtCk/WNNYn3XpSE2nzq4=",
+			"checksumSHA1": "kvE/F+2yIiH81drWjcgd47y4qRQ=",
 			"path": "github.com/PennockTech/tabular",
-			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
-			"revisionTime": "2016-11-30T20:49:51Z"
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
+		},
+		{
+			"checksumSHA1": "zIbj5FLoEmveLTiGQPGHh5Btees=",
+			"path": "github.com/PennockTech/tabular/auto",
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
+		},
+		{
+			"checksumSHA1": "Qp98ss5sF3XI1SVIdXC5+lDY2xk=",
+			"path": "github.com/PennockTech/tabular/csv",
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
+		},
+		{
+			"checksumSHA1": "lp5sXjpPPwfQodkkRUymMhOE8jU=",
+			"path": "github.com/PennockTech/tabular/html",
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
 		},
 		{
 			"checksumSHA1": "SHa1sFGOWgWQ2ehcOsGq5/lGkgU=",
 			"path": "github.com/PennockTech/tabular/length",
-			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
-			"revisionTime": "2016-11-30T20:49:51Z"
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
 		},
 		{
 			"checksumSHA1": "D1qbe8Q7HTlBV23QCbTd7xk5l/s=",
 			"path": "github.com/PennockTech/tabular/texttable",
-			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
-			"revisionTime": "2016-11-30T20:49:51Z"
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
 		},
 		{
 			"checksumSHA1": "Mcw6miM52zeicpBuS3v1NZXyEOs=",
 			"path": "github.com/PennockTech/tabular/texttable/decoration",
-			"revision": "b307237dd3407d1722f84e5bc617d175767a4543",
-			"revisionTime": "2016-11-30T20:49:51Z"
+			"revision": "931afa564a070410fdf0ce374d7787c6370bf790",
+			"revisionTime": "2016-12-03T22:45:25Z"
 		},
 		{
 			"checksumSHA1": "ScUJlhyF2WM67J0BwYuZhUmHvx0=",

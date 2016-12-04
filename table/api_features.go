@@ -15,3 +15,10 @@ const (
 	CENTER
 	RIGHT
 )
+
+// RenderStyle represents how the table should be styled.
+var RenderStyle string
+
+// AvailableStyles when non-nil, indicates that we can set style options, and
+// lists those styles.  Should be sorted.
+var AvailableStyles []string

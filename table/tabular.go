@@ -16,25 +16,28 @@ Known current limitations:
 package table
 
 import (
-	"github.com/PennockTech/tabular/texttable"
+	tb "github.com/PennockTech/tabular/auto"
 )
 
 // Supported indicates that we have a terminal table provider loaded.
 func Supported() bool { return true }
 
+// defaultRenderStyle indicates which style to use by default.  Is used
+// to initialize the RenderStyle control variable, which should be used
+// for lookups.
+const defaultRenderStyle = "utf8-heavy"
+
 // A Table encapsulates our terminal table object from the dependency.
 type Table struct {
-	t        *texttable.TextTable
+	t        tb.RenderTable
 	rowCount int
 }
 
 // New gives us a new empty table, configured for our basic requirements.
 func New() *Table {
-	ours := &Table{
-		t: texttable.New(),
+	return &Table{
+		t: tb.New(RenderStyle),
 	}
-	ours.t.SetDecorationNamed("utf8-heavy")
-	return ours
 }
 
 // AddHeaders takes a sequence of header-names for each column, and configures
@@ -76,4 +79,10 @@ func (t *Table) AlignColumn(column int, align Alignment) {
 	// IGNORED
 	_ = column
 	_ = align
+}
+
+// We support styles.
+func init() {
+	AvailableStyles = tb.ListStyles()
+	RenderStyle = defaultRenderStyle
 }
