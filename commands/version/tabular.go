@@ -6,7 +6,7 @@
 
 package version
 
-import "github.com/PennockTech/tabular"
+import "go.pennock.tech/tabular"
 
 func init() {
 	addLibraryVersionFunc(func() (string, []string) {

@@ -16,7 +16,7 @@ Known current limitations:
 package table
 
 import (
-	tb "github.com/PennockTech/tabular/auto"
+	tb "go.pennock.tech/tabular/auto"
 )
 
 // Supported indicates that we have a terminal table provider loaded.

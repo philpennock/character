@@ -1,11 +1,7 @@
 {
 	"ImportPath": "github.com/philpennock/character",
-	"GoVersion": "go1.7.3",
+	"GoVersion": "go1.7.4",
 	"Deps": [
-		{
-			"ImportPath": "github.com/PennockTech/tabular",
-			"Rev": "931afa564a070410fdf0ce374d7787c6370bf790"
-		},
 		{
 			"ImportPath": "github.com/argusdusty/Ferret",
 			"Rev": "dd9e84ef70e3825921d1472aac879d4223a95e86"
@@ -21,11 +17,16 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "9495bc009a56819bdb0ddbc1a373e29c140bc674"
+			"Rev": "b62566898a99f2db9c68ed0026aa0a052e59678d"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "5ccb023bc27df288a957c5e994cd44fd19619465"
+			"Rev": "25f8b5b07aece3207895bf19f7ab517eb3b22a40"
+		},
+		{
+			"ImportPath": "go.pennock.tech/tabular",
+			"Comment": "v1.0.3",
+			"Rev": "483afbe1c53ddf488def1a7f5a84b68ab57b2d3a"
 		}
 	]
 }

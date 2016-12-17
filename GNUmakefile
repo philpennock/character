@@ -49,13 +49,12 @@ else ifeq ($(TABLES),tablewriter)
 BUILD_TAGS+= tablewriter
 else ifeq ($(TABLES),tabular)
 BUILD_TAGS+= tabular
-# FIXME: beware future change of GH owner
-ifneq "$(wildcard vendor/github.com/PennockTech/tabular )" ""
-TABULAR_DIR=vendor/github.com/PennockTech/tabular
+ifneq "$(wildcard vendor/go.pennock.tech/tabular )" ""
+TABULAR_DIR=vendor/go.pennock.tech/tabular
 else
-TABULAR_DIR=../../PennockTech/tabular
+TABULAR_DIR=../../../go.pennock.tech/tabular
 endif
-GO_LDFLAGS+= -X github.com/PennockTech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
+GO_LDFLAGS+= -X go.pennock.tech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
 endif
 
 .PHONY : all install help devhelp short_help cleaninstall gvsync depends \
