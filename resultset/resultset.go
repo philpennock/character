@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/net/idna"
+
 	"github.com/philpennock/character/entities"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/table"
@@ -33,7 +35,7 @@ const (
 	_DIVIDER
 )
 
-type printItem int
+type printItem uint
 
 // These constants dictate what attribute of a rune should be printed.
 const (
@@ -42,10 +44,18 @@ const (
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX
 	PRINT_RUNE_UTF8ENC
+	PRINT_RUNE_PUNY
 	PRINT_NAME
 	PRINT_BLOCK
 	PRINT_HTML_ENTITIES
 	PRINT_XML_ENTITIES
+)
+
+type fieldSetSelector uint
+
+const (
+	FIELD_SET_DEFAULT fieldSetSelector = iota
+	FIELD_SET_NET
 )
 
 type errorItem struct {
@@ -61,6 +71,10 @@ type resultSet struct {
 
 	OutputStream io.Writer
 	ErrorStream  io.Writer
+
+	// This is subject to change; do we want fully selectable sets of fields,
+	// just pre-canned, something else?  For now ... let's keep it simple.
+	fields fieldSetSelector
 }
 
 // New creates a resultSet, which records items and errors encountered, and a
@@ -74,6 +88,12 @@ func New(s *sources.Sources, sizeHint int) *resultSet {
 		errors:  make([]errorItem, 0, 3),
 		which:   make([]selector, 0, sizeHint),
 	}
+}
+
+// SelectFieldsNet says to use the network fields, not the default fields.
+// This API call is very much subject to change.
+func (rs *resultSet) SelectFieldsNet() {
+	rs.fields = FIELD_SET_NET
 }
 
 // AddError records, in-sequence, that we got an error at this point.
@@ -192,6 +212,12 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 			s += fmt.Sprintf("%%%X", bb[i])
 		}
 		return s
+	case PRINT_RUNE_PUNY:
+		p, err := idna.ToASCII(string(ci.Number))
+		if err != nil {
+			return ""
+		}
+		return p
 	case PRINT_NAME:
 		return ci.Name
 	case PRINT_BLOCK:
@@ -219,7 +245,7 @@ func (rs *resultSet) PrintTables() {
 	rs.fixStreams()
 	if len(rs.items) > 0 {
 		t := table.New()
-		t.AddHeaders(detailsHeaders()...)
+		t.AddHeaders(rs.detailsHeaders()...)
 		ii := 0
 		for _, s := range rs.which {
 			switch s {
@@ -232,7 +258,7 @@ func (rs *resultSet) PrintTables() {
 				t.AddSeparator()
 			}
 		}
-		for _, align := range detailsColumnAlignments {
+		for _, align := range rs.detailsColumnAlignments() {
 			t.AlignColumn(align.column, align.where)
 		}
 		fmt.Fprint(rs.OutputStream, t.Render())
@@ -247,32 +273,65 @@ func (rs *resultSet) PrintTables() {
 	}
 }
 
-func detailsHeaders() []interface{} {
-	return []interface{}{
-		"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Vim", "HTML", "XML",
+func (rs *resultSet) detailsHeaders() []interface{} {
+	switch rs.fields {
+	case FIELD_SET_DEFAULT:
+		return []interface{}{
+			"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Vim", "HTML", "XML",
+		}
+	case FIELD_SET_NET:
+		return []interface{}{
+			"C", "Name", "Hex", "UTF-8", "Punycode",
+		}
 	}
+	return nil
 }
 
-var detailsColumnAlignments = []struct {
+type columnAlignments struct {
 	column int // 1-based
 	where  table.Alignment
-}{
-	{3, table.RIGHT},
-	{4, table.RIGHT},
-	{5, table.RIGHT},
+}
+
+func (rs *resultSet) detailsColumnAlignments() []columnAlignments {
+	switch rs.fields {
+	case FIELD_SET_DEFAULT:
+		return []columnAlignments{
+			{3, table.RIGHT},
+			{4, table.RIGHT},
+			{5, table.RIGHT},
+		}
+	case FIELD_SET_NET:
+		return []columnAlignments{
+			{3, table.RIGHT},
+			{4, table.RIGHT},
+		}
+	}
+	return nil
 }
 
 func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
-	return []interface{}{
-		rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
-		rs.RenderCharInfoItem(ci, PRINT_NAME),
-		rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
-		rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
-		rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
-		rs.RenderCharInfoItem(ci, PRINT_BLOCK),
-		// We might put Info in here, to match old Perl script behaviour
-		rs.sources.Vim.DigraphsFor(ci.Number),
-		rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
-		rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
+	switch rs.fields {
+	case FIELD_SET_DEFAULT:
+		return []interface{}{
+			rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+			rs.RenderCharInfoItem(ci, PRINT_NAME),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
+			rs.RenderCharInfoItem(ci, PRINT_BLOCK),
+			// We might put Info in here, to match old Perl script behaviour
+			rs.sources.Vim.DigraphsFor(ci.Number),
+			rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
+			rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
+		}
+	case FIELD_SET_NET:
+		return []interface{}{
+			rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+			rs.RenderCharInfoItem(ci, PRINT_NAME),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY),
+		}
 	}
+	return nil
 }

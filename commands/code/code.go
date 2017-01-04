@@ -23,11 +23,12 @@ import (
 )
 
 var flags struct {
-	base      intconvBase
-	clipboard bool
-	livevim   bool
-	utf8hex   bool
-	verbose   bool
+	base       intconvBase
+	clipboard  bool
+	netVerbose bool
+	livevim    bool
+	utf8hex    bool
+	verbose    bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -136,6 +137,9 @@ var codeCmd = &cobra.Command{
 
 		if flags.verbose {
 			results.PrintTables()
+		} else if flags.netVerbose {
+			results.SelectFieldsNet()
+			results.PrintTables()
 		} else {
 			results.PrintPlain(resultset.PRINT_RUNE)
 		}
@@ -149,6 +153,7 @@ func init() {
 	codeCmd.Flags().VarP(&flags.base, "base", "b", "numeric base for code-ponts [default: usual parse rules]")
 	if resultset.CanTable() {
 		codeCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
+		codeCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 	}
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,

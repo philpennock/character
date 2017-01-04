@@ -20,13 +20,14 @@ import (
 )
 
 var flags struct {
-	clipboard bool
-	join      bool
-	livevim   bool
-	oneline   bool
-	search    bool
-	unsorted  bool
-	verbose   bool
+	clipboard  bool
+	join       bool
+	livevim    bool
+	netVerbose bool
+	oneline    bool
+	search     bool
+	unsorted   bool
+	verbose    bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -107,6 +108,9 @@ var namedCmd = &cobra.Command{
 
 		if flags.verbose {
 			results.PrintTables()
+		} else if flags.netVerbose {
+			results.SelectFieldsNet()
+			results.PrintTables()
 		} else if flags.oneline {
 			fmt.Println(results.StringPlain(resultset.PRINT_RUNE))
 		} else {
@@ -124,6 +128,7 @@ func init() {
 	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
 	if resultset.CanTable() {
 		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
+		namedCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 	}
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
