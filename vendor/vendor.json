@@ -115,6 +115,12 @@
 			"path": "go.pennock.tech/tabular/texttable/decoration",
 			"revision": "483afbe1c53ddf488def1a7f5a84b68ab57b2d3a",
 			"revisionTime": "2016-12-16T23:08:22Z"
+		},
+		{
+			"checksumSHA1": "GIGmSrYACByf5JDIP9ByBZksY80=",
+			"path": "golang.org/x/net/idna",
+			"revision": "45e771701b814666a7eb299e6c7a57d0b1799e91",
+			"revisionTime": "2016-12-15T19:42:18Z"
 		}
 	],
 	"rootPath": "github.com/philpennock/character"

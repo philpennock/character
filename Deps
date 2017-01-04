@@ -27,6 +27,10 @@
 			"ImportPath": "go.pennock.tech/tabular",
 			"Comment": "v1.0.3",
 			"Rev": "483afbe1c53ddf488def1a7f5a84b68ab57b2d3a"
+		},
+		{
+			"ImportPath": "golang.org/x/net/idna",
+			"Rev": "45e771701b814666a7eb299e6c7a57d0b1799e91"
 		}
 	]
 }
