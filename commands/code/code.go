@@ -57,37 +57,50 @@ var codeCmd = &cobra.Command{
 		if flags.utf8hex {
 			// WAG the capacity
 			newargs := make([]string, 0, len(args)*4)
-			matchHexPairSeq := regexp.MustCompile(`^(?:%[0-9A-Fa-f]{2})+`)
+			matchHexPairSeq := regexp.MustCompile(`^(?:[%=][0-9A-Fa-f]{2})+`)
+
+			// If we have %-encoded, then take non-%-preceded entries as literal character
+			// If we don't, then assume that we just have hex strings
+			// Handle = too, for MIME HDR encoding
+			// We handle either, but only one or the other per command-invocation.
+			var escapeChar rune = 0
 
 			for _, arg := range args {
-				// If we have %-encoded, then take non-%-preceded entries as literal character
-				// If we don't, then assume that we just have hex strings
-				if strings.ContainsRune(arg, '%') {
+				if escapeChar == 0 {
+					if strings.ContainsRune(arg, '%') {
+						escapeChar = '%'
+					} else if strings.ContainsRune(arg, '=') {
+						escapeChar = '='
+					}
+				}
+
+				if escapeChar != 0 && strings.ContainsRune(arg, escapeChar) {
 					for len(arg) > 0 {
-						nextPercent := strings.IndexByte(arg, '%')
-						if nextPercent < 0 {
+						nextEscape := strings.IndexRune(arg, escapeChar)
+						if nextEscape < 0 {
 							for _, c := range arg {
 								newargs = append(newargs, strconv.Itoa(int(c)))
 							}
 							arg = ""
 							continue
 						}
-						if nextPercent > 0 {
-							for _, c := range arg[:nextPercent] {
+						if nextEscape > 0 {
+							for _, c := range arg[:nextEscape] {
 								newargs = append(newargs, strconv.Itoa(int(c)))
 							}
-							arg = arg[nextPercent:]
+							arg = arg[nextEscape:]
 							// do not 'continue', handle inline immediately next
 						}
 						matches := matchHexPairSeq.FindStringSubmatch(arg)
 						if matches == nil {
-							deferredErrors = append(deferredErrors, deferredError{arg: arg, err: errors.New("malformed %hex seq")})
+							emsg := "malformed " + string(escapeChar) + "hex sequene"
+							deferredErrors = append(deferredErrors, deferredError{arg: arg, err: errors.New(emsg)})
 							arg = ""
 							continue
 						}
 						got := matches[0]
 						arg = arg[len(got):]
-						got = strings.Replace(got, "%", "", -1)
+						got = strings.Replace(got, string(escapeChar), "", -1)
 
 						toAdd, defErr := codepointsFromHexString(got)
 						if toAdd != nil {
