@@ -288,7 +288,7 @@ func (rs *resultSet) detailsHeaders() []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
-			"C", "Name", "Hex", "Dec", "UTF-8", "Block", "Vim", "HTML", "XML",
+			"C", "Name", "Hex", "Dec", "Block", "Vim", "HTML", "XML",
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
@@ -328,7 +328,6 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
-			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
 			rs.RenderCharInfoItem(ci, PRINT_BLOCK),
 			// We might put Info in here, to match old Perl script behaviour
 			rs.sources.Vim.DigraphsFor(ci.Number),
