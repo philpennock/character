@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode/utf16"
 
 	"golang.org/x/net/idna"
 
@@ -42,8 +43,9 @@ const (
 	PRINT_RUNE printItem = iota
 	PRINT_RUNE_ISOLATED
 	PRINT_RUNE_DEC
-	PRINT_RUNE_HEX
-	PRINT_RUNE_UTF8ENC
+	PRINT_RUNE_HEX     // raw hex
+	PRINT_RUNE_JSON    // surrogate pair in JSON syntax
+	PRINT_RUNE_UTF8ENC // URL format
 	PRINT_RUNE_PUNY
 	PRINT_NAME
 	PRINT_BLOCK
@@ -212,6 +214,15 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 			s += fmt.Sprintf("%%%X", bb[i])
 		}
 		return s
+	case PRINT_RUNE_JSON:
+		r1, r2 := utf16.EncodeRune(ci.Number)
+		if r1 == 0xFFFD && r2 == 0xFFFD {
+			if ci.Number <= 0xFFFF {
+				return fmt.Sprintf("\\u%04X", ci.Number)
+			}
+			return "?"
+		}
+		return fmt.Sprintf("\\u%04X\\u%04X", r1, r2)
 	case PRINT_RUNE_PUNY:
 		p, err := idna.ToASCII(string(ci.Number))
 		if err != nil {
@@ -281,7 +292,7 @@ func (rs *resultSet) detailsHeaders() []interface{} {
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
-			"C", "Name", "Hex", "UTF-8", "Punycode",
+			"C", "Name", "Hex", "UTF-8", "JSON", "Punycode",
 		}
 	}
 	return nil
@@ -330,6 +341,7 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_JSON),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY),
 		}
 	}
