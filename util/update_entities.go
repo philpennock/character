@@ -143,7 +143,7 @@ var setOfEntities = []struct {
 		"entities/generated_html.go",
 		"HTMLEntities",
 		[]string{
-			"/usr/local/share/sgml/html/4.01",
+			"/usr/local/share/sgml/html/4.01",                                                      // FreeBSD textproc/html
 			"/opt/local/share/OpenSP",                                                              // MacOS(MacPorts)
 			"/usr/share/sgml/html/entities",                                                        // Debian/Ubuntu
 			"/System/Library/PrivateFrameworks/CoreProfile.framework/Versions/A/Resources/Devices", // MacOS
@@ -154,7 +154,7 @@ var setOfEntities = []struct {
 		"entities/generated_xml.go",
 		"XMLEntities",
 		[]string{
-			"/usr/local/share/xml/xmlcharent",
+			"/usr/local/share/xml/xmlcharent",                    // FreeBSD textproc/xmlcharent
 			"/opt/local/share/xml/docbook/*/ent",                 // MacOS(MacPorts)
 			"/usr/share/xml/entities/xml-iso-entities-8879.1986", // Debian/Ubuntu
 			"/usr/local/Cellar/docbook/*/docbook/xml/*/ent",      // MacOS(homebrew:docbook)

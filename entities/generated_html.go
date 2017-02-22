@@ -67,9 +67,9 @@ var HTMLEntities = map[string]rune{
 	"agrave":   224,
 	"alefsym":  8501,
 	"alpha":    945,
+	"amp":      38,
 	"and":      8743,
 	"ang":      8736,
-	"apos":     39,
 	"aring":    229,
 	"asymp":    8776,
 	"atilde":   227,
@@ -149,6 +149,7 @@ var HTMLEntities = map[string]rune{
 	"lrm":      8206,
 	"lsaquo":   8249,
 	"lsquo":    8216,
+	"lt":       60,
 	"macr":     175,
 	"mdash":    8212,
 	"micro":    181,
@@ -256,7 +257,8 @@ var HTMLEntities = map[string]rune{
 
 var HTMLEntitiesReverse = map[rune][]string{
 	34:   []string{"quot"},
-	39:   []string{"apos"},
+	38:   []string{"amp"},
+	60:   []string{"lt"},
 	62:   []string{"gt"},
 	160:  []string{"nbsp"},
 	161:  []string{"iexcl"},
