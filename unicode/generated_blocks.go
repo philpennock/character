@@ -1,9 +1,9 @@
 package unicode
 
 var rawBlocks = []byte(`
-# Blocks-9.0.0.txt
-# Date: 2016-02-05, 23:48:00 GMT [KW]
-# © 2016 Unicode®, Inc.
+# Blocks-10.0.0.txt
+# Date: 2017-01-09, 17:46:00 GMT [KW]
+# © 2017 Unicode®, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Unicode Character Database
@@ -54,6 +54,7 @@ var rawBlocks = []byte(`
 07C0..07FF; NKo
 0800..083F; Samaritan
 0840..085F; Mandaic
+0860..086F; Syriac Supplement
 08A0..08FF; Arabic Extended-A
 0900..097F; Devanagari
 0980..09FF; Bengali
@@ -256,9 +257,12 @@ FFF0..FFFF; Specials
 11680..116CF; Takri
 11700..1173F; Ahom
 118A0..118FF; Warang Citi
+11A00..11A4F; Zanabazar Square
+11A50..11AAF; Soyombo
 11AC0..11AFF; Pau Cin Hau
 11C00..11C6F; Bhaiksuki
 11C70..11CBF; Marchen
+11D00..11D5F; Masaram Gondi
 12000..123FF; Cuneiform
 12400..1247F; Cuneiform Numbers and Punctuation
 12480..1254F; Early Dynastic Cuneiform
@@ -273,6 +277,8 @@ FFF0..FFFF; Specials
 17000..187FF; Tangut
 18800..18AFF; Tangut Components
 1B000..1B0FF; Kana Supplement
+1B100..1B12F; Kana Extended-A
+1B170..1B2FF; Nushu
 1BC00..1BC9F; Duployan
 1BCA0..1BCAF; Shorthand Format Controls
 1D000..1D0FF; Byzantine Musical Symbols
@@ -303,6 +309,7 @@ FFF0..FFFF; Specials
 2A700..2B73F; CJK Unified Ideographs Extension C
 2B740..2B81F; CJK Unified Ideographs Extension D
 2B820..2CEAF; CJK Unified Ideographs Extension E
+2CEB0..2EBEF; CJK Unified Ideographs Extension F
 2F800..2FA1F; CJK Compatibility Ideographs Supplement
 E0000..E007F; Tags
 E0100..E01EF; Variation Selectors Supplement
@@ -312,6 +319,6 @@ F0000..FFFFF; Supplementary Private Use Area-A
 # EOF
 `)
 
-const rawBlocksLineCount = 309
+const rawBlocksLineCount = 316
 
 // EOF
