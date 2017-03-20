@@ -8,7 +8,7 @@ UNICODE_BLOCKS=''
 
 use_unpublished() {
 	URLBASE='http://www.unicode.org/Public/10.0.0/ucd/'
-	UNICODE_DATA='UnicodeData-10.0.0d3.txt'
+	UNICODE_DATA='UnicodeData-10.0.0d5.txt'
 	UNICODE_BLOCKS='Blocks-10.0.0d1.txt'
 }
 
