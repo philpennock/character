@@ -1,4 +1,4 @@
-// Copyright © 2016 Phil Pennock.
+// Copyright © 2016-2017 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -23,12 +23,13 @@ import (
 )
 
 var flags struct {
-	base       intconvBase
-	clipboard  bool
-	netVerbose bool
-	livevim    bool
-	utf8hex    bool
-	verbose    bool
+	base          intconvBase
+	clipboard     bool
+	internalDebug bool
+	livevim       bool
+	netVerbose    bool
+	utf8hex       bool
+	verbose       bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -153,6 +154,9 @@ var codeCmd = &cobra.Command{
 		} else if flags.netVerbose {
 			results.SelectFieldsNet()
 			results.PrintTables()
+		} else if flags.internalDebug {
+			results.SelectFieldsDebug()
+			results.PrintTables()
 		} else {
 			results.PrintPlain(resultset.PRINT_RUNE)
 		}
@@ -167,6 +171,8 @@ func init() {
 	if resultset.CanTable() {
 		codeCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 		codeCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
+		codeCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
+		codeCmd.Flags().MarkHidden("internal-debug")
 	}
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,

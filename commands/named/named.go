@@ -1,4 +1,4 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2015-2017 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -20,14 +20,15 @@ import (
 )
 
 var flags struct {
-	clipboard  bool
-	join       bool
-	livevim    bool
-	netVerbose bool
-	oneline    bool
-	search     bool
-	unsorted   bool
-	verbose    bool
+	clipboard     bool
+	internalDebug bool
+	join          bool
+	livevim       bool
+	netVerbose    bool
+	oneline       bool
+	search        bool
+	unsorted      bool
+	verbose       bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -111,6 +112,9 @@ var namedCmd = &cobra.Command{
 		} else if flags.netVerbose {
 			results.SelectFieldsNet()
 			results.PrintTables()
+		} else if flags.internalDebug {
+			results.SelectFieldsDebug()
+			results.PrintTables()
 		} else if flags.oneline {
 			fmt.Println(results.StringPlain(resultset.PRINT_RUNE))
 		} else {
@@ -121,6 +125,8 @@ var namedCmd = &cobra.Command{
 
 func init() {
 	namedCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
+	namedCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
+	namedCmd.Flags().MarkHidden("internal-debug")
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.oneline, "oneline", "1", false, "multiple chars on one line")

@@ -1,4 +1,4 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2015-2017 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -18,10 +18,11 @@ import (
 )
 
 var flags struct {
-	livevim    bool
-	netVerbose bool
-	punyIn     bool
-	verbose    bool
+	internalDebug bool
+	livevim       bool
+	netVerbose    bool
+	punyIn        bool
+	verbose       bool
 }
 
 var nameCmd = &cobra.Command{
@@ -79,6 +80,9 @@ var nameCmd = &cobra.Command{
 		} else if flags.netVerbose {
 			results.SelectFieldsNet()
 			results.PrintTables()
+		} else if flags.internalDebug {
+			results.SelectFieldsDebug()
+			results.PrintTables()
 		} else {
 			results.PrintPlain(resultset.PRINT_NAME)
 		}
@@ -89,6 +93,8 @@ func init() {
 	if resultset.CanTable() {
 		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 		nameCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
+		nameCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
+		nameCmd.Flags().MarkHidden("internal-debug")
 		nameCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "p", false, "decode punycode on cmdline")
 		nameCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}

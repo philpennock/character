@@ -1,4 +1,4 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2015-2017 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -14,6 +14,7 @@ import (
 
 	"golang.org/x/net/idna"
 
+	"github.com/philpennock/character/aux"
 	"github.com/philpennock/character/entities"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/table"
@@ -47,6 +48,7 @@ const (
 	PRINT_RUNE_JSON    // surrogate pair in JSON syntax
 	PRINT_RUNE_UTF8ENC // URL format
 	PRINT_RUNE_PUNY
+	PRINT_RUNE_WIDTH // best guess, terminal display cell width
 	PRINT_NAME
 	PRINT_BLOCK
 	PRINT_HTML_ENTITIES
@@ -58,6 +60,7 @@ type fieldSetSelector uint
 const (
 	FIELD_SET_DEFAULT fieldSetSelector = iota
 	FIELD_SET_NET
+	FIELD_SET_DEBUG
 )
 
 type errorItem struct {
@@ -96,6 +99,12 @@ func New(s *sources.Sources, sizeHint int) *resultSet {
 // This API call is very much subject to change.
 func (rs *resultSet) SelectFieldsNet() {
 	rs.fields = FIELD_SET_NET
+}
+
+// SelectFieldsDebug says to show some internal diagnostics, not the default fields.
+// This API call is very much subject to change.
+func (rs *resultSet) SelectFieldsDebug() {
+	rs.fields = FIELD_SET_DEBUG
 }
 
 // AddError records, in-sequence, that we got an error at this point.
@@ -229,6 +238,8 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 			return ""
 		}
 		return p
+	case PRINT_RUNE_WIDTH:
+		return strconv.FormatUint(uint64(aux.DisplayCellWidth(string(ci.Number))), 10)
 	case PRINT_NAME:
 		return ci.Name
 	case PRINT_BLOCK:
@@ -294,6 +305,10 @@ func (rs *resultSet) detailsHeaders() []interface{} {
 		return []interface{}{
 			"C", "Name", "Hex", "UTF-8", "JSON", "Punycode",
 		}
+	case FIELD_SET_DEBUG:
+		return []interface{}{
+			"C", "Width", "Hex", "Name",
+		}
 	}
 	return nil
 }
@@ -307,14 +322,18 @@ func (rs *resultSet) detailsColumnAlignments() []columnAlignments {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []columnAlignments{
-			{3, table.RIGHT},
-			{4, table.RIGHT},
-			{5, table.RIGHT},
+			{3, table.RIGHT}, // Hex
+			{4, table.RIGHT}, // Dec
+			{5, table.RIGHT}, // Block??
 		}
 	case FIELD_SET_NET:
 		return []columnAlignments{
-			{3, table.RIGHT},
-			{4, table.RIGHT},
+			{3, table.RIGHT}, // Hex
+			{4, table.RIGHT}, // Dec
+		}
+	case FIELD_SET_DEBUG:
+		return []columnAlignments{
+			{3, table.RIGHT}, // Hex
 		}
 	}
 	return nil
@@ -342,6 +361,13 @@ func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_JSON),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY),
+		}
+	case FIELD_SET_DEBUG:
+		return []interface{}{
+			rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_WIDTH),
+			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
+			rs.RenderCharInfoItem(ci, PRINT_NAME),
 		}
 	}
 	return nil
