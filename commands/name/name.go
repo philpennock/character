@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/idna"
+	"golang.org/x/text/unicode/norm"
 
 	"github.com/philpennock/character/metadata"
 	"github.com/philpennock/character/resultset"
@@ -52,26 +53,7 @@ var nameCmd = &cobra.Command{
 			}
 			pairedCodepoint = 0
 			for _, r := range arg {
-				if ci, ok := srcs.Unicode.ByRune[r]; ok {
-					results.AddCharInfo(ci)
-					// Ancillary extra data if warranted
-					if metadata.IsPairCode(ci.Number) {
-						if pairedCodepoint != 0 {
-							if ci2, ok := metadata.PairCharInfo(pairedCodepoint, ci.Number); ok {
-								results.AddCharInfo(ci2)
-							} else {
-								results.AddError("", fmt.Errorf("unknown codepair %x-%x", pairedCodepoint, ci.Number))
-							}
-							pairedCodepoint = 0
-						} else {
-							pairedCodepoint = ci.Number
-						}
-					}
-				} else {
-					root.Errored()
-					// FIXME: proper error type
-					results.AddError(string(r), fmt.Errorf("unknown codepoint %x", int(r)))
-				}
+				convertRune(r, &pairedCodepoint, srcs, results, false)
 			}
 		}
 
@@ -101,4 +83,38 @@ func init() {
 	// FIXME: support verbose results without tables
 
 	root.AddCommand(nameCmd)
+}
+
+func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *resultset.ResultSet, isNormalized bool) {
+	ci, ok := srcs.Unicode.ByRune[r]
+	if !ok {
+		if !isNormalized {
+			rs := string(r)
+			decomp := norm.NFD.String(rs)
+			if decomp != rs {
+				for _, r2 := range decomp {
+					convertRune(r2, pairedCodepoint, srcs, results, true)
+				}
+				return
+			}
+		}
+		root.Errored()
+		// FIXME: proper error type
+		results.AddError(string(r), fmt.Errorf("unknown codepoint %x", int(r)))
+	}
+
+	results.AddCharInfo(ci)
+	// Ancillary extra data if warranted
+	if metadata.IsPairCode(ci.Number) {
+		if *pairedCodepoint != 0 {
+			if ci2, ok := metadata.PairCharInfo(*pairedCodepoint, ci.Number); ok {
+				results.AddCharInfo(ci2)
+			} else {
+				results.AddError("", fmt.Errorf("unknown codepair %x-%x", *pairedCodepoint, ci.Number))
+			}
+			*pairedCodepoint = 0
+		} else {
+			*pairedCodepoint = ci.Number
+		}
+	}
 }

@@ -30,7 +30,7 @@ func CanTable() bool {
 
 type selector int
 
-// These constants dictate what is being added to a resultSet.
+// These constants dictate what is being added to a ResultSet.
 const (
 	_ITEM selector = iota
 	_ERROR
@@ -68,7 +68,7 @@ type errorItem struct {
 	err   error
 }
 
-type resultSet struct {
+type ResultSet struct {
 	sources *sources.Sources
 	items   []unicode.CharInfo
 	errors  []errorItem
@@ -82,12 +82,15 @@ type resultSet struct {
 	fields fieldSetSelector
 }
 
-// New creates a resultSet, which records items and errors encountered, and a
+// New creates a ResultSet, which records items and errors encountered, and a
 // little structure, so that the results can be printed out in a variety of
 // styles later.  Just the character, or tables of attributes, are derived from
 // the recorded results.
-func New(s *sources.Sources, sizeHint int) *resultSet {
-	return &resultSet{
+//
+// We now make ResultSet an exported type, ugh, so this stutters when used.
+// Most usage should never do that.
+func New(s *sources.Sources, sizeHint int) *ResultSet {
+	return &ResultSet{
 		sources: s,
 		items:   make([]unicode.CharInfo, 0, sizeHint),
 		errors:  make([]errorItem, 0, 3),
@@ -97,39 +100,39 @@ func New(s *sources.Sources, sizeHint int) *resultSet {
 
 // SelectFieldsNet says to use the network fields, not the default fields.
 // This API call is very much subject to change.
-func (rs *resultSet) SelectFieldsNet() {
+func (rs *ResultSet) SelectFieldsNet() {
 	rs.fields = FIELD_SET_NET
 }
 
 // SelectFieldsDebug says to show some internal diagnostics, not the default fields.
 // This API call is very much subject to change.
-func (rs *resultSet) SelectFieldsDebug() {
+func (rs *ResultSet) SelectFieldsDebug() {
 	rs.fields = FIELD_SET_DEBUG
 }
 
 // AddError records, in-sequence, that we got an error at this point.
-func (rs *resultSet) AddError(input string, e error) {
+func (rs *ResultSet) AddError(input string, e error) {
 	rs.errors = append(rs.errors, errorItem{input, e})
 	rs.which = append(rs.which, _ERROR)
 }
 
 // AddCharInfo is used for recording character information as an item in the result set.
-func (rs *resultSet) AddCharInfo(ci unicode.CharInfo) {
+func (rs *ResultSet) AddCharInfo(ci unicode.CharInfo) {
 	rs.items = append(rs.items, ci)
 	rs.which = append(rs.which, _ITEM)
 }
 
 // AddDivider is use between words.
-func (rs *resultSet) AddDivider() {
+func (rs *ResultSet) AddDivider() {
 	rs.which = append(rs.which, _DIVIDER)
 }
 
-// ErrorCount sums the number of errors in the entire resultSet.
-func (rs *resultSet) ErrorCount() int {
+// ErrorCount sums the number of errors in the entire ResultSet.
+func (rs *ResultSet) ErrorCount() int {
 	return len(rs.errors)
 }
 
-func (rs *resultSet) fixStreams() {
+func (rs *ResultSet) fixStreams() {
 	if rs.OutputStream == nil {
 		rs.OutputStream = os.Stdout
 	}
@@ -140,7 +143,7 @@ func (rs *resultSet) fixStreams() {
 
 // PrintPlain shows just characters, but with full errors interleaved too.
 // One character or error per line.
-func (rs *resultSet) PrintPlain(what printItem) {
+func (rs *ResultSet) PrintPlain(what printItem) {
 	rs.fixStreams()
 	var ii, ei int
 	var s selector
@@ -161,7 +164,7 @@ func (rs *resultSet) PrintPlain(what printItem) {
 }
 
 // StringPlain returns the characters as chars in a word, dividers as a space.
-func (rs *resultSet) StringPlain(what printItem) string {
+func (rs *ResultSet) StringPlain(what printItem) string {
 	rs.fixStreams()
 	out := make([]string, 0, len(rs.which))
 	var ii, ei int
@@ -184,17 +187,17 @@ func (rs *resultSet) StringPlain(what printItem) string {
 }
 
 // LenTotalCount yields how many rows are in the resultset, including dividers and errors
-func (rs *resultSet) LenTotalCount() int {
+func (rs *ResultSet) LenTotalCount() int {
 	return len(rs.which)
 }
 
 // LenItemCount yields how many successful items are in the table
-func (rs *resultSet) LenItemCount() int {
+func (rs *ResultSet) LenItemCount() int {
 	return len(rs.items)
 }
 
 // RenderCharInfoItem converts a unicode.CharInfo and an attribute selector into a string
-func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) string {
+func (rs *ResultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) string {
 	// we use 0 as a special-case for things like combinations, where there's only a name
 	if ci.Number == 0 && what != PRINT_NAME {
 		return " "
@@ -262,8 +265,8 @@ func (rs *resultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) str
 }
 
 // PrintTables provides much more verbose details about the contents of
-// a resultSet, in a structured terminal table.
-func (rs *resultSet) PrintTables() {
+// a ResultSet, in a structured terminal table.
+func (rs *ResultSet) PrintTables() {
 	rs.fixStreams()
 	if len(rs.items) > 0 {
 		t := table.New()
@@ -295,7 +298,7 @@ func (rs *resultSet) PrintTables() {
 	}
 }
 
-func (rs *resultSet) detailsHeaders() []interface{} {
+func (rs *ResultSet) detailsHeaders() []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
@@ -318,7 +321,7 @@ type columnAlignments struct {
 	where  table.Alignment
 }
 
-func (rs *resultSet) detailsColumnAlignments() []columnAlignments {
+func (rs *ResultSet) detailsColumnAlignments() []columnAlignments {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []columnAlignments{
@@ -339,7 +342,7 @@ func (rs *resultSet) detailsColumnAlignments() []columnAlignments {
 	return nil
 }
 
-func (rs *resultSet) detailsFor(ci unicode.CharInfo) []interface{} {
+func (rs *ResultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
