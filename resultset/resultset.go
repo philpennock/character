@@ -53,6 +53,7 @@ const (
 	PRINT_BLOCK
 	PRINT_HTML_ENTITIES
 	PRINT_XML_ENTITIES
+	PRINT_PART_OF // when we decomposed from input
 )
 
 type fieldSetSelector uint
@@ -68,9 +69,14 @@ type errorItem struct {
 	err   error
 }
 
+type charItem struct {
+	unicode unicode.CharInfo
+	partOf  rune
+}
+
 type ResultSet struct {
 	sources *sources.Sources
-	items   []unicode.CharInfo
+	items   []charItem
 	errors  []errorItem
 	which   []selector
 
@@ -92,7 +98,7 @@ type ResultSet struct {
 func New(s *sources.Sources, sizeHint int) *ResultSet {
 	return &ResultSet{
 		sources: s,
-		items:   make([]unicode.CharInfo, 0, sizeHint),
+		items:   make([]charItem, 0, sizeHint),
 		errors:  make([]errorItem, 0, 3),
 		which:   make([]selector, 0, sizeHint),
 	}
@@ -118,7 +124,14 @@ func (rs *ResultSet) AddError(input string, e error) {
 
 // AddCharInfo is used for recording character information as an item in the result set.
 func (rs *ResultSet) AddCharInfo(ci unicode.CharInfo) {
-	rs.items = append(rs.items, ci)
+	rs.items = append(rs.items, charItem{unicode: ci})
+	rs.which = append(rs.which, _ITEM)
+}
+
+// AddCharInfoDerivedFrom is used when the character was decomposed by us, so
+// that we can display original input if requested.
+func (rs *ResultSet) AddCharInfoDerivedFrom(ci unicode.CharInfo, from rune) {
+	rs.items = append(rs.items, charItem{unicode: ci, partOf: from})
 	rs.which = append(rs.which, _ITEM)
 }
 
@@ -196,69 +209,74 @@ func (rs *ResultSet) LenItemCount() int {
 	return len(rs.items)
 }
 
-// RenderCharInfoItem converts a unicode.CharInfo and an attribute selector into a string
-func (rs *ResultSet) RenderCharInfoItem(ci unicode.CharInfo, what printItem) string {
+// RenderCharInfoItem converts a charItem and an attribute selector into a string
+func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) string {
 	// we use 0 as a special-case for things like combinations, where there's only a name
-	if ci.Number == 0 && what != PRINT_NAME {
+	if ci.unicode.Number == 0 && what != PRINT_NAME {
 		return " "
 	}
 	switch what {
 	case PRINT_RUNE:
-		return string(ci.Number)
+		return string(ci.unicode.Number)
 	case PRINT_RUNE_ISOLATED: // BROKEN
 		// FIXME: None of these are actually working
 		return fmt.Sprintf("%c%c%c",
 			0x202A, // LEFT-TO-RIGHT EMBEDDING
 			// 0x202D, // LEFT-TO-RIGHT OVERRIDE
 			// 0x2066, // LEFT-TO-RIGHT ISOLATE
-			ci.Number,
+			ci.unicode.Number,
 			// 0x2069, // POP DIRECTIONAL ISOLATE
 			0x202C, // POP DIRECTIONAL FORMATTING
 		)
 	case PRINT_RUNE_HEX:
-		return strconv.FormatUint(uint64(ci.Number), 16)
+		return strconv.FormatUint(uint64(ci.unicode.Number), 16)
 	case PRINT_RUNE_DEC:
-		return strconv.FormatUint(uint64(ci.Number), 10)
+		return strconv.FormatUint(uint64(ci.unicode.Number), 10)
 	case PRINT_RUNE_UTF8ENC:
-		bb := []byte(string(ci.Number))
+		bb := []byte(string(ci.unicode.Number))
 		var s string
 		for i := range bb {
 			s += fmt.Sprintf("%%%X", bb[i])
 		}
 		return s
 	case PRINT_RUNE_JSON:
-		r1, r2 := utf16.EncodeRune(ci.Number)
+		r1, r2 := utf16.EncodeRune(ci.unicode.Number)
 		if r1 == 0xFFFD && r2 == 0xFFFD {
-			if ci.Number <= 0xFFFF {
-				return fmt.Sprintf("\\u%04X", ci.Number)
+			if ci.unicode.Number <= 0xFFFF {
+				return fmt.Sprintf("\\u%04X", ci.unicode.Number)
 			}
 			return "?"
 		}
 		return fmt.Sprintf("\\u%04X\\u%04X", r1, r2)
 	case PRINT_RUNE_PUNY:
-		p, err := idna.ToASCII(string(ci.Number))
+		p, err := idna.ToASCII(string(ci.unicode.Number))
 		if err != nil {
 			return ""
 		}
 		return p
 	case PRINT_RUNE_WIDTH:
-		return strconv.FormatUint(uint64(aux.DisplayCellWidth(string(ci.Number))), 10)
+		return strconv.FormatUint(uint64(aux.DisplayCellWidth(string(ci.unicode.Number))), 10)
 	case PRINT_NAME:
-		return ci.Name
+		return ci.unicode.Name
 	case PRINT_BLOCK:
-		return rs.sources.UBlocks.Lookup(ci.Number)
+		return rs.sources.UBlocks.Lookup(ci.unicode.Number)
 	case PRINT_HTML_ENTITIES:
-		eList, ok := entities.HTMLEntitiesReverse[ci.Number]
+		eList, ok := entities.HTMLEntitiesReverse[ci.unicode.Number]
 		if !ok {
 			return ""
 		}
 		return "&" + strings.Join(eList, "; &") + ";"
 	case PRINT_XML_ENTITIES:
-		eList, ok := entities.XMLEntitiesReverse[ci.Number]
+		eList, ok := entities.XMLEntitiesReverse[ci.unicode.Number]
 		if !ok {
 			return ""
 		}
 		return "&" + strings.Join(eList, "; &") + ";"
+	case PRINT_PART_OF:
+		if ci.partOf == 0 {
+			return ""
+		}
+		return string(ci.partOf)
 	default:
 		panic(fmt.Sprintf("unhandled item to print: %v", what))
 	}
@@ -302,11 +320,11 @@ func (rs *ResultSet) detailsHeaders() []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
-			"C", "Name", "Hex", "Dec", "Block", "Vim", "HTML", "XML",
+			"C", "Name", "Hex", "Dec", "Block", "Vim", "HTML", "XML", "Of",
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
-			"C", "Name", "Hex", "UTF-8", "JSON", "Punycode",
+			"C", "Name", "Hex", "UTF-8", "JSON", "Punycode", "Of",
 		}
 	case FIELD_SET_DEBUG:
 		return []interface{}{
@@ -342,7 +360,7 @@ func (rs *ResultSet) detailsColumnAlignments() []columnAlignments {
 	return nil
 }
 
-func (rs *ResultSet) detailsFor(ci unicode.CharInfo) []interface{} {
+func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
@@ -352,9 +370,10 @@ func (rs *ResultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
 			rs.RenderCharInfoItem(ci, PRINT_BLOCK),
 			// We might put Info in here, to match old Perl script behaviour
-			rs.sources.Vim.DigraphsFor(ci.Number),
+			rs.sources.Vim.DigraphsFor(ci.unicode.Number),
 			rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
 			rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
+			rs.RenderCharInfoItem(ci, PRINT_PART_OF),
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
@@ -364,6 +383,7 @@ func (rs *ResultSet) detailsFor(ci unicode.CharInfo) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_JSON),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY),
+			rs.RenderCharInfoItem(ci, PRINT_PART_OF),
 		}
 	case FIELD_SET_DEBUG:
 		return []interface{}{

@@ -9,9 +9,6 @@ import (
 	"errors"
 	"testing"
 
-	// make the current module available under same namespace callers would use:
-	resultset "."
-
 	"github.com/liquidgecka/testlib"
 
 	"github.com/philpennock/character/sources"
@@ -38,7 +35,7 @@ func TestResultSetBasics(t *testing.T) {
 	defer T.Finish()
 
 	srcs := sources.NewFast()
-	rs := resultset.New(srcs, 10)
+	rs := New(srcs, 10)
 
 	T.Equal(rs.ErrorCount(), 0, "no errors in fresh resultset")
 
@@ -55,7 +52,7 @@ func TestResultSetBasics(t *testing.T) {
 		if reset {
 			b.Reset()
 		}
-		rs.PrintPlain(resultset.PRINT_RUNE)
+		rs.PrintPlain(PRINT_RUNE)
 		have := b.String()
 		T.Equal(have, desired, msg)
 	}
@@ -80,7 +77,7 @@ func TestBlockNames(t *testing.T) {
 	T := testlib.NewT(t)
 	defer T.Finish()
 	srcs := sources.NewFast()
-	rs := resultset.New(srcs, 10)
+	rs := New(srcs, 10)
 
 	for _, pair := range []struct {
 		r  rune
@@ -96,8 +93,8 @@ func TestBlockNames(t *testing.T) {
 		{'🌸', "Miscellaneous Symbols and Pictographs"},
 		{'x', "Basic Latin"},
 	} {
-		ci := unicode.CharInfo{Number: pair.r}
-		have := rs.RenderCharInfoItem(ci, resultset.PRINT_BLOCK)
+		ci := charItem{unicode: unicode.CharInfo{Number: pair.r}}
+		have := rs.RenderCharInfoItem(ci, PRINT_BLOCK)
 		T.Equal(have, pair.bn, "block lookup of known char should be known")
 	}
 }

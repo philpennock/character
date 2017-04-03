@@ -53,7 +53,7 @@ var nameCmd = &cobra.Command{
 			}
 			pairedCodepoint = 0
 			for _, r := range arg {
-				convertRune(r, &pairedCodepoint, srcs, results, false)
+				convertRune(r, &pairedCodepoint, srcs, results, 0)
 			}
 		}
 
@@ -85,15 +85,15 @@ func init() {
 	root.AddCommand(nameCmd)
 }
 
-func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *resultset.ResultSet, isNormalized bool) {
+func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *resultset.ResultSet, originalRune rune) {
 	ci, ok := srcs.Unicode.ByRune[r]
 	if !ok {
-		if !isNormalized {
+		if originalRune == 0 {
 			rs := string(r)
 			decomp := norm.NFD.String(rs)
 			if decomp != rs {
 				for _, r2 := range decomp {
-					convertRune(r2, pairedCodepoint, srcs, results, true)
+					convertRune(r2, pairedCodepoint, srcs, results, r)
 				}
 				return
 			}
@@ -103,12 +103,12 @@ func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *
 		results.AddError(string(r), fmt.Errorf("unknown codepoint %x", int(r)))
 	}
 
-	results.AddCharInfo(ci)
+	results.AddCharInfoDerivedFrom(ci, originalRune)
 	// Ancillary extra data if warranted
 	if metadata.IsPairCode(ci.Number) {
 		if *pairedCodepoint != 0 {
 			if ci2, ok := metadata.PairCharInfo(*pairedCodepoint, ci.Number); ok {
-				results.AddCharInfo(ci2)
+				results.AddCharInfoDerivedFrom(ci2, originalRune)
 			} else {
 				results.AddError("", fmt.Errorf("unknown codepair %x-%x", *pairedCodepoint, ci.Number))
 			}
