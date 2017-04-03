@@ -1,4 +1,4 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2015-2017 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -85,6 +85,13 @@ func Start() {
 		fmt.Fprintf(os.Stderr, "command failed: %s\n", err)
 		Errored()
 	}
+}
+
+// Errorf is a convenience for errors from other commands so that things are consistent
+// instead of importing fmt and os all over the place
+func Errorf(spec string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, spec, args...)
+	Errored()
 }
 
 // Cobra exposes the root-level cobra object

@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/idna"
 	"golang.org/x/text/unicode/norm"
 
+	"github.com/philpennock/character/aux"
 	"github.com/philpennock/character/metadata"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
@@ -19,10 +20,13 @@ import (
 )
 
 var flags struct {
+	encoding      string
 	internalDebug bool
+	listEncodings bool
 	livevim       bool
 	netVerbose    bool
 	punyIn        bool
+	hexInput      bool
 	verbose       bool
 }
 
@@ -30,6 +34,20 @@ var nameCmd = &cobra.Command{
 	Use:   "name [char... [char...]]",
 	Short: "shows information about supplied characters",
 	Run: func(cmd *cobra.Command, args []string) {
+		if flags.listEncodings {
+			cmd.Printf("%s %s: these names (and some aliases) are known:\n", root.Cobra().Name(), cmd.Name())
+			for _, enc := range listKnownCharsets() {
+				cmd.Printf("\t%q\n", enc)
+			}
+			return
+		}
+
+		decoder, err := loadCharsetDecoder(flags.encoding)
+		if err != nil {
+			root.Errorf("unable to get charset decoder: %s\n", err)
+			return
+		}
+
 		srcs := sources.NewFast()
 		if flags.verbose && flags.livevim {
 			srcs.LoadLiveVim()
@@ -42,17 +60,32 @@ var nameCmd = &cobra.Command{
 
 		var pairedCodepoint rune = 0
 
+		// We first handle hex encoding, as being the most likely source of
+		// non-UTF8 in UTF8 environments.
+		if flags.hexInput {
+			var errList []error
+			args, errList = aux.HexDecodeArgs(args)
+			for _, e := range errList {
+				results.AddError("", e)
+			}
+		}
+
 		for i, arg := range args {
+			argUTF8, err := decoder.String(arg)
+			if err != nil {
+				results.AddError(arg, err)
+				continue
+			}
 			if i > 0 {
 				results.AddDivider()
 			}
 			if flags.punyIn {
-				if t, err := idna.ToUnicode(arg); err == nil {
+				if t, err := idna.ToUnicode(argUTF8); err == nil {
 					arg = t
 				}
 			}
 			pairedCodepoint = 0
-			for _, r := range arg {
+			for _, r := range argUTF8 {
 				convertRune(r, &pairedCodepoint, srcs, results, 0)
 			}
 		}
@@ -72,12 +105,15 @@ var nameCmd = &cobra.Command{
 }
 
 func init() {
+	nameCmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "", "translate input from this encoding")
+	nameCmd.Flags().BoolVarP(&flags.hexInput, "hex-input", "H", false, "take Hex-encoded input")
+	nameCmd.Flags().BoolVarP(&flags.listEncodings, "list-encodings", "", false, "list -e encodings & exit")
+	nameCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "p", false, "decode punycode on cmdline")
 	if resultset.CanTable() {
-		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
-		nameCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 		nameCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
 		nameCmd.Flags().MarkHidden("internal-debug")
-		nameCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "p", false, "decode punycode on cmdline")
+		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
+		nameCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 		nameCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
 	// FIXME: support verbose results without tables
