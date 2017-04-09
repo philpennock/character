@@ -81,7 +81,7 @@ var nameCmd = &cobra.Command{
 			}
 			if flags.punyIn {
 				if t, err := idna.ToUnicode(argUTF8); err == nil {
-					arg = t
+					argUTF8 = t
 				}
 			}
 			pairedCodepoint = 0
