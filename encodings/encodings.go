@@ -2,7 +2,7 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-package name
+package encodings
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ func (u unknownCharsetError) Error() string {
 	return fmt.Sprintf("unknown charset: %q", u.input)
 }
 
-func listKnownCharsets() []string {
+func ListKnownCharsets() []string {
 	return []string{
 		"UTF-8",
 		// sort the rest
@@ -38,7 +38,7 @@ func listKnownCharsets() []string {
 	}
 }
 
-func loadCharsetDecoder(charset string) (*encoding.Decoder, error) {
+func LoadCharsetDecoder(charset string) (*encoding.Decoder, error) {
 	if charset == "" {
 		return encoding.Nop.NewDecoder(), nil
 	}

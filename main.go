@@ -15,6 +15,7 @@ import (
 
 	_ "github.com/philpennock/character/commands/browse"
 	_ "github.com/philpennock/character/commands/code"
+	_ "github.com/philpennock/character/commands/known"
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
 	_ "github.com/philpennock/character/commands/transform"

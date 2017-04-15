@@ -12,6 +12,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 
 	"github.com/philpennock/character/aux"
+	"github.com/philpennock/character/encodings"
 	"github.com/philpennock/character/metadata"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
@@ -35,14 +36,15 @@ var nameCmd = &cobra.Command{
 	Short: "shows information about supplied characters",
 	Run: func(cmd *cobra.Command, args []string) {
 		if flags.listEncodings {
+			// This should be deprecated, now that we have `known` top-level command
 			cmd.Printf("%s %s: these names (and some aliases) are known:\n", root.Cobra().Name(), cmd.Name())
-			for _, enc := range listKnownCharsets() {
+			for _, enc := range encodings.ListKnownCharsets() {
 				cmd.Printf("\t%q\n", enc)
 			}
 			return
 		}
 
-		decoder, err := loadCharsetDecoder(flags.encoding)
+		decoder, err := encodings.LoadCharsetDecoder(flags.encoding)
 		if err != nil {
 			root.Errorf("unable to get charset decoder: %s\n", err)
 			return
