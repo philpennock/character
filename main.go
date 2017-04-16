@@ -18,6 +18,7 @@ import (
 	_ "github.com/philpennock/character/commands/known"
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
+	_ "github.com/philpennock/character/commands/puny"
 	_ "github.com/philpennock/character/commands/transform"
 	_ "github.com/philpennock/character/commands/version"
 
