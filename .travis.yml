@@ -5,9 +5,9 @@ language: go
 sudo: false
 
 go:
-  - 1.7.4
+  - 1.8.1
+  - 1.7.5
   - 1.6
-  - 1.5.3
 # 2016-03-14: removed `tip` ∵ `go vet` on Travis throwing false errors,
 # complaining about missing format strings where they're most definitely
 # present.
