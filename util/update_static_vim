@@ -14,7 +14,9 @@ echo
 echo "var staticVimData = []byte(\`"
 
 # capture built-in digraphs, so skip any .vimrc additions
-vim -u /dev/null -e +digraphs +quit | \
+# We need to redir from the tty for vim to be happy and emit content;
+# `go generate` does not plumb through stdin.
+vim -u /dev/null -e +digraphs +quit </dev/tty | \
 	perl -pe 's/\e\[[?0-9;]*[a-zA-Z]//g;  s/\e=//g; s/\e>//g' | \
 	sed 's/`/`+"`"+`/g'
 

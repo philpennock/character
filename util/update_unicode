@@ -24,6 +24,7 @@ update() {
 
 	if [ ".${SKIP_FETCH:-}" = "." ]; then
 		if [ ".${origin_override}" != "." ]; then
+			echo >&2 "WARNING: using override file for ${datafile}: ${origin_override}"
 			cp -v -- "$origin_override" "$datafile"
 		else
 			curl -L -o "$datafile" "${URLBASE}${input#*:}"
