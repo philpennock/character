@@ -58,6 +58,7 @@ const (
 
 type fieldSetSelector uint
 
+// These constants determine which columns will appear in a table.
 const (
 	FIELD_SET_DEFAULT fieldSetSelector = iota
 	FIELD_SET_NET
@@ -69,11 +70,24 @@ type errorItem struct {
 	err   error
 }
 
+// Originally we stored unicode.CharInfo directly but as of the point where
+// we support normalization handling, we also want to record where an item came
+// from, because it might not be obvious from what was typed at the
+// command-line.
 type charItem struct {
 	unicode unicode.CharInfo
 	partOf  rune
 }
 
+// A ResultSet is the collection of unicode characters (or near facsimiles thereof)
+// about which we wish to see data.  Various front-end commands just figure out which
+// characters are being asked about and throw them in the ResultSet, then at the end
+// the ResultSet is asked to print itself in an appropriate format, which might be
+// in a table, as lines, or in other ways.
+// For convenience, errors are also accumulated here.  If emitting tables, the errors
+// will be in a separate second table, but otherwise they're interleaved with
+// the real characters in the correct order (but to stderr (probably), so if
+// the streams diverge then this might not be reconstructible).
 type ResultSet struct {
 	sources *sources.Sources
 	items   []charItem
@@ -88,11 +102,7 @@ type ResultSet struct {
 	fields fieldSetSelector
 }
 
-// New creates a ResultSet, which records items and errors encountered, and a
-// little structure, so that the results can be printed out in a variety of
-// styles later.  Just the character, or tables of attributes, are derived from
-// the recorded results.
-//
+// New creates a ResultSet.
 // We now make ResultSet an exported type, ugh, so this stutters when used.
 // Most usage should never do that.
 func New(s *sources.Sources, sizeHint int) *ResultSet {

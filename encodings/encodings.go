@@ -23,6 +23,9 @@ func (u unknownCharsetError) Error() string {
 	return fmt.Sprintf("unknown charset: %q", u.input)
 }
 
+// ListKnownCharsets returns a slice of strings representing the names which we
+// advertise as being known.  We support a few more, as aliases, but they're not
+// reported.
 func ListKnownCharsets() []string {
 	return []string{
 		"UTF-8",
@@ -38,6 +41,9 @@ func ListKnownCharsets() []string {
 	}
 }
 
+// LoadCharsetDecoder returns an encoding decoder matching the given name; it
+// is designed to take user input, so tries to normalize and handle various
+// aliases.
 func LoadCharsetDecoder(charset string) (*encoding.Decoder, error) {
 	if charset == "" {
 		return encoding.Nop.NewDecoder(), nil

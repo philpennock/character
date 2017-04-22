@@ -10,6 +10,10 @@ import (
 	"github.com/philpennock/character/unicode"
 )
 
+// IsPairCode indicates if the passed run is part of a pairing code designed
+// for extensible lookup.  This is used for national flags.
+// Eg, [0x1F1FA 0x1F1F8] = [<Regional Indicator U> <Regional Indicator S>] = 🇺🇸
+// which will display in some contexts as the flag of the USA.
 func IsPairCode(r rune) bool {
 	// Enclosed Alphanumeric Supplement Block
 	// "REGIONAL INDICATOR SYMBOL LETTER A" -- "REGIONAL INDICATOR SYMBOL LETTER Z"
@@ -19,6 +23,7 @@ func IsPairCode(r rune) bool {
 	return false
 }
 
+// PairCharInfo returns a faked-up CharInfo which is for rune 0 but with an informative name.
 func PairCharInfo(r1, r2 rune) (unicode.CharInfo, bool) {
 	return unicode.CharInfo{
 		Number: 0,

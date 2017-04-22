@@ -49,7 +49,7 @@ func ensureBidirectionalRuneTable(table *map[rune]rune, charsA, charsB string) {
 type transformFlags int
 
 const (
-	TRANS_REVERSE transformFlags = 1 << iota
+	kTRANS_REVERSE transformFlags = 1 << iota // reverse order of runes in string
 )
 
 func transformText(table map[rune]rune, args []string, flags transformFlags) string {
@@ -71,7 +71,7 @@ func transformText(table map[rune]rune, args []string, flags transformFlags) str
 		}
 	}
 
-	if (flags&TRANS_REVERSE) != 0 && len(text) >= 2 {
+	if (flags&kTRANS_REVERSE) != 0 && len(text) >= 2 {
 		last := len(text) - 1
 		for i := 0; i <= (last)/2; i++ {
 			text[i], text[last-i] = text[last-i], text[i]

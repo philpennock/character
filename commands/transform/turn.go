@@ -20,7 +20,7 @@ func transformTurn(args []string) (string, error) {
 	ensureBidirectionalRuneTable(&turnTable, turnReplacementsA, turnReplacementsB)
 	var transFlags transformFlags
 	if !flags.preserveOrder {
-		transFlags |= TRANS_REVERSE
+		transFlags |= kTRANS_REVERSE
 	}
 	return transformText(turnTable, args, transFlags), nil
 }

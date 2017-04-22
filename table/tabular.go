@@ -7,7 +7,11 @@
 // See also version command's tabular.go and replicate build tag constraints there.
 
 /*
+Package table provides table support for character.
 This implementation uses tabular for layout.
+
+With the more modern Golang features, this should probably be in /internal/
+namespace.
 
 Known current limitations:
 

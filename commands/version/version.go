@@ -13,8 +13,8 @@ import (
 	"github.com/philpennock/character/commands/root"
 )
 
-// should be updated by the linker from the Go command-line, if make used
-// for build
+// VersionString is expected to be set by the linker during build.
+// If make(1) is used for build, this will happen.
 var VersionString string
 
 // Library version functions should be defined in other files in this dir,
@@ -26,16 +26,12 @@ var VersionString string
 var libraryVersionFuncs []func() (string, []string)
 
 func addLibraryVersionFunc(f func() (string, []string)) {
-	if libraryVersionFuncs == nil {
-		libraryVersionFuncs = make([]func() (string, []string), 0, 3)
-	}
 	libraryVersionFuncs = append(libraryVersionFuncs, f)
 }
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
-	// TODO: add verbose flag, list versions of dependencies when verbose
 	Run: func(cmd *cobra.Command, args []string) {
 		if VersionString == "" {
 			VersionString = "<unknown>"

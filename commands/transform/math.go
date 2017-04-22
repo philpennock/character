@@ -230,9 +230,8 @@ var mathSubcommand = transformCobraCommand{
 		want := strings.Map(func(r rune) rune {
 			if unicode.IsLower(r) {
 				return r
-			} else {
-				return -1
 			}
+			return -1
 		}, strings.ToLower(flags.target))
 		if len(want) == 0 {
 			want = "normal"

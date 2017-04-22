@@ -2,6 +2,7 @@
 
 package entities
 
+// XMLEntities maps those names to Unicode codepoints
 var XMLEntities = map[string]rune{
 	"AElig":    198,
 	"Aacgr":    902,
@@ -977,6 +978,7 @@ var XMLEntities = map[string]rune{
 	"zhcy":     1078,
 }
 
+// XMLEntitiesReverse maps Unicode codepoints to XMLEntities
 var XMLEntitiesReverse = map[rune][]string{
 	33:    []string{"excl"},
 	34:    []string{"quot"},

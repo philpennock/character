@@ -29,7 +29,7 @@ func HexDecodeArgs(in []string) (out []string, errList []error) {
 	// If we don't, then assume that we just have hex strings
 	// Handle = too, for MIME HDR encoding
 	// We handle either, but only one or the other per command-invocation.
-	var escapeChar rune = 0
+	var escapeChar rune
 	var escapeByteSeq []byte
 
 	for argN, arg := range in {

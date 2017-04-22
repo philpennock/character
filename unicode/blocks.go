@@ -82,6 +82,7 @@ func (b Blocks) FindByName(name string) (min, max rune, candidateNames []string)
 	return 0, 0, nil
 }
 
+// ListBlocks returns an ordered list of known blocks.
 func (b Blocks) ListBlocks() []BlockInfo {
 	return b.ordered
 }

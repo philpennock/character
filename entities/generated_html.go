@@ -2,6 +2,7 @@
 
 package entities
 
+// HTMLEntities maps those names to Unicode codepoints
 var HTMLEntities = map[string]rune{
 	"AElig":    198,
 	"Aacute":   193,
@@ -257,6 +258,7 @@ var HTMLEntities = map[string]rune{
 	"zwnj":     8204,
 }
 
+// HTMLEntitiesReverse maps Unicode codepoints to HTMLEntities
 var HTMLEntitiesReverse = map[rune][]string{
 	34:   []string{"quot"},
 	38:   []string{"amp"},
