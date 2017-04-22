@@ -1,6 +1,10 @@
 #!/bin/sh -eu
 
 # This should not be in shell, should move to go, but for now, be fast to write
+#
+# THIS SHOULD NOT BE DEFERRING PARSE TO RUNTIME.
+# This was done for speed of creation and getting working code; we should be doing
+# the fetch and parsing in Golang, and making static tables.
 
 URLBASE='http://www.unicode.org/Public/UCD/latest/ucd/'
 UNICODE_DATA=''
@@ -9,7 +13,7 @@ UNICODE_BLOCKS=''
 use_unpublished() {
 	URLBASE='http://www.unicode.org/Public/10.0.0/ucd/'
 	UNICODE_DATA='UnicodeData-10.0.0d5.txt'
-	UNICODE_BLOCKS='Blocks-10.0.0d1.txt'
+	UNICODE_BLOCKS='Blocks-10.0.0d2.txt'
 }
 
 update() {
