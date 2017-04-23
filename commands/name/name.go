@@ -13,9 +13,9 @@ import (
 
 	"github.com/philpennock/character/aux"
 	"github.com/philpennock/character/encodings"
-	"github.com/philpennock/character/metadata"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
+	"github.com/philpennock/character/unicode"
 
 	"github.com/philpennock/character/commands/root"
 )
@@ -143,9 +143,9 @@ func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *
 
 	results.AddCharInfoDerivedFrom(ci, originalRune)
 	// Ancillary extra data if warranted
-	if metadata.IsPairCode(ci.Number) {
+	if aux.IsPairCode(ci.Number) {
 		if *pairedCodepoint != 0 {
-			if ci2, ok := metadata.PairCharInfo(*pairedCodepoint, ci.Number); ok {
+			if ci2, ok := unicode.PairCharInfo(*pairedCodepoint, ci.Number); ok {
 				results.AddCharInfoDerivedFrom(ci2, originalRune)
 			} else {
 				results.AddError("", fmt.Errorf("unknown codepair %x-%x", *pairedCodepoint, ci.Number))

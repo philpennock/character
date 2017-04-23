@@ -23,6 +23,7 @@ var flags struct {
 // ErrInvalidRegionLetter means not known as a Regional Indicator character
 var ErrInvalidRegionLetter = errors.New("unknown regional indicator character")
 
+// RegionalIndicatorBase is the first rune in the A-Z range of the Regional Indicators.
 const RegionalIndicatorBase = 0x1F1E6
 
 var regionCmd = &cobra.Command{

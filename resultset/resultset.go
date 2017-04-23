@@ -79,6 +79,21 @@ type charItem struct {
 	partOf  rune
 }
 
+// fixedWidthCell satisfies an interface used by the tabular table provider, to
+// let us override the width. [types.go TerminalCellWidther -- not asserting here
+// so as to maintain table provider abstraction]
+//
+// The table providers take various approaches to determining width; tabular uses
+// go-runewidth which is Pretty Good and far better than most, but we are a tool
+// all about Unicode and can sometimes do a little better in some corner cases.
+type fixedWidthCell struct {
+	s string
+	w int
+}
+
+func (fwc fixedWidthCell) String() string         { return fwc.s }
+func (fwc fixedWidthCell) TerminalCellWidth() int { return fwc.w }
+
 // A ResultSet is the collection of unicode characters (or near facsimiles thereof)
 // about which we wish to see data.  Various front-end commands just figure out which
 // characters are being asked about and throw them in the ResultSet, then at the end
@@ -195,7 +210,15 @@ func (rs *ResultSet) StringPlain(what printItem) string {
 	for _, s = range rs.which {
 		switch s {
 		case _ITEM:
-			out = append(out, rs.RenderCharInfoItem(rs.items[ii], what))
+			item := rs.RenderCharInfoItem(rs.items[ii], what)
+			if itemS, ok := item.(fmt.Stringer); ok {
+				out = append(out, itemS.String())
+			} else if itemS, ok := item.(string); ok {
+				out = append(out, itemS)
+			} else {
+				// shouldn't happen (but can't have a primitive type satisfy an interface)
+				out = append(out, fmt.Sprintf("%v", item))
+			}
 			ii++
 		case _ERROR:
 			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
@@ -219,15 +242,19 @@ func (rs *ResultSet) LenItemCount() int {
 	return len(rs.items)
 }
 
-// RenderCharInfoItem converts a charItem and an attribute selector into a string
-func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) string {
+// RenderCharInfoItem converts a charItem and an attribute selector into a string or Stringer
+func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{} {
 	// we use 0 as a special-case for things like combinations, where there's only a name
 	if ci.unicode.Number == 0 && what != PRINT_NAME {
 		return " "
 	}
 	switch what {
 	case PRINT_RUNE:
-		return string(ci.unicode.Number)
+		s := string(ci.unicode.Number)
+		if w, override := aux.DisplayCellWidth(s); override {
+			return fixedWidthCell{s: s, w: w}
+		}
+		return s
 	case PRINT_RUNE_ISOLATED: // BROKEN
 		// FIXME: None of these are actually working
 		return fmt.Sprintf("%c%c%c",
@@ -265,9 +292,15 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) string {
 		}
 		return p
 	case PRINT_RUNE_WIDTH:
-		return strconv.FormatUint(uint64(aux.DisplayCellWidth(string(ci.unicode.Number))), 10)
+		// If we supported color etc, then this would be a good opportunity to
+		// use the override return bool to color red or something.
+		width, _ := aux.DisplayCellWidth(string(ci.unicode.Number))
+		return strconv.FormatUint(uint64(width), 10)
 	case PRINT_NAME:
-		return ci.unicode.Name
+		if ci.unicode.NameWidth == 0 {
+			return ci.unicode.Name
+		}
+		return fixedWidthCell{s: ci.unicode.Name, w: ci.unicode.NameWidth}
 	case PRINT_BLOCK:
 		return rs.sources.UBlocks.Lookup(ci.unicode.Number)
 	case PRINT_HTML_ENTITIES:

@@ -17,9 +17,10 @@ import (
 // CharInfo is the basic set of information about one Unicode character.
 // We record the codepoint (as a Go rune) and the formal Name.
 type CharInfo struct {
-	_      struct{}
-	Number rune
-	Name   string
+	_         struct{}
+	Number    rune
+	Name      string
+	NameWidth int // occasional override
 }
 
 // Unicode is the set of all data about all characters which we've retrieved
