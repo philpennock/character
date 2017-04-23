@@ -8,6 +8,7 @@ package puny
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/idna"
@@ -63,13 +64,21 @@ var punyCmd = &cobra.Command{
 				errFPTU, errFUTP                     error
 			)
 
+			argPrefix := ""
+			for _, p := range []string{"http://", "https://"} {
+				if strings.HasPrefix(argUTF8, p) {
+					argPrefix = p
+					argUTF8 = argUTF8[len(p):]
+				}
+			}
+
 			if !flags.punyOut {
 				fromPunyToUnicode, errFPTU = idna.ToUnicode(argUTF8)
 				if flags.punyIn {
 					if errFPTU != nil {
 						root.Errorf("error decoding arg %d %q from punycode: %s\n", i, arg, errFPTU)
 					} else {
-						fmt.Println(fromPunyToUnicode)
+						fmt.Println(argPrefix + fromPunyToUnicode)
 					}
 					continue
 				}
@@ -81,13 +90,16 @@ var punyCmd = &cobra.Command{
 					if errFUTP != nil {
 						root.Errorf("error encoding arg %d %q to punycode: %s\n", i, arg, errFUTP)
 					} else {
-						fmt.Println(fromUnicodeToPuny)
+						fmt.Println(argPrefix + fromUnicodeToPuny)
 					}
 					continue
 				}
 			}
 
-			fmt.Printf("Input: %s\nUnicode: %s\nPunycode: %s\n", arg, fromPunyToUnicode, fromUnicodeToPuny)
+			fmt.Printf("Input: %s\nUnicode: %s%s\nPunycode: %s%s\n",
+				/* no prefix, wasn't stripped from arg */ arg,
+				argPrefix, fromPunyToUnicode,
+				argPrefix, fromUnicodeToPuny)
 			// not root.Errorf, see what failures we actually get in practice
 			if errFPTU != nil {
 				cmd.Printf("error decoding arg %d %q from punycode: %s\n", i, arg, errFPTU)
