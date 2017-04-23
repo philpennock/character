@@ -5,7 +5,7 @@
 package root
 
 import (
-	"github.com/philpennock/character/table"
+	"github.com/philpennock/character/internal/table"
 )
 
 func init() {

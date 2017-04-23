@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/philpennock/character/aux"
+	"github.com/philpennock/character/internal/aux"
 )
 
 // What we need is a SegmentTreeMap, such that lookup of a key matches an entry

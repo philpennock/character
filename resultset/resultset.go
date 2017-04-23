@@ -14,10 +14,10 @@ import (
 
 	"golang.org/x/net/idna"
 
-	"github.com/philpennock/character/aux"
 	"github.com/philpennock/character/entities"
+	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/table"
 	"github.com/philpennock/character/sources"
-	"github.com/philpennock/character/table"
 	"github.com/philpennock/character/unicode"
 )
 

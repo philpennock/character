@@ -11,8 +11,8 @@ import (
 	"golang.org/x/net/idna"
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/philpennock/character/aux"
-	"github.com/philpennock/character/encodings"
+	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/encodings"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"

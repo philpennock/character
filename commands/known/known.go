@@ -9,8 +9,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/philpennock/character/encodings"
-	"github.com/philpennock/character/table"
+	"github.com/philpennock/character/internal/encodings"
+	"github.com/philpennock/character/internal/table"
 
 	"github.com/philpennock/character/commands/root"
 )

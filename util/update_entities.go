@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/philpennock/character/aux"
+	"github.com/philpennock/character/internal/aux"
 )
 
 func processEntityDirTo(entityFiles []string, outfile string, pkg, mapName string) error {

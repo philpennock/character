@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/idna"
 
-	"github.com/philpennock/character/aux"
-	"github.com/philpennock/character/encodings"
+	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/encodings"
 
 	"github.com/philpennock/character/commands/root"
 )

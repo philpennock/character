@@ -9,7 +9,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/philpennock/character/aux"
+	"github.com/philpennock/character/internal/aux"
 
 	"github.com/argusdusty/Ferret"
 )

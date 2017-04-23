@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/philpennock/character/table"
+	"github.com/philpennock/character/internal/table"
 )
 
 // This file would be less repetitive, albeit more complex, if it used Reflection to handle the fields

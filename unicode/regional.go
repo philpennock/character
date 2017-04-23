@@ -7,7 +7,7 @@ package unicode
 import (
 	"fmt"
 
-	"github.com/philpennock/character/aux"
+	"github.com/philpennock/character/internal/aux"
 )
 
 // PairCharInfo returns a faked-up CharInfo which is for rune 0 but with an informative name.

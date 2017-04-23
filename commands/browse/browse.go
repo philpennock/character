@@ -11,9 +11,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/philpennock/character/internal/table"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
-	"github.com/philpennock/character/table"
 	"github.com/philpennock/character/unicode"
 
 	"github.com/philpennock/character/commands/root"
