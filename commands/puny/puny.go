@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/idna"
 
+	"github.com/philpennock/character/aux"
 	"github.com/philpennock/character/encodings"
 
 	"github.com/philpennock/character/commands/root"
@@ -20,6 +21,7 @@ import (
 
 var flags struct {
 	encoding string
+	hexInput bool
 	punyIn   bool
 	punyOut  bool
 }
@@ -46,6 +48,16 @@ var punyCmd = &cobra.Command{
 		if err != nil {
 			root.Errorf("unable to get charset decoder: %s\n", err)
 			return
+		}
+
+		// We first handle hex encoding, as being the most likely source of
+		// non-UTF8 in UTF8 environments.
+		if flags.hexInput {
+			var errList []error
+			args, errList = aux.HexDecodeArgs(args)
+			for _, e := range errList {
+				root.Errorf("error decoding hex: %s\n", e)
+			}
 		}
 
 		for i, arg := range args {
@@ -113,6 +125,7 @@ var punyCmd = &cobra.Command{
 
 func init() {
 	punyCmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "", "translate input from this encoding")
+	punyCmd.Flags().BoolVarP(&flags.hexInput, "hex-input", "H", false, "take Hex-encoded input")
 	punyCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "i", false, "expect punycode, show only decode")
 	punyCmd.Flags().BoolVarP(&flags.punyOut, "punycode-output", "o", false, "expect non-punycode, show only encode")
 
