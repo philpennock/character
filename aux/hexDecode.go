@@ -9,16 +9,17 @@ import (
 	"encoding/hex"
 	"regexp"
 	"strings"
+	"unicode/utf16"
 )
 
-var matchHexPairSeq = regexp.MustCompile(`^(?:[%=][0-9A-Fa-f]{2})+`)
+var matchHexSeq = regexp.MustCompile(`^(?:(?:[%=][0-9A-Fa-f]{2})|(?:\\u[0-9A-Fa-f]{4}))+`)
 
 type malformedHexSequence struct {
-	escapeChar rune
+	escapeSeq string
 }
 
 func (m malformedHexSequence) Error() string {
-	return "malformed " + string(m.escapeChar) + "hex sequence"
+	return "malformed " + m.escapeSeq + "hex sequence"
 }
 
 // HexDecodeArgs decodes hex strings passed in argv, returning new args.
@@ -28,22 +29,28 @@ func HexDecodeArgs(in []string) (out []string, errList []error) {
 	// If we have %-encoded, then take non-%-preceded entries as literal character
 	// If we don't, then assume that we just have hex strings
 	// Handle = too, for MIME HDR encoding
-	// We handle either, but only one or the other per command-invocation.
-	var escapeChar rune
-	var escapeByteSeq []byte
+	// Handle \u with _four_ digits too
+	// We handle any, but only one per command-invocation.
+	var escapeSeq string
+	var escapeSeqBytes []byte
+	needUTF16Decode := false
 
 	for argN, arg := range in {
-		if escapeChar == 0 {
+		if escapeSeq == "" {
 			if strings.ContainsRune(arg, '%') {
-				escapeChar = '%'
-				escapeByteSeq = []byte{'%'}
+				escapeSeq = "%"
 			} else if strings.ContainsRune(arg, '=') {
-				escapeChar = '='
-				escapeByteSeq = []byte{'='}
+				escapeSeq = "="
+			} else if strings.Contains(arg, "\\u") {
+				escapeSeq = "\\u"
+				needUTF16Decode = true
+			}
+			if escapeSeq != "" {
+				escapeSeqBytes = []byte(escapeSeq)
 			}
 		}
 
-		if escapeChar == 0 || !strings.ContainsRune(arg, escapeChar) {
+		if escapeSeq == "" || !strings.Contains(arg, escapeSeq) {
 			out[argN] = in[argN]
 			continue
 		}
@@ -52,7 +59,7 @@ func HexDecodeArgs(in []string) (out []string, errList []error) {
 		chunks := make([][]byte, 0, len(argB))
 
 		for len(argB) > 0 {
-			nextEscape := bytes.IndexByte(argB, escapeByteSeq[0])
+			nextEscape := bytes.Index(argB, escapeSeqBytes)
 			if nextEscape < 0 {
 				chunks = append(chunks, argB)
 				argB = []byte{}
@@ -64,9 +71,9 @@ func HexDecodeArgs(in []string) (out []string, errList []error) {
 				argB = argB[nextEscape:]
 			}
 
-			matches := matchHexPairSeq.FindSubmatch(argB)
+			matches := matchHexSeq.FindSubmatch(argB)
 			if matches == nil {
-				errList = append(errList, malformedHexSequence{escapeChar})
+				errList = append(errList, malformedHexSequence{escapeSeq})
 				chunks = append(chunks, argB)
 				argB = []byte{}
 				continue
@@ -74,7 +81,7 @@ func HexDecodeArgs(in []string) (out []string, errList []error) {
 
 			got := matches[0]
 			argB = argB[len(got):]
-			got = bytes.Replace(got, escapeByteSeq, []byte{}, -1)
+			got = bytes.Replace(got, escapeSeqBytes, []byte{}, -1)
 			// have an even-length sequence, length at least 2
 			target := make([]byte, len(got)/2)
 			n, err := hex.Decode(target, got)
@@ -84,6 +91,15 @@ func HexDecodeArgs(in []string) (out []string, errList []error) {
 			}
 			if n != len(got)/2 {
 				panic("oops, not got the right length buffer")
+			}
+			if needUTF16Decode {
+				// we know from the regexp that for the \u case there are a multiple of 4 hexdigits
+				sixteens := make([]uint16, n/2)
+				for i := range sixteens {
+					sixteens[i] = uint16(target[i*2])*256 + uint16(target[i*2+1])
+				}
+				runes := utf16.Decode(sixteens)
+				target = []byte(string(runes))
 			}
 			chunks = append(chunks, target)
 		}
