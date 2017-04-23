@@ -19,6 +19,7 @@ import (
 	_ "github.com/philpennock/character/commands/name"
 	_ "github.com/philpennock/character/commands/named"
 	_ "github.com/philpennock/character/commands/puny"
+	_ "github.com/philpennock/character/commands/region"
 	_ "github.com/philpennock/character/commands/transform"
 	_ "github.com/philpennock/character/commands/version"
 
