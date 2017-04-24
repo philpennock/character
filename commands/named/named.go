@@ -6,6 +6,7 @@ package named
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/atotto/clipboard"
@@ -41,6 +42,10 @@ var namedCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := resultset.FlagsOkay(); err != nil {
 			root.Errorf("%s", err)
+			return
+		}
+		if resultset.CmdVerbose() && flags.oneline {
+			root.Errorf("can't use --oneline and a verbose table")
 			return
 		}
 		srcs := sources.NewFast()
@@ -107,7 +112,11 @@ var namedCmd = &cobra.Command{
 			}
 		}
 
-		results.RenderPerCmdline(resultset.PRINT_RUNE)
+		if flags.oneline {
+			fmt.Println(results.StringPlain(resultset.PRINT_RUNE))
+		} else {
+			results.RenderPerCmdline(resultset.PRINT_RUNE)
+		}
 	},
 }
 
