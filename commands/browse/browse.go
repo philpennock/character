@@ -150,6 +150,6 @@ func init() {
 	browseCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data")
 	browseCmd.Flags().IntVarP(&flags.startrune, "from", "f", 0, "show range starting at this value")
 	browseCmd.Flags().IntVarP(&flags.stoprune, "to", "t", 0, "show range ending at this value")
-	resultset.RegisterCmdFlags(browseCmd) // verbose v | net-verbose N | internal-debug
+	resultset.RegisterCmdFlags(browseCmd, false) // verbose v | net-verbose N | internal-debug; ; don't enable oneline
 	root.AddCommand(browseCmd)
 }

@@ -6,7 +6,6 @@ package named
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/atotto/clipboard"
@@ -23,7 +22,6 @@ var flags struct {
 	clipboard bool
 	join      bool
 	livevim   bool
-	oneline   bool
 	search    bool
 	unsorted  bool
 }
@@ -41,11 +39,7 @@ var namedCmd = &cobra.Command{
 	Short: "shows character with given name",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := resultset.FlagsOkay(); err != nil {
-			root.Errorf("%s", err)
-			return
-		}
-		if resultset.CmdVerbose() && flags.oneline {
-			root.Errorf("can't use --oneline and a verbose table")
+			root.Errorf("%s\n", err)
 			return
 		}
 		srcs := sources.NewFast()
@@ -112,11 +106,7 @@ var namedCmd = &cobra.Command{
 			}
 		}
 
-		if flags.oneline {
-			fmt.Println(results.StringPlain(resultset.PRINT_RUNE))
-		} else {
-			results.RenderPerCmdline(resultset.PRINT_RUNE)
-		}
+		results.RenderPerCmdline(resultset.PRINT_RUNE)
 	},
 }
 
@@ -124,10 +114,9 @@ func init() {
 	namedCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
-	namedCmd.Flags().BoolVarP(&flags.oneline, "oneline", "1", false, "multiple chars on one line")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
-	resultset.RegisterCmdFlags(namedCmd) // verbose v | net-verbose N | internal-debug
+	resultset.RegisterCmdFlags(namedCmd, true) // verbose v | net-verbose N | internal-debug; enable oneline
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
 		// because that makes client portability more problematic.  Instead, we

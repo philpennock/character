@@ -6,6 +6,7 @@ package resultset
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -14,12 +15,16 @@ import (
 
 var resultCmdFlags struct {
 	internalDebug bool
+	oneline       bool
 	netVerbose    bool
 	verbose       bool
 }
 
 // RegisterCmdFlags adds the --verbose/--net-verbose/--internal-debug flags to a Cobra cmd.
-func RegisterCmdFlags(cmd *cobra.Command) {
+func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
+	if supportOneline {
+		cmd.Flags().BoolVarP(&resultCmdFlags.oneline, "oneline", "1", false, "multiple chars on one line")
+	}
 	if !CanTable() {
 		return
 	}
@@ -50,6 +55,9 @@ func FlagsOkay() error {
 	if resultCmdFlags.verbose {
 		c++
 	}
+	if resultCmdFlags.oneline {
+		c++
+	}
 	if c > 1 {
 		return ErrIncompatibleFlags
 	}
@@ -68,6 +76,8 @@ func (rs *ResultSet) RenderPerCmdline(defaultPI printItem) {
 	} else if resultCmdFlags.internalDebug {
 		rs.SelectFieldsDebug()
 		rs.PrintTables()
+	} else if resultCmdFlags.oneline {
+		fmt.Println(rs.StringPlain(defaultPI))
 	} else {
 		rs.PrintPlain(defaultPI)
 	}

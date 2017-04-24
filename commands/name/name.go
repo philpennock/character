@@ -33,7 +33,7 @@ var nameCmd = &cobra.Command{
 	Short: "shows information about supplied characters",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := resultset.FlagsOkay(); err != nil {
-			root.Errorf("%s", err)
+			root.Errorf("%s\n", err)
 			return
 		}
 
@@ -103,7 +103,7 @@ func init() {
 	nameCmd.Flags().BoolVarP(&flags.hexInput, "hex-input", "H", false, "take Hex-encoded input")
 	nameCmd.Flags().BoolVarP(&flags.listEncodings, "list-encodings", "", false, "list -e encodings & exit")
 	nameCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "p", false, "decode punycode on cmdline")
-	resultset.RegisterCmdFlags(nameCmd) // verbose v | net-verbose N | internal-debug
+	resultset.RegisterCmdFlags(nameCmd, false) // verbose v | net-verbose N | internal-debug; don't enable oneline
 	if resultset.CanTable() {
 		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	}

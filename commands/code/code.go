@@ -45,7 +45,7 @@ var codeCmd = &cobra.Command{
 	Short: "shows character with codepoint",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := resultset.FlagsOkay(); err != nil {
-			root.Errorf("%s", err)
+			root.Errorf("%s\n", err)
 			return
 		}
 
@@ -160,7 +160,7 @@ func init() {
 	codeCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	codeCmd.Flags().BoolVarP(&flags.utf8hex, "utf8hex", "H", false, "take UTF-8 Hex-encoded codepoint")
 	codeCmd.Flags().VarP(&flags.base, "base", "b", "numeric base for code-ponts [default: usual parse rules]")
-	resultset.RegisterCmdFlags(codeCmd) // verbose v | net-verbose N | internal-debug
+	resultset.RegisterCmdFlags(codeCmd, true) // verbose v | net-verbose N | internal-debug; enable oneline
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
 		// because that makes client portability more problematic.  Instead, we
