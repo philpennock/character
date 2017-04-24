@@ -22,19 +22,21 @@ import (
 
 var flags struct {
 	encoding      string
-	internalDebug bool
 	listEncodings bool
 	livevim       bool
-	netVerbose    bool
 	punyIn        bool
 	hexInput      bool
-	verbose       bool
 }
 
 var nameCmd = &cobra.Command{
 	Use:   "name [char... [char...]]",
 	Short: "shows information about supplied characters",
 	Run: func(cmd *cobra.Command, args []string) {
+		if err := resultset.FlagsOkay(); err != nil {
+			root.Errorf("%s", err)
+			return
+		}
+
 		if flags.listEncodings {
 			// This should be deprecated, now that we have `known` top-level command
 			cmd.Printf("%s %s: these names (and some aliases) are known:\n", root.Cobra().Name(), cmd.Name())
@@ -51,7 +53,7 @@ var nameCmd = &cobra.Command{
 		}
 
 		srcs := sources.NewFast()
-		if flags.verbose && flags.livevim {
+		if flags.livevim {
 			srcs.LoadLiveVim()
 		}
 		approxCharCount := 0
@@ -92,17 +94,7 @@ var nameCmd = &cobra.Command{
 			}
 		}
 
-		if flags.verbose {
-			results.PrintTables()
-		} else if flags.netVerbose {
-			results.SelectFieldsNet()
-			results.PrintTables()
-		} else if flags.internalDebug {
-			results.SelectFieldsDebug()
-			results.PrintTables()
-		} else {
-			results.PrintPlain(resultset.PRINT_NAME)
-		}
+		results.RenderPerCmdline(resultset.PRINT_NAME)
 	},
 }
 
@@ -111,12 +103,9 @@ func init() {
 	nameCmd.Flags().BoolVarP(&flags.hexInput, "hex-input", "H", false, "take Hex-encoded input")
 	nameCmd.Flags().BoolVarP(&flags.listEncodings, "list-encodings", "", false, "list -e encodings & exit")
 	nameCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "p", false, "decode punycode on cmdline")
+	resultset.RegisterCmdFlags(nameCmd) // verbose v | net-verbose N | internal-debug
 	if resultset.CanTable() {
-		nameCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
-		nameCmd.Flags().MarkHidden("internal-debug")
 		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
-		nameCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
-		nameCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
 	}
 	// FIXME: support verbose results without tables
 

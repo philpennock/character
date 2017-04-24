@@ -23,13 +23,10 @@ import (
 )
 
 var flags struct {
-	base          intconvBase
-	clipboard     bool
-	internalDebug bool
-	livevim       bool
-	netVerbose    bool
-	utf8hex       bool
-	verbose       bool
+	base      intconvBase
+	clipboard bool
+	livevim   bool
+	utf8hex   bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -47,8 +44,13 @@ var codeCmd = &cobra.Command{
 	Use:   "code [codepoint ...]",
 	Short: "shows character with codepoint",
 	Run: func(cmd *cobra.Command, args []string) {
+		if err := resultset.FlagsOkay(); err != nil {
+			root.Errorf("%s", err)
+			return
+		}
+
 		srcs := sources.NewFast()
-		if flags.verbose && flags.livevim {
+		if flags.livevim {
 			srcs.LoadLiveVim()
 		}
 
@@ -149,17 +151,7 @@ var codeCmd = &cobra.Command{
 			}
 		}
 
-		if flags.verbose {
-			results.PrintTables()
-		} else if flags.netVerbose {
-			results.SelectFieldsNet()
-			results.PrintTables()
-		} else if flags.internalDebug {
-			results.SelectFieldsDebug()
-			results.PrintTables()
-		} else {
-			results.PrintPlain(resultset.PRINT_RUNE)
-		}
+		results.RenderPerCmdline(resultset.PRINT_RUNE)
 	},
 }
 
@@ -168,12 +160,7 @@ func init() {
 	codeCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	codeCmd.Flags().BoolVarP(&flags.utf8hex, "utf8hex", "H", false, "take UTF-8 Hex-encoded codepoint")
 	codeCmd.Flags().VarP(&flags.base, "base", "b", "numeric base for code-ponts [default: usual parse rules]")
-	if resultset.CanTable() {
-		codeCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
-		codeCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
-		codeCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
-		codeCmd.Flags().MarkHidden("internal-debug")
-	}
+	resultset.RegisterCmdFlags(codeCmd) // verbose v | net-verbose N | internal-debug
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
 		// because that makes client portability more problematic.  Instead, we

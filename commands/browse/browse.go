@@ -26,7 +26,6 @@ var flags struct {
 	livevim    bool
 	startrune  int
 	stoprune   int
-	verbose    bool
 }
 
 var browseCmd = &cobra.Command{
@@ -110,12 +109,12 @@ var browseCmd = &cobra.Command{
 			return
 		}
 
-		results.PrintTables()
+		results.RenderPerCmdline(resultset.PRINT_NAME)
 	},
 }
 
 func showBlocks(srcs *sources.Sources) {
-	if !flags.verbose {
+	if !resultset.CmdVerbose() {
 		for _, blockInfo := range srcs.UBlocks.ListBlocks() {
 			fmt.Printf("%s\n", blockInfo.Name)
 		}
@@ -151,6 +150,6 @@ func init() {
 	browseCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data")
 	browseCmd.Flags().IntVarP(&flags.startrune, "from", "f", 0, "show range starting at this value")
 	browseCmd.Flags().IntVarP(&flags.stoprune, "to", "t", 0, "show range ending at this value")
-	browseCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about block-names (for list-blocks)")
+	resultset.RegisterCmdFlags(browseCmd) // verbose v | net-verbose N | internal-debug
 	root.AddCommand(browseCmd)
 }

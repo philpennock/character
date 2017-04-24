@@ -6,7 +6,6 @@ package named
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/atotto/clipboard"
@@ -20,15 +19,12 @@ import (
 )
 
 var flags struct {
-	clipboard     bool
-	internalDebug bool
-	join          bool
-	livevim       bool
-	netVerbose    bool
-	oneline       bool
-	search        bool
-	unsorted      bool
-	verbose       bool
+	clipboard bool
+	join      bool
+	livevim   bool
+	oneline   bool
+	search    bool
+	unsorted  bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -43,11 +39,15 @@ var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
 	Short: "shows character with given name",
 	Run: func(cmd *cobra.Command, args []string) {
+		if err := resultset.FlagsOkay(); err != nil {
+			root.Errorf("%s", err)
+			return
+		}
 		srcs := sources.NewFast()
 		if flags.search {
 			srcs.LoadUnicodeSearch()
 		}
-		if flags.verbose && flags.livevim {
+		if flags.livevim {
 			srcs.LoadLiveVim()
 		}
 		results := resultset.New(srcs, len(args))
@@ -107,35 +107,18 @@ var namedCmd = &cobra.Command{
 			}
 		}
 
-		if flags.verbose {
-			results.PrintTables()
-		} else if flags.netVerbose {
-			results.SelectFieldsNet()
-			results.PrintTables()
-		} else if flags.internalDebug {
-			results.SelectFieldsDebug()
-			results.PrintTables()
-		} else if flags.oneline {
-			fmt.Println(results.StringPlain(resultset.PRINT_RUNE))
-		} else {
-			results.PrintPlain(resultset.PRINT_RUNE)
-		}
+		results.RenderPerCmdline(resultset.PRINT_RUNE)
 	},
 }
 
 func init() {
 	namedCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
-	namedCmd.Flags().BoolVarP(&flags.internalDebug, "internal-debug", "", false, "")
-	namedCmd.Flags().MarkHidden("internal-debug")
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.oneline, "oneline", "1", false, "multiple chars on one line")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
-	if resultset.CanTable() {
-		namedCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show information about the character")
-		namedCmd.Flags().BoolVarP(&flags.netVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
-	}
+	resultset.RegisterCmdFlags(namedCmd) // verbose v | net-verbose N | internal-debug
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
 		// because that makes client portability more problematic.  Instead, we
