@@ -6,11 +6,11 @@ sudo: false
 
 go:
   - 1.8.1
+  - 1.7.5
+  - 1.6
 # 2016-03-14: removed `tip` ∵ `go vet` on Travis throwing false errors,
 # complaining about missing format strings where they're most definitely
 # present.
-# 2017-04-24: removed 1.6/1.7.5 because of pathologically bad performance
-# in building the unicode dir.  1.8.1 is better, as long as I avoid maps.
 
 # Need deppy to support test dependencies too, to lock testlib
 

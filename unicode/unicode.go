@@ -28,8 +28,8 @@ type Unicode struct {
 	MaxRune rune
 
 	// these will be blanked by Search once Search setup is complete
-	linearNames   []string
-	linearIfaceCI []interface{}
+	linearNames []string
+	linearCI    []CharInfo
 }
 
 var once struct {
@@ -51,14 +51,18 @@ func LoadSearch() Unicode {
 }
 
 func addSearch() {
+	linearIfaceCI := make([]interface{}, len(global.linearCI))
+	for i := range global.linearCI {
+		linearIfaceCI[i] = global.linearCI[i]
+	}
 	global.Search = ferret.New(
 		global.linearNames,
 		global.linearNames,
-		global.linearIfaceCI,
+		linearIfaceCI,
 		ferret.UnicodeToLowerASCII)
 
 	global.linearNames = nil
-	global.linearIfaceCI = nil
+	global.linearCI = nil
 }
 
 // populateUnicode is done so that we don't need to put the maps into the
@@ -68,12 +72,12 @@ func populateUnicode() {
 	global.ByRune = make(map[rune]CharInfo, runeTotalCount)
 	global.ByName = make(map[string]CharInfo, runeTotalCount)
 
-	for i := range global.linearIfaceCI {
-		ci := global.linearIfaceCI[i].(CharInfo)
-		global.ByRune[ci.Number] = ci
+	for i := range global.linearCI {
+		ci := &global.linearCI[i]
+		global.ByRune[ci.Number] = *ci
 		// skip the <control> dups
 		if ci.Number >= 32 {
-			global.ByName[ci.Name] = ci
+			global.ByName[ci.Name] = *ci
 		}
 	}
 }

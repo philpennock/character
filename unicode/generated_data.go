@@ -31627,7 +31627,7 @@ var global = Unicode{
 		"<Plane 16 Private Use, First>",
 		"<Plane 16 Private Use, Last>",
 	},
-	linearIfaceCI: []interface{}{
+	linearCI: []CharInfo{
 		CharInfo{Number: 0, Name: "<control>"},
 		CharInfo{Number: 1, Name: "<control>"},
 		CharInfo{Number: 2, Name: "<control>"},
