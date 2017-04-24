@@ -5,14 +5,7 @@
 package unicode
 
 import (
-	"bytes"
-	"fmt"
-	"io"
-	"regexp"
 	"strings"
-	"sync"
-
-	"github.com/philpennock/character/internal/aux"
 )
 
 // What we need is a SegmentTreeMap, such that lookup of a key matches an entry
@@ -87,73 +80,11 @@ func (b Blocks) ListBlocks() []BlockInfo {
 	return b.ordered
 }
 
-var oneBlocks struct {
-	sync.Once
-	b Blocks
-}
-
 // LoadBlocks returns a Blocks holder for BlockInfo lookup
+// This is much simpler now that we generate static Golang code for the blocks.
 func LoadBlocks() Blocks {
-	oneBlocks.Do(func() {
-		oneBlocks.b = parseRawBlocks()
-		// NB: at this time, the sorting is done at parse-time with a panic
-		// if out-of-order.
-	})
-	return oneBlocks.b
-}
-
-func parseRawBlocks() Blocks {
-	b := bytes.NewBuffer(rawBlocks)
-	blocks := Blocks{
-		ordered:           make([]BlockInfo, 0, rawBlocksLineCount),
-		maxKnownBlockRune: 0,
+	return Blocks{
+		ordered:           allKnownBlocks,
+		maxKnownBlockRune: maxKnownBlockRune,
 	}
-
-	// ordered []BlockInfo
-	// maxKnownBlockRune rune
-
-	matcher := regexp.MustCompile(`^([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+);\s+(\S.*?)\s*$`)
-
-	lineNum := 0
-	for {
-		if b.Len() == 0 {
-			break
-		}
-		line, err := b.ReadBytes('\n')
-		lineNum++
-		if err != nil {
-			switch err {
-			case io.EOF:
-				break
-			default:
-				panic(err.Error())
-			}
-		}
-		line = line[:len(line)-1]
-
-		// our embedding inserts an extra newline at the start; be resistant
-		if len(line) == 0 {
-			continue
-		}
-
-		got := matcher.FindSubmatch(line)
-		if got == nil {
-			continue
-		}
-
-		bi := BlockInfo{
-			Min:  aux.RuneFromHexField(got[1]),
-			Max:  aux.RuneFromHexField(got[2]),
-			Name: string(got[3]),
-		}
-		if bi.Max < blocks.maxKnownBlockRune {
-			panic(fmt.Sprintf("unsorted block info line %d got max %d which < %d", lineNum, bi.Max, blocks.maxKnownBlockRune))
-		}
-		// fmt.Printf("Found block %v\n", bi)
-		blocks.maxKnownBlockRune = bi.Max
-		blocks.ordered = append(blocks.ordered, bi)
-	}
-
-	// fmt.Printf("Have %d blocks with max rune %x\n", len(blocks.ordered), blocks.maxKnownBlockRune)
-	return blocks
 }

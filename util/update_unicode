@@ -70,8 +70,8 @@ update() {
 update "UnicodeData.txt${UNICODE_DATA:+:}${UNICODE_DATA:-}" \
 	generated_data.go "${UNICODE_DATA_FILE:-}" \
 	rawData rawLineCount
-update "Blocks.txt${UNICODE_BLOCKS:+:}${UNICODE_BLOCKS:-}" \
-	generated_blocks.go "" \
-	rawBlocks rawBlocksLineCount
+# update "Blocks.txt${UNICODE_BLOCKS:+:}${UNICODE_BLOCKS:-}" \
+# 	generated_blocks.go "" \
+# 	rawBlocks rawBlocksLineCount
 
 echo Done
