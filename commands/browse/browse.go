@@ -32,6 +32,12 @@ var browseCmd = &cobra.Command{
 	Use:   "browse",
 	Short: "lists all runes (constrained by block or range)",
 	Run: func(cmd *cobra.Command, args []string) {
+		// We always display a table; documented as doing so, makes most sense
+		// Temporarily lost that after moving to common display flags handling.
+		if !resultset.CmdVerbose() {
+			resultset.ResultCmdFlags.Verbose = true
+		}
+
 		srcs := sources.NewFast()
 		if flags.livevim {
 			srcs.LoadLiveVim()
