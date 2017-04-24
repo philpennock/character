@@ -68,5 +68,5 @@ func NewFast() *Sources {
 // NewAll gives us a Sources item which has had loaded all the data sources
 // that we know about.
 func NewAll() *Sources {
-	return NewEmpty().LoadUnicodeSearch().LoadLiveVim()
+	return NewEmpty().LoadUnicode().LoadUnicodeSearch().LoadStaticVim().LoadLiveVim()
 }

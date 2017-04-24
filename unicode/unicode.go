@@ -33,11 +33,13 @@ type Unicode struct {
 }
 
 var once struct {
-	loadSearch sync.Once
+	populateUnicode sync.Once
+	loadSearch      sync.Once
 }
 
 // Load gives us all the Unicode-spec derived data which we have.
 func Load() Unicode {
+	once.populateUnicode.Do(populateUnicode)
 	return global
 }
 
@@ -57,4 +59,21 @@ func addSearch() {
 
 	global.linearNames = nil
 	global.linearIfaceCI = nil
+}
+
+// populateUnicode is done so that we don't need to put the maps into the
+// generated code, because that triggered some rather unfortunate degenerate
+// performance (40s to build instead of 1s).
+func populateUnicode() {
+	global.ByRune = make(map[rune]CharInfo, runeTotalCount)
+	global.ByName = make(map[string]CharInfo, runeTotalCount)
+
+	for i := range global.linearIfaceCI {
+		ci := global.linearIfaceCI[i].(CharInfo)
+		global.ByRune[ci.Number] = ci
+		// skip the <control> dups
+		if ci.Number >= 32 {
+			global.ByName[ci.Name] = ci
+		}
+	}
 }
