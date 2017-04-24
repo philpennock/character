@@ -10,6 +10,9 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+// We need block info from unicode, which depends upon us.  Bleh.
+var OverrideWidthMSPMin, OverrideWidthMSPMax rune // Miscellaneous Symbols and Pictographs
+
 // DisplayCellWidth is a best-guess at how many "terminal grid cells" wide a character is
 // The actual calculations are done by the table layer; our preferred table layer
 // (tabular; because we wrote it and it's better) uses github.com/mattn/go-runewidth and this
@@ -29,6 +32,8 @@ func DisplayCellWidth(s string) (width int, isOverride bool) {
 	case r == utf8.RuneError:
 		return 1, true
 	case IsPairCode(r):
+		return 1, true
+	case OverrideWidthMSPMin != 0 && OverrideWidthMSPMin <= r && r <= OverrideWidthMSPMax:
 		return 1, true
 	default:
 		return runewidth.StringWidth(s), false
