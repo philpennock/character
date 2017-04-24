@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -24,21 +25,28 @@ import (
 )
 
 var flags struct {
-	outDir             string
-	unstable           bool
-	minBlocksFetchSize uint64
-	noFetch            bool
-	packageName        string
-	noFmt              bool
+	outDir              string
+	unstable            bool
+	minBlocksFetchSize  uint64
+	minUnicodeFetchSize uint64
+	noFetch             bool
+	packageName         string
+	noFmt               bool
 }
 var warningCount int
 
 const (
-	stableUnicodeBaseURL   = "http://www.unicode.org/Public/UCD/latest/ucd/"
-	unstableUnicodeBaseURL = "http://www.unicode.org/Public/10.0.0/ucd/"
-	blocksFilename         = "Blocks.txt"
-	unstableBlocksFilename = "Blocks-10.0.0d2.txt"
-	blocksOutFilename      = "generated_blocks.go"
+	stableUnicodeBaseURL    = "http://www.unicode.org/Public/UCD/latest/ucd/"
+	unstableUnicodeBaseURL  = "http://www.unicode.org/Public/10.0.0/ucd/"
+	blocksFilename          = "Blocks.txt"
+	unstableBlocksFilename  = "Blocks-10.0.0d2.txt"
+	blocksOutFilename       = "generated_blocks.go"
+	unidataFilename         = "UnicodeData.txt"
+	unstableUnidataFilename = "UnicodeData-10.0.0d5.txt"
+	unidataOutFilename      = "generated_data.go"
+
+	approxBlockUpperBound   = 500
+	approxUnidataUpperBound = 35000
 )
 
 func init() {
@@ -46,6 +54,7 @@ func init() {
 	flag.StringVar(&flags.packageName, "package", "unicode", "package to name generated files")
 	flag.BoolVar(&flags.unstable, "unstable", false, "use latest draft Unicode we know of")
 	flag.Uint64Var(&flags.minBlocksFetchSize, "min-blocks-fetchsize", 6*1024, "minimum size of Blocks.txt to not be an error")
+	flag.Uint64Var(&flags.minUnicodeFetchSize, "min-unicode-fetchsize", 1024*1024, "minimum size of UnicodeData.txt to not be an error")
 	flag.BoolVar(&flags.noFetch, "no-fetch", false, "do not retrieve current files, regenerate from local only")
 	flag.BoolVar(&flags.noFmt, "no-fmt", false, "do not run go fmt automatically")
 }
@@ -60,19 +69,26 @@ func main() {
 		Die("missing directory %q", flags.outDir)
 	}
 
-	var blocksURL string
+	var blocksURL, unicodeURL string
 	switch flags.unstable {
 	case false:
 		blocksURL = stableUnicodeBaseURL + blocksFilename
+		unicodeURL = stableUnicodeBaseURL + unidataFilename
 	case true:
 		blocksURL = unstableUnicodeBaseURL + unstableBlocksFilename
+		unicodeURL = unstableUnicodeBaseURL + unstableUnidataFilename
 	}
 	blocksRawOutPath := filepath.Join(flags.outDir, blocksFilename)
 	blocksGenOutPath := filepath.Join(flags.outDir, blocksOutFilename)
+	unidataRawOutPath := filepath.Join(flags.outDir, unidataFilename)
+	unidataGenOutPath := filepath.Join(flags.outDir, unidataOutFilename)
 
 	if !flags.noFetch {
-		if err := fetchURLtoFile(blocksURL, blocksRawOutPath); err != nil {
+		if err := fetchURLtoFile(blocksURL, blocksRawOutPath, flags.minBlocksFetchSize); err != nil {
 			Die("fetching %q from %q failed: %s", blocksRawOutPath, blocksURL, err)
+		}
+		if err := fetchURLtoFile(unicodeURL, unidataRawOutPath, flags.minUnicodeFetchSize); err != nil {
+			Die("fetching %q from %q failed: %s", unidataRawOutPath, unicodeURL, err)
 		}
 	}
 
@@ -80,9 +96,15 @@ func main() {
 		Die("Generating %q from %q failed: %s", blocksGenOutPath, blocksRawOutPath, err)
 	}
 
+	if err := generateUnicodeDataFromTo(unidataRawOutPath, unidataGenOutPath); err != nil {
+		Die("Generating %q from %q failed: %s", unidataGenOutPath, unidataRawOutPath, err)
+	}
+
 	if !flags.noFmt {
-		if err := reformatFile(blocksGenOutPath); err != nil {
-			Die("Running go fmt failed: %s", err)
+		for _, fn := range []string{blocksGenOutPath, unidataGenOutPath} {
+			if err := reformatFile(fn); err != nil {
+				Die("Running go fmt failed: %s", err)
+			}
 		}
 	}
 
@@ -92,7 +114,7 @@ func main() {
 	}
 }
 
-func fetchURLtoFile(url, outpath string) (err error) {
+func fetchURLtoFile(url, outpath string, minSize uint64) (err error) {
 	out, err := os.Create(outpath)
 	if err != nil {
 		return err
@@ -112,8 +134,8 @@ func fetchURLtoFile(url, outpath string) (err error) {
 	if err != nil {
 		return err
 	}
-	if copied < 0 || uint64(copied) < flags.minBlocksFetchSize {
-		return fmt.Errorf("copied too little data, only %d octets, need at least %d", copied, flags.minBlocksFetchSize)
+	if copied < 0 || uint64(copied) < minSize {
+		return fmt.Errorf("copied too little data, only %d octets, need at least %d", copied, minSize)
 	}
 	Trace("Updated %q from %q, size %d", outpath, url, copied)
 	return nil
@@ -155,9 +177,68 @@ func generateBlocksFromTo(inFn, outFn string) error {
 	return nil
 }
 
+func generateUnicodeDataFromTo(inFn, outFn string) error {
+	in, err := os.Open(inFn)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	unidata, extra, err := parseUnicodeData(in)
+	if err != nil {
+		return err
+	}
+
+	out, err := os.Create(outFn)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		e := out.Close()
+		if err == nil {
+			err = e
+		}
+	}()
+
+	fmt.Fprintf(out, "// Code generated by %s; DO NOT EDIT.\n", filepath.Base(os.Args[0]))
+	fmt.Fprintf(out, "\npackage %s\n\n", flags.packageName)
+	fmt.Fprintf(out, "var global = Unicode{\n")
+
+	fmt.Fprintf(out, "\tByRune: map[rune]CharInfo{\n")
+	for _, r := range extra.Runes {
+		fmt.Fprintf(out, "\t\t%d: %s,\n", r, fmtCharInfo(unidata.ByRune[r]))
+	}
+	fmt.Fprintf(out, "\t},\n")
+	fmt.Fprintf(out, "\tByName: map[string]CharInfo{\n")
+RuneLoop:
+	for _, r := range extra.Runes {
+		switch unidata.ByRune[r].Name {
+		case "<control>":
+			continue RuneLoop
+		}
+		fmt.Fprintf(out, "\t\t%q: %s,\n", unidata.ByRune[r].Name, fmtCharInfo(unidata.ByRune[r]))
+	}
+	fmt.Fprintf(out, "\t},\n")
+	fmt.Fprintf(out, "\t// linear* for substring search construction\n")
+	fmt.Fprintf(out, "\tlinearNames: []string{\n")
+	for i, _ := range extra.linearNames {
+		fmt.Fprintf(out, "\t\t%q,\n", extra.linearNames[i])
+	}
+	fmt.Fprintf(out, "\t},\n")
+	fmt.Fprintf(out, "\tlinearIfaceCI: []interface{}{\n")
+	for i, _ := range extra.linearCI {
+		fmt.Fprintf(out, "\t\t%s,\n", fmtCharInfo(extra.linearCI[i]))
+	}
+	fmt.Fprintf(out, "\t},\n")
+	fmt.Fprintf(out, "\tMaxRune: %d,\n", unidata.MaxRune)
+
+	fmt.Fprintf(out, "}\n")
+	return nil
+}
+
 func parseRawBlocks(in io.Reader) ([]unicode.BlockInfo, rune, error) {
 	rdr := bufio.NewReader(in)
-	ordered := make([]unicode.BlockInfo, 0, 500)
+	ordered := make([]unicode.BlockInfo, 0, approxBlockUpperBound)
 	matcher := regexp.MustCompile(`^([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+);\s+(\S.*?)\s*$`)
 
 	var maxKnownBlockRune rune
@@ -200,6 +281,78 @@ ReadLoop:
 	}
 
 	return ordered, maxKnownBlockRune, nil
+}
+
+func fmtCharInfo(ci unicode.CharInfo) string {
+	return fmt.Sprintf("CharInfo{Number: %d, Name: %q}", ci.Number, ci.Name)
+}
+
+type ExtraUnicode struct {
+	// These are for unexported fields in the Unicode
+	linearNames []string
+	linearCI    []unicode.CharInfo // nb: is `linearIfaceCI []interface{}` in generated code
+
+	// These are just used by us
+	Runes []rune
+}
+
+func parseUnicodeData(in io.Reader) (unicode.Unicode, ExtraUnicode, error) {
+	rdr := bufio.NewReader(in)
+
+	byRune := make(map[rune]unicode.CharInfo, approxUnidataUpperBound)
+	byName := make(map[string]unicode.CharInfo, approxUnidataUpperBound)
+	linearNames := make([]string, 0, approxUnidataUpperBound)
+	linearCI := make([]unicode.CharInfo, 0, approxUnidataUpperBound)
+	Runes := make([]rune, 0, approxUnidataUpperBound)
+	var max rune
+
+	lineNum := 0
+ReadLoop:
+	for {
+		line, err := rdr.ReadBytes('\n')
+		lineNum++
+		if err != nil {
+			switch err {
+			case io.EOF:
+				break ReadLoop
+			default:
+				return unicode.Unicode{}, ExtraUnicode{}, err
+			}
+		}
+		line = line[:len(line)-1]
+
+		// our embedding inserts an extra newline at the start; be resistant
+		if len(line) == 0 {
+			continue
+		}
+
+		fields := bytes.FieldsFunc(line, func(r rune) bool { return r == ';' })
+
+		r := aux.RuneFromHexField(fields[0])
+		name := string(fields[1])
+		ci := unicode.CharInfo{
+			Number: r,
+			Name:   name,
+		}
+		byRune[r] = ci
+		byName[name] = ci
+		Runes = append(Runes, r)
+		linearNames = append(linearNames, name)
+		linearCI = append(linearCI, ci)
+		if r > max {
+			max = r
+		}
+	}
+
+	return unicode.Unicode{
+			ByRune:  byRune,
+			ByName:  byName,
+			MaxRune: max,
+		}, ExtraUnicode{
+			linearNames: linearNames,
+			linearCI:    linearCI,
+			Runes:       Runes,
+		}, nil
 }
 
 func reformatFile(fn string) error {
