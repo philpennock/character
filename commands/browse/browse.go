@@ -31,7 +31,22 @@ var flags struct {
 var browseCmd = &cobra.Command{
 	Use:   "browse",
 	Short: "lists all runes (constrained by block or range)",
+	Long: `lists all runes (constrained by block or range)
+
+Browse the Unicode tables by various constraints.
+Use "known -bv/-bn" to list known blocks for "browse -b".
+`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if flags.listblocks {
+			root.Cobra().SetArgs([]string{"known", "--blocks__verbose"}) // hidden compat option
+			err := root.Cobra().Execute()
+			if err != nil {
+				root.Errored()
+				cmd.Printf("running known/--blocks(compat-shim) cmd failed: %s\n", err.Error())
+			}
+			return
+		}
+
 		// We always display a table; documented as doing so, makes most sense
 		// Temporarily lost that after moving to common display flags handling.
 		if !resultset.CmdVerbose() {
@@ -45,11 +60,6 @@ var browseCmd = &cobra.Command{
 
 		if flags.stoprune == 0 {
 			flags.stoprune = int(srcs.Unicode.MaxRune)
-		}
-
-		if flags.listblocks {
-			showBlocks(srcs)
-			return
 		}
 
 		if flags.blockname != "" {
@@ -153,6 +163,7 @@ func init() {
 	browseCmd.Flags().StringVarP(&flags.blockname, "block", "b", "", "only show this block")
 	browseCmd.Flags().IntVarP(&flags.limitAbort, "limit-abort", "A", 3000, "abort if would show more than this many entries")
 	browseCmd.Flags().BoolVarP(&flags.listblocks, "list-blocks", "B", false, "list all available block names")
+	browseCmd.Flags().MarkHidden("list-blocks") // moved to `known` sub-command
 	browseCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data")
 	browseCmd.Flags().IntVarP(&flags.startrune, "from", "f", 0, "show range starting at this value")
 	browseCmd.Flags().IntVarP(&flags.stoprune, "to", "t", 0, "show range ending at this value")
