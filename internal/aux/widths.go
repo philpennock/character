@@ -11,7 +11,13 @@ import (
 )
 
 // We need block info from unicode, which depends upon us.  Bleh.
-var OverrideWidthMSPMin, OverrideWidthMSPMax rune // Miscellaneous Symbols and Pictographs
+// NOTE: this means that testing this requires importing unicode too, so the tests
+// are elsewhere.  Eww.
+var (
+	OverrideWidthMSPMin, OverrideWidthMSPMax             rune // Miscellaneous Symbols and Pictographs
+	OverrideWidthSSPMin, OverrideWidthSSPMax             rune // Supplemental Symbols and Pictographs
+	OverrideWidthEmoticonsMin, OverrideWidthEmoticonsMax rune // Emoticons
+)
 
 // DisplayCellWidth is a best-guess at how many "terminal grid cells" wide a character is
 // The actual calculations are done by the table layer; our preferred table layer
@@ -34,6 +40,10 @@ func DisplayCellWidth(s string) (width int, isOverride bool) {
 	case IsPairCode(r):
 		return 1, true
 	case OverrideWidthMSPMin != 0 && OverrideWidthMSPMin <= r && r <= OverrideWidthMSPMax:
+		fallthrough
+	case OverrideWidthSSPMin != 0 && OverrideWidthSSPMin <= r && r <= OverrideWidthSSPMax:
+		fallthrough
+	case OverrideWidthEmoticonsMin != 0 && OverrideWidthEmoticonsMin <= r && r <= OverrideWidthEmoticonsMax:
 		return 1, true
 	default:
 		return runewidth.StringWidth(s), false

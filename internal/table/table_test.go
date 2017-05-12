@@ -14,6 +14,7 @@ import (
 // Example functions with output in comments?
 func TestBasicTables(t *testing.T) {
 	T := testlib.NewT(t)
+	defer T.Finish()
 	T.Equal(Supported(), true, "table should be supported")
 
 	// beware https://github.com/apcera/termtables/issues/28 and problems rendering twice if have headers.

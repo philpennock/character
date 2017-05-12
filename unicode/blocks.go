@@ -111,4 +111,6 @@ func init() {
 	// but we want width override logic to depend upon some block information.
 	// Suck it up.
 	aux.OverrideWidthMSPMin, aux.OverrideWidthMSPMax, _ = FindBlockById(BlockMiscellaneousSymbolsandPictographs)
+	aux.OverrideWidthSSPMin, aux.OverrideWidthSSPMax, _ = FindBlockById(BlockSupplementalSymbolsandPictographs)
+	aux.OverrideWidthEmoticonsMin, aux.OverrideWidthEmoticonsMax, _ = FindBlockById(BlockEmoticons)
 }

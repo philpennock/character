@@ -13,6 +13,7 @@ import (
 
 func TestFrakturRuneMapping(t *testing.T) {
 	T := testlib.NewT(t)
+	defer T.Finish()
 
 	for _, pair := range []struct{ from, to rune }{
 		{'A', '𝔄'},
