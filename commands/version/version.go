@@ -13,6 +13,10 @@ import (
 	"github.com/philpennock/character/commands/root"
 )
 
+// SourceURL is so that the version command identifies where this came from.
+// It can be overriden at link time, but is not expected to be.
+var SourceURL = "https://github.com/philpennock/character"
+
 // VersionString is expected to be set by the linker during build.
 // If make(1) is used for build, this will happen.
 var VersionString string
@@ -48,6 +52,7 @@ var versionCmd = &cobra.Command{
 				}
 			}
 		}
+		fmt.Printf("%s: Source URL <%s>\n", cmd.Root().Name(), SourceURL)
 	},
 }
 
