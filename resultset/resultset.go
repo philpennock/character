@@ -43,6 +43,8 @@ type printItem uint
 const (
 	PRINT_RUNE printItem = iota
 	PRINT_RUNE_ISOLATED
+	PRINT_RUNE_PRESENT_TEXT
+	PRINT_RUNE_PRESENT_EMOJI
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX     // raw hex
 	PRINT_RUNE_JSON    // surrogate pair in JSON syntax
@@ -63,6 +65,15 @@ const (
 	FIELD_SET_DEFAULT fieldSetSelector = iota
 	FIELD_SET_NET
 	FIELD_SET_DEBUG
+)
+
+// These are used to influence how runes are rendered
+type runeRenderBiasType uint
+
+const (
+	runeRenderUnspecified runeRenderBiasType = iota
+	runeRenderText
+	runeRenderEmoji
 )
 
 type errorItem struct {
@@ -115,18 +126,30 @@ type ResultSet struct {
 	// This is subject to change; do we want fully selectable sets of fields,
 	// just pre-canned, something else?  For now ... let's keep it simple.
 	fields fieldSetSelector
+
+	// runeBias is used by the flags-control in this package, to select
+	// UTS#51 presentation selectors to emit after a character, to try to bias how
+	// it is shown.
+	runeBias runeRenderBiasType
 }
 
 // New creates a ResultSet.
 // We now make ResultSet an exported type, ugh, so this stutters when used.
 // Most usage should never do that.
 func New(s *sources.Sources, sizeHint int) *ResultSet {
-	return &ResultSet{
+	r := &ResultSet{
 		sources: s,
 		items:   make([]charItem, 0, sizeHint),
 		errors:  make([]errorItem, 0, 3),
 		which:   make([]selector, 0, sizeHint),
 	}
+	if ResultCmdFlags.Text {
+		r.runeBias = runeRenderText
+	}
+	if ResultCmdFlags.Emoji {
+		r.runeBias = runeRenderEmoji
+	}
+	return r
 }
 
 // SelectFieldsNet says to use the network fields, not the default fields.
@@ -139,6 +162,21 @@ func (rs *ResultSet) SelectFieldsNet() {
 // This API call is very much subject to change.
 func (rs *ResultSet) SelectFieldsDebug() {
 	rs.fields = FIELD_SET_DEBUG
+}
+
+// RunePrintType returns PRINT_RUNE or one of its variants, appropriate to
+// handle command-line-chosen variant selectors accordingly.
+func (rs *ResultSet) RunePrintType() printItem {
+	switch rs.runeBias {
+	case runeRenderUnspecified:
+		return PRINT_RUNE
+	case runeRenderText:
+		return PRINT_RUNE_PRESENT_TEXT
+	case runeRenderEmoji:
+		return PRINT_RUNE_PRESENT_EMOJI
+	default:
+		panic("unhandled internal runeBias")
+	}
 }
 
 // AddError records, in-sequence, that we got an error at this point.
@@ -265,6 +303,20 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 			// 0x2069, // POP DIRECTIONAL ISOLATE
 			0x202C, // POP DIRECTIONAL FORMATTING
 		)
+	case PRINT_RUNE_PRESENT_TEXT: // text presentation selector, UTS#51 §1.4.3 ED-8
+		s := string(ci.unicode.Number)
+		w, _ := aux.DisplayCellWidth(s)
+		if unicode.Emojiable(ci.unicode.Number) {
+			s = s + "\uFE0E"
+		}
+		return fixedWidthCell{s: s, w: w}
+	case PRINT_RUNE_PRESENT_EMOJI: // emoji presentation selector, UTS#51 §1.4.3 ED-9
+		s := string(ci.unicode.Number)
+		w, _ := aux.DisplayCellWidth(s)
+		if unicode.Emojiable(ci.unicode.Number) {
+			s = s + "\uFE0F"
+		}
+		return fixedWidthCell{s: s, w: w}
 	case PRINT_RUNE_HEX:
 		return strconv.FormatUint(uint64(ci.unicode.Number), 16)
 	case PRINT_RUNE_DEC:
@@ -404,10 +456,19 @@ func (rs *ResultSet) detailsColumnAlignments() []columnAlignments {
 }
 
 func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
+	runeDisplay := PRINT_RUNE // should be PRINT_RUNE_ISOLATED
+	switch rs.runeBias {
+	case runeRenderUnspecified:
+		// no action, want PRINT_RUNE
+	case runeRenderText:
+		runeDisplay = PRINT_RUNE_PRESENT_TEXT
+	case runeRenderEmoji:
+		runeDisplay = PRINT_RUNE_PRESENT_EMOJI
+	}
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
-			rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+			rs.RenderCharInfoItem(ci, runeDisplay),
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC),
@@ -420,7 +481,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
-			rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+			rs.RenderCharInfoItem(ci, runeDisplay),
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC),
@@ -430,7 +491,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 		}
 	case FIELD_SET_DEBUG:
 		return []interface{}{
-			rs.RenderCharInfoItem(ci, PRINT_RUNE), // should be PRINT_RUNE_ISOLATED
+			rs.RenderCharInfoItem(ci, runeDisplay),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_WIDTH),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 			rs.RenderCharInfoItem(ci, PRINT_NAME),

@@ -18,6 +18,8 @@ var ResultCmdFlags struct {
 	Oneline       bool
 	NetVerbose    bool
 	Verbose       bool
+	Emoji         bool
+	Text          bool
 }
 
 // RegisterCmdFlags adds the --verbose/--net-verbose/--internal-debug flags to a Cobra cmd.
@@ -32,6 +34,8 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	cmd.Flags().MarkHidden("internal-debug")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.NetVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Verbose, "verbose", "v", false, "show information about the character")
+	cmd.Flags().BoolVarP(&ResultCmdFlags.Emoji, "emoji-presentation", "E", false, "force emoji presentation")
+	cmd.Flags().BoolVarP(&ResultCmdFlags.Text, "text-presentation", "T", false, "force text presentation")
 }
 
 // CmdVerbose indicates if a documented verbose flag was set; occasionally commands want to know
@@ -68,6 +72,12 @@ func FlagsOkay() error {
 // command-line, or iteration in non-table form, printing the item passed.
 // This is otherwise per-command boilerplate.
 func (rs *ResultSet) RenderPerCmdline(defaultPI printItem) {
+	if ResultCmdFlags.Emoji && defaultPI == PRINT_RUNE {
+		defaultPI = PRINT_RUNE_PRESENT_EMOJI
+	}
+	if ResultCmdFlags.Text && defaultPI == PRINT_RUNE {
+		defaultPI = PRINT_RUNE_PRESENT_TEXT
+	}
 	if ResultCmdFlags.Verbose {
 		rs.PrintTables()
 	} else if ResultCmdFlags.NetVerbose {

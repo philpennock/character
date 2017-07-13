@@ -113,4 +113,5 @@ func init() {
 	aux.OverrideWidthMSPMin, aux.OverrideWidthMSPMax, _ = FindBlockById(BlockMiscellaneousSymbolsandPictographs)
 	aux.OverrideWidthSSPMin, aux.OverrideWidthSSPMax, _ = FindBlockById(BlockSupplementalSymbolsandPictographs)
 	aux.OverrideWidthEmoticonsMin, aux.OverrideWidthEmoticonsMax, _ = FindBlockById(BlockEmoticons)
+	// These are also re-used for Emojiable() in emoji.go
 }

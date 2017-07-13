@@ -99,7 +99,7 @@ var namedCmd = &cobra.Command{
 		}
 
 		if flags.clipboard {
-			err := clipboard.WriteAll(results.StringPlain(resultset.PRINT_RUNE))
+			err := clipboard.WriteAll(results.StringPlain(results.RunePrintType()))
 			if err != nil {
 				root.Errored()
 				results.AddError("<clipboard>", err)
