@@ -193,6 +193,17 @@ setgo-and-build:
 
 shuffle-and-build: perform-shuffle setgo-and-build
 
+show-versions:
+	date
+	uname -a
+	git version
+	go version
+	./.version
+	govendor -version || true
+	# Assume git for everything
+	for DIR in $$(go list -f '{{range .Deps}}{{.}}{{"\n"}}{{end}}' | egrep '^[^/.]+\..*/' | xargs go list -f '{{.Dir}}' | xargs -I {} git -C {} rev-parse --show-toplevel | sort -u); do echo $$DIR; git -C $$DIR describe --always --dirty --tags ; done
+
+
 # Where BSD lets you `make -V VARNAME` to print the value of a variable instead
 # of building a target, this gives GNU make a target `print-VARNAME` to print
 # the value.  I have so missed this when using GNU make.

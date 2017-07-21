@@ -16,10 +16,11 @@ go:
 
 install:
   - go get github.com/hamfist/deppy
-  - go get github.com/liquidgecka/testlib
+  - go get -t -v ./...
   - make depends
 
 script:
+  - make show-versions
   - make all
   - make vet
   - make test
