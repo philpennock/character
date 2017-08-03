@@ -96,7 +96,7 @@ var codeCmd = &cobra.Command{
 						}
 						matches := matchHexPairSeq.FindStringSubmatch(arg)
 						if matches == nil {
-							emsg := "malformed " + string(escapeChar) + "hex sequene"
+							emsg := "malformed " + string(escapeChar) + "hex sequence"
 							deferredErrors = append(deferredErrors, deferredError{arg: arg, err: errors.New(emsg)})
 							arg = ""
 							continue
@@ -173,7 +173,12 @@ func init() {
 }
 
 func findCharInfoByCodepoint(u unicode.Unicode, needle string) (unicode.CharInfo, error) {
-	n32, err := strconv.ParseInt(needle, flags.base.Int(), 32)
+	parseBase := flags.base.Int()
+	if !flags.utf8hex && strings.HasPrefix(needle, "U+") {
+		needle = needle[2:]
+		parseBase = 16
+	}
+	n32, err := strconv.ParseInt(needle, parseBase, 32)
 	if err != nil {
 		return unicode.CharInfo{}, err
 	}
