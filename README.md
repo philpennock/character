@@ -101,6 +101,8 @@ official non-git releases, which _will_ include all dependencies.
 
 Specifics available below, after the Building sub-section
 
+**WARNING: am highly likely to switch vendoring mechanisms over to `go dep`**
+
 
 ### Building
 
@@ -128,6 +130,8 @@ And then build.
 
 ### Deppy
 
+**WARNING: am highly likely to switch vendoring mechanisms over to `go dep`**
+
 Deppy is a simple vendor-locking tool for recording which versions are
 known-good and making it easy to check those back out.  It's a fork from
 `godep`, preserving its original working model.
@@ -151,6 +155,8 @@ use `go build` and accept the loss of version information.
 
 
 ### govendor
+
+**WARNING: am highly likely to switch vendoring mechanisms over to `go dep`**
 
 govendor is a more sophisticated tool for managing locking and vendoring.
 This is the tooling approach used for the `make shuffle-and-build` target.
