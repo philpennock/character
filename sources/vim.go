@@ -79,7 +79,7 @@ func loadVimDigraphs() VimData {
 }
 
 func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
-	approxDigraphCountEstimate := 1000
+	const approxDigraphCountEstimate = 1500
 
 	// Sample: Eu €  8364
 	// value is decimal
@@ -113,8 +113,14 @@ func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
 					broken++
 					continue
 				}
-				theRune, consumes := utf8.DecodeRune(chunk[2])
-				if consumes != len(chunk[2]) {
+				// handle movement controls in newer vim
+				probable := chunk[2]
+				movement := bytes.Index(probable, []byte("\x1b[40;"))
+				if movement > -1 {
+					probable = probable[:movement]
+				}
+				theRune, consumes := utf8.DecodeRune(probable)
+				if consumes != len(probable) {
 					// We don't care about ^A or <80> or other such entries, only entire runes on their own
 					continue
 				}
