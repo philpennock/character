@@ -15,6 +15,7 @@ import (
 
 var ResultCmdFlags struct {
 	internalDebug bool
+	JSON          bool
 	Oneline       bool
 	NetVerbose    bool
 	Verbose       bool
@@ -32,6 +33,7 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	}
 	cmd.Flags().BoolVarP(&ResultCmdFlags.internalDebug, "internal-debug", "", false, "")
 	cmd.Flags().MarkHidden("internal-debug")
+	cmd.Flags().BoolVarP(&ResultCmdFlags.JSON, "json", "J", false, "show JSON output")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.NetVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Verbose, "verbose", "v", false, "show information about the character")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Emoji, "emoji-presentation", "E", false, "force emoji presentation")
@@ -62,6 +64,9 @@ func FlagsOkay() error {
 	if ResultCmdFlags.Oneline {
 		c++
 	}
+	if ResultCmdFlags.JSON {
+		c++
+	}
 	if c > 1 {
 		return ErrIncompatibleFlags
 	}
@@ -88,6 +93,8 @@ func (rs *ResultSet) RenderPerCmdline(defaultPI printItem) {
 		rs.PrintTables()
 	} else if ResultCmdFlags.Oneline {
 		fmt.Println(rs.StringPlain(defaultPI))
+	} else if ResultCmdFlags.JSON {
+		rs.PrintJSON()
 	} else {
 		rs.PrintPlain(defaultPI)
 	}

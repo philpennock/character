@@ -5,6 +5,7 @@
 package resultset
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -375,6 +376,116 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 	default:
 		panic(fmt.Sprintf("unhandled item to print: %v", what))
 	}
+}
+
+// JItem is how a character is represented in JSON output.
+type JItem struct {
+	Display      string   `json:"display"`
+	DisplayText  string   `json:"displayText"`
+	DisplayEmoji string   `json:"displayEmoji"`
+	Name         string   `json:"name"`
+	Hex          string   `json:"hex"`
+	Dec          string   `json:"decimal"`
+	Block        string   `json:"block"`
+	VIMDigraphs  []string `json:"vimDigraphs,omitempty"`
+	HTMLEntities []string `json:"htmlEntities,omitempty"`
+	XMLEntities  []string `json:"xmlEntities,omitempty"`
+	UTF8         string   `json:"utf8"`
+	JSONEscape   string   `json:"jsonEscape"`
+	Puny         string   `json:"puny"`
+	PartOf       string   `json:"part-of,omitempty"`
+}
+
+// JInfo is something which might be shown instead of JItem.
+type JInfo struct {
+	Comment string `json:"comment"`
+}
+
+// S converts to a string, for JSON
+func S(x interface{}) string {
+	switch s := x.(type) {
+	case string:
+		return s
+	case fixedWidthCell:
+		return s.s
+	case fmt.Stringer:
+		return s.String()
+	default:
+		return ""
+	}
+}
+
+// JSONEntry constructs a probably-JItem struct for JSON rendering of a character.
+func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
+	html, _ := entities.HTMLEntitiesReverse[ci.unicode.Number]
+	xml, _ := entities.XMLEntitiesReverse[ci.unicode.Number]
+
+	if ci.unicode.Number == 0 && ci.unicode.Name != "" {
+		return &JInfo{Comment: ci.unicode.Name}
+	}
+
+	return &JItem{
+		Display:      S(rs.RenderCharInfoItem(ci, PRINT_RUNE)),
+		DisplayText:  S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_TEXT)),
+		DisplayEmoji: S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_EMOJI)),
+		Name:         S(rs.RenderCharInfoItem(ci, PRINT_NAME)),
+		Hex:          S(rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX)),
+		Dec:          S(rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC)),
+		Block:        S(rs.RenderCharInfoItem(ci, PRINT_BLOCK)),
+		VIMDigraphs:  rs.sources.Vim.DigraphsSliceFor(ci.unicode.Number),
+		HTMLEntities: html,
+		XMLEntities:  xml,
+		UTF8:         S(rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC)),
+		JSONEscape:   S(rs.RenderCharInfoItem(ci, PRINT_RUNE_JSON)),
+		Puny:         S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY)),
+		PartOf:       S(rs.RenderCharInfoItem(ci, PRINT_PART_OF)),
+	}
+}
+
+// PrintJSON shows everything we know about each result, in JSON.
+// Rather than array of char/div/error, we have two top-level arrays
+// of results and a divider is represented by a nil item.  Not sure
+// how friendly that is for arbitrary input, but it helps with syncing I think
+// (but errors inline might help more).
+func (rs *ResultSet) PrintJSON() {
+	rs.fixStreams()
+	type JError struct {
+		Input string `json:"input"`
+		Error string `json:"error"`
+	}
+	var output struct {
+		Characters []interface{} `json:"characters,omitempty"`
+		Errors     []JError      `json:"errors,omitempty"`
+	}
+	if len(rs.items) > 0 {
+		output.Characters = make([]interface{}, 0, len(rs.items))
+		ii := 0
+		for _, s := range rs.which {
+			switch s {
+			case _ITEM:
+				output.Characters = append(output.Characters, rs.JSONEntry(rs.items[ii]))
+				ii++
+			case _ERROR:
+				// skip, handled below
+			case _DIVIDER:
+				output.Characters = append(output.Characters, nil)
+			}
+		}
+	}
+	if len(rs.errors) > 0 {
+		output.Errors = make([]JError, 0, len(rs.errors))
+		for _, ei := range rs.errors {
+			output.Errors = append(output.Errors, JError{ei.input, ei.err.Error()})
+		}
+	}
+
+	b, err := json.MarshalIndent(&output, "", "  ")
+	if err != nil {
+		fmt.Fprintln(rs.ErrorStream, err)
+		return
+	}
+	rs.OutputStream.Write(b)
+	rs.OutputStream.Write([]byte{'\n'})
 }
 
 // PrintTables provides much more verbose details about the contents of

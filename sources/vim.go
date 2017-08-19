@@ -148,9 +148,16 @@ func loadStaticVimDigraphs() VimData {
 // DigraphsFor retrieves a string which is a space-separated list of the known
 // digraph sequences which will produce a given rune.
 func (v VimData) DigraphsFor(r rune) string {
+	return strings.Join(v.DigraphsSliceFor(r), " ")
+}
+
+// DigraphsSliceFor returns the same as DigraphsFor but without space-joining.
+// Just in case someone uses a space as part of a digraph sequence, we don't
+// split on space for the one case where we want this.
+func (v VimData) DigraphsSliceFor(r rune) []string {
 	items, ok := v.DigraphByRune[r]
 	if !ok {
-		return ""
+		return nil
 	}
 	entries := make([]string, 0, len(items))
 	uniq := make(map[string]struct{}, len(items))
@@ -163,5 +170,5 @@ func (v VimData) DigraphsFor(r rune) string {
 		uniq[digraph.Sequence] = struct{}{}
 	}
 	sort.Strings(entries)
-	return strings.Join(entries, " ")
+	return entries
 }
