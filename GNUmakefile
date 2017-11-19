@@ -18,7 +18,12 @@ endif
 # Set this via the cmdline to change the tables backend
 TABLES=		tabular
 
-SOURCES=	$(shell find . -name vendor -prune -o -type f -name '*.go')
+# http://blog.jgc.org/2011/07/gnu-make-recursive-wildcard-function.html
+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+# mine:
+rwildnovendor=$(filter-out vendor/%,$(call rwildcard,$1,$2))
+
+SOURCES=	$(call rwildnovendor,,*.go)
 TOP_SOURCE=	main.go
 BINARIES=	character
 CRUFT=		dependency-graph.png
