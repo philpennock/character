@@ -58,15 +58,13 @@ func TestBasicTables(t *testing.T) {
 	tb.AddRow("snerty", "word", 3)
 	T.Equal(tb.Render(), should, "basic table with separator added")
 
-	// FIXME:
-	// 1. make alignment actually work
 	tb = New()
 	should = "" +
 		"┏━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━┓\n" +
-		"┃ foo    ┃ loquacious ┃ x        ┃\n" +
+		"┃ foo    ┃ loquacious ┃        x ┃\n" +
 		"┣━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━┫\n" +
 		"┃ 42     │ .          │ frederic ┃\n" +
-		"┃ snerty │ word       │ 3        ┃\n" + // FIXME: this is wrong
+		"┃ snerty │ word       │        3 ┃\n" +
 		"┗━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━━━┛\n" +
 		""
 	tb.AddHeaders("foo", "loquacious", "x")
