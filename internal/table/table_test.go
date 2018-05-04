@@ -53,6 +53,7 @@ func TestBasicTables(t *testing.T) {
 		"┗━━━━━━━━┷━━━━━━━━━━━━┷━━━━━━━━━━┛\n" +
 		""
 	tb.AddHeaders("foo", "loquacious", "x")
+	tb.SetSkipableColumn(2)
 	tb.AddRow(42, ".", "frederic")
 	tb.AddSeparator()
 	tb.AddRow("snerty", "word", 3)

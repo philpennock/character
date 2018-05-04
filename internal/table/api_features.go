@@ -11,7 +11,8 @@ type Alignment int
 // These constants define how a given column of the table should have each
 // cell aligned.
 const (
-	LEFT Alignment = iota
+	UNSET Alignment = iota
+	LEFT
 	CENTER
 	RIGHT
 )

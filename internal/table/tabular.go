@@ -16,8 +16,9 @@ namespace.
 package table
 
 import (
-	"go.pennock.tech/tabular/align"
 	tb "go.pennock.tech/tabular/auto"
+	"go.pennock.tech/tabular/properties"
+	"go.pennock.tech/tabular/properties/align"
 )
 
 // Supported indicates that we have a terminal table provider loaded.
@@ -86,6 +87,12 @@ func (t *Table) AlignColumn(column int, ourAlign Alignment) {
 		how = align.Right
 	}
 	t.t.Column(column).SetProperty(align.PropertyType, how)
+}
+
+// SetSkipableColumn sets a column as skipable in some contexts (typically if
+// every entry is empty).
+func (t *Table) SetSkipableColumn(column int) {
+	t.t.Column(column).SetProperty(properties.Skipable, true)
 }
 
 // We support styles.
