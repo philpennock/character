@@ -53,12 +53,18 @@ else ifeq ($(TABLES),tablewriter)
 BUILD_TAGS+= tablewriter
 else ifeq ($(TABLES),tabular)
 BUILD_TAGS+= tabular
-ifneq "$(wildcard vendor/go.pennock.tech/tabular )" ""
-TABULAR_DIR=vendor/go.pennock.tech/tabular
+TABULAR_PKG:=go.pennock.tech/tabular
+ifneq "$(wildcard vendor/$(TABULAR_PKG) )" ""
+TABULAR_DIR=vendor/$(TABULAR_PKG)
+TABULAR_VERSION_VAR=$(REPO_PATH)/$(TABULAR_DIR).LinkerSpecifiedVersion
+# dep removes the git metadata we want
+TABULAR_VERSION_VALUE=$(shell dep status -f '{{if eq .ProjectRoot "go.pennock.tech/tabular"}}{{.Version}}{{end}}')
 else
-TABULAR_DIR=../../../go.pennock.tech/tabular
+TABULAR_DIR=../../../$(TABULAR_PKG)
+TABULAR_VERSION_VAR=$(TABULAR_PKG).LinkerSpecifiedVersion
+TABULAR_VERSION_VALUE=$(shell $(TABULAR_DIR)/.version)
 endif
-GO_LDFLAGS+= -X go.pennock.tech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
+GO_LDFLAGS+= -X $(TABULAR_VERSION_VAR)=$(TABULAR_VERSION_VALUE)
 endif
 
 .PHONY : all install help devhelp short_help cleaninstall \
@@ -91,7 +97,7 @@ devhelp:
 	@echo " 'lint': golint"
 	@echo " 'test': go test, unit-tests"
 
-$(BINARIES): $(TOP_SOURCE) $(SOURCES) dep
+$(BINARIES): $(TOP_SOURCE) $(SOURCES)
 ifeq ($(REPO_VERSION),)
 	@echo "Missing a REPO_VERSION"
 	@false
