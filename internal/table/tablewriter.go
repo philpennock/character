@@ -104,7 +104,13 @@ func (t *Table) Render() string {
 // columns starting from 1.  In this implementation, it has no effect because
 // tablewriter only supports per-table, not per-column, alignments.
 func (t *Table) AlignColumn(column int, align Alignment) {
-	// IGNORED bec
+	// IGNORED
 	_ = column
 	_ = align
+}
+
+// SetSkipableColumn sets a column as skipable in some contexts (typically if
+// every entry is empty).  In this implementation, it is ignored.
+func (t *Table) SetSkipableColumn(column int) {
+	_ = column
 }

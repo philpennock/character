@@ -15,6 +15,7 @@ import (
 
 var globalFlags struct {
 	profileCPUFile string
+	version        bool
 }
 
 var characterCmd = &cobra.Command{
@@ -35,6 +36,13 @@ var characterCmd = &cobra.Command{
 			pprof.StopCPUProfile()
 		}
 	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if globalFlags.version {
+			cmd.SetArgs([]string{"version"})
+			return cmd.Execute()
+		}
+		return fmt.Errorf("need a sub-command")
+	},
 }
 
 func init() {
@@ -48,6 +56,7 @@ func init() {
 	// for any init()-flag-setting there too.
 	flagSet := characterCmd.PersistentFlags()
 	flagSet.StringVar(&globalFlags.profileCPUFile, "profile-cpu-file", "", "write CPU profile to file")
+	flagSet.BoolVar(&globalFlags.version, "version", false, "alias for version sub-command")
 	characterCmd.MarkFlagFilename("profile-cpu-file")
 }
 

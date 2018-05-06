@@ -447,6 +447,9 @@ func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
 // of results and a divider is represented by a nil item.  Not sure
 // how friendly that is for arbitrary input, but it helps with syncing I think
 // (but errors inline might help more).
+//
+// Note that this is distinct from using a JSON table renderer for the normal
+// tables and is instead emitting completely different output.
 func (rs *ResultSet) PrintJSON() {
 	rs.fixStreams()
 	type JError struct {
@@ -507,8 +510,13 @@ func (rs *ResultSet) PrintTables() {
 				t.AddSeparator()
 			}
 		}
-		for _, align := range rs.detailsColumnAlignments() {
-			t.AlignColumn(align.column, align.where)
+		for _, props := range rs.detailsColumnProperties() {
+			if props.align != table.UNSET {
+				t.AlignColumn(props.column, props.align)
+			}
+			if props.skipable {
+				t.SetSkipableColumn(props.column)
+			}
 		}
 		fmt.Fprint(rs.OutputStream, t.Render())
 	}
@@ -540,27 +548,32 @@ func (rs *ResultSet) detailsHeaders() []interface{} {
 	return nil
 }
 
-type columnAlignments struct {
-	column int // 1-based
-	where  table.Alignment
+type columnProperties struct {
+	column   int // 1-based
+	align    table.Alignment
+	skipable bool
 }
 
-func (rs *ResultSet) detailsColumnAlignments() []columnAlignments {
+func (rs *ResultSet) detailsColumnProperties() []columnProperties {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
-		return []columnAlignments{
-			{3, table.RIGHT}, // Hex
-			{4, table.RIGHT}, // Dec
-			{5, table.RIGHT}, // Block??
+		return []columnProperties{
+			{3, table.RIGHT, false}, // Hex
+			{4, table.RIGHT, false}, // Dec
+			{6, table.UNSET, true},  // Vim
+			{7, table.UNSET, true},  // HTML
+			{8, table.UNSET, true},  // XML
+			{9, table.UNSET, true},  // Of
 		}
 	case FIELD_SET_NET:
-		return []columnAlignments{
-			{3, table.RIGHT}, // Hex
-			{4, table.RIGHT}, // Dec
+		return []columnProperties{
+			{3, table.RIGHT, false}, // Hex
+			{4, table.RIGHT, false}, // Dec
+			{7, table.UNSET, true},  // Of
 		}
 	case FIELD_SET_DEBUG:
-		return []columnAlignments{
-			{3, table.RIGHT}, // Hex
+		return []columnProperties{
+			{3, table.RIGHT, false}, // Hex
 		}
 	}
 	return nil

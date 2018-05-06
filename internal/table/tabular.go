@@ -12,15 +12,13 @@ This implementation uses tabular for layout.
 
 With the more modern Golang features, this should probably be in /internal/
 namespace.
-
-Known current limitations:
-
-* No columnar alignment
 */
 package table
 
 import (
 	tb "go.pennock.tech/tabular/auto"
+	"go.pennock.tech/tabular/properties"
+	"go.pennock.tech/tabular/properties/align"
 )
 
 // Supported indicates that we have a terminal table provider loaded.
@@ -77,12 +75,24 @@ func (t *Table) Render() string {
 }
 
 // AlignColumn sets the alignment of one column in a given table.  It counts
-// columns starting from 1.  In this implementation, it has no effect because
-// tabular doesn't yet support alignment.
-func (t *Table) AlignColumn(column int, align Alignment) {
-	// IGNORED
-	_ = column
-	_ = align
+// columns starting from 1.
+func (t *Table) AlignColumn(column int, ourAlign Alignment) {
+	var how align.Alignment
+	switch ourAlign {
+	case LEFT:
+		how = align.Left
+	case CENTER:
+		how = align.Center
+	case RIGHT:
+		how = align.Right
+	}
+	t.t.Column(column).SetProperty(align.PropertyType, how)
+}
+
+// SetSkipableColumn sets a column as skipable in some contexts (typically if
+// every entry is empty).
+func (t *Table) SetSkipableColumn(column int) {
+	t.t.Column(column).SetProperty(properties.Skipable, true)
 }
 
 // We support styles.

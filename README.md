@@ -57,34 +57,24 @@ problems, please try one of the vendored library mechanisms listed below
 instead.
 
 So `go get github.com/philpennock/character` should download and install the
-tool into the `bin` dir inside the first directory listed in `$GOPATH`.
+tool into the `bin` dir inside the first directory listed in `$GOPATH`, which
+defaults to being `$HOME/go`.
+
+With no Go environment variables set, that go command should thus give you an
+output executable at `$HOME/go/bin/character`.
 
 
 ### GOPATH avoidance
 
-*For non-Go-programmers*:
-If you just `git clone` this repository and don't want to learn about the
-`GOPATH` and don't want to set up a new global one, then run:
+At present, we require that the code be checked out "correctly", per Go, which
+probably means (if you've not set Go-specific environment variables, etc) that
+it should be checked out into `~/go/src/github.com/philpennock/character/`.
 
-```console
-$ make shuffle-and-build
-```
+We had some shuffle logic, I've removed it.  If this affects you, please open
+an issue.
 
-*BEWARE* that this will move this directory, to be inside a child tree.
-Also this uses the otherwise-optional `make` system, on the assumption that
-this is okay for people who use Git but not Golang.  Note that GNU make
-is required.
-
-This target will:
-
-1. Make a `go` directory as a sibling to the current directory, move the
-   current directory into the correct place in the tree relative to that `go`
-   dir and use that dir as the `GOPATH` for other tooling
-2. Fetch and install `govendor` if not already available
-3. Invoke `govendor` to sync the dependencies into the `vendor/` directory
-4. Build `character`, leaving the binary in the now-current directory
-
-Remember to `cd "$(pwd)"` afterwards.
+My intention is to move to Go's new workspace system, when that's published,
+which gets rid of the need for `GOPATH`, as this is an end tool.
 
 
 ### Dependencies and vendoring.
@@ -100,8 +90,6 @@ code briefly harder to compile.  Reproducible builds are only guaranteed for
 official non-git releases, which _will_ include all dependencies.
 
 Specifics available below, after the Building sub-section
-
-**WARNING: am highly likely to switch vendoring mechanisms over to `go dep`**
 
 
 ### Building
@@ -128,47 +116,21 @@ $ go get -v
 And then build.
 
 
-### Deppy
+### godep
 
-**WARNING: am highly likely to switch vendoring mechanisms over to `go dep`**
+`dep` is a vendor-locking tool which uses human directives in `Gopkg.toml` to
+let the maintainer update known versions in the tooling file `Gopkg.lock`,
+which is used to check out content and make it available in the `vendor`
+directory.
 
-Deppy is a simple vendor-locking tool for recording which versions are
-known-good and making it easy to check those back out.  It's a fork from
-`godep`, preserving its original working model.
-Deppy plays well with Travis CI.
-
-The `Deps` file used by `deppy` should be considered to be akin to a
-`foo.lock` file in Ruby's ecosystem, but where the required files are not
-listed in `foo` but instead taken straight from the imports of the Go code.
-
-Assuming that this repository is checked out into
-`src/github.com/philpennnock/character` relative to an entry in your `$GOPATH`
-list of directories:
+Note that `dep ensure` checks out the repositories in a common area,
+`~/go/pkg/dep/sources` (or elsewhere with `$GOPATH` set) and copies in the
+specific files for this revision.  Thus there will be no git/mercurial
+repository data within the vendor tree.
 
 ```console
-$ go get github.com/hamfist/deppy
-$ deppy restore
-```
-
-That should work for most people; assumes GNU make.  Without `make`, just
-use `go build` and accept the loss of version information.
-
-
-### govendor
-
-**WARNING: am highly likely to switch vendoring mechanisms over to `go dep`**
-
-govendor is a more sophisticated tool for managing locking and vendoring.
-This is the tooling approach used for the `make shuffle-and-build` target.
-
-```console
-$ go get -v github.com/kardianos/govendor
-
-  ... AND THEN ONE OF: ...
-
-$ make gvsync
-  OR
-$ govendor sync +vendor +missing
+$ dep ensure
+$ make || go build
 ```
 
 
@@ -185,6 +147,18 @@ provenance than having to hunt around for another clone of a dependency which
 does at least match the available checksums.
 
 
+Table packages
+--------------
+
+Rendering content to tables requires a table package.  We default to my own
+package, `go.pennock.tech/tabular`.  We originally used
+`github.com/apcera/termtables` and briefly tried
+`github.com/olekukonko/tablewriter` before switching to writing my own.
+
+You can use Go build tags to switch the table package used.  I might remove
+support for this in the future.
+
+
 Optional Tools
 --------------
 
@@ -195,8 +169,4 @@ might.
    Dependency graphing tool
 * `go get -v github.com/golang/lint/golint`  
   Linter for Go
-* `go get -v github.com/hamfist/deppy`  
-  Dependency version manager; one choice
-* `go get -v github.com/kardianos/govendor`  
-  Dependency version manager; another choice
 

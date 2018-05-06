@@ -5,19 +5,17 @@ language: go
 sudo: false
 
 go:
-  - 1.8.1
-  - 1.7.5
-  - 1.6
+  - 1.10.x
+  - 1.9.x
 # 2016-03-14: removed `tip` ∵ `go vet` on Travis throwing false errors,
 # complaining about missing format strings where they're most definitely
 # present.
 
-# Need deppy to support test dependencies too, to lock testlib
-
 install:
-  - go get github.com/hamfist/deppy
-  - go get -t -v ./...
-  - make depends
+  # This is evil and wrong, but it's a container managed by Travis, and this is testing,
+  # not CI which generates artifacts which we deploy, so can't leak out:
+  - dep version || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - make dep
 
 script:
   - make show-versions

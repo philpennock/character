@@ -2,12 +2,11 @@
 # tasks; basic installation should _always_ be `go build` compatible.
 #
 # If need to support non-GNU make too, use a Makefile.common file and move
-# logic around as needed.
+# logic around as needed.  Although at this point I'm inclined to nuke the
+# makefile entirely.
 
 # Use CANONICAL_CHARACTER_REPO in environ to override where this is checked out
 # You'll probably also need to bulk-edit the Go src.
-# The GOPATH-less shuffle logic will get upset at you if you fork to a new repo
-# and don't set this environment variable.
 
 ifdef CANONICAL_CHARACTER_REPO
 REPO_PATH=	$(CANONICAL_CHARACTER_REPO)
@@ -62,9 +61,9 @@ endif
 GO_LDFLAGS+= -X go.pennock.tech/tabular.LinkerSpecifiedVersion=$(shell $(TABULAR_DIR)/.version)
 endif
 
-.PHONY : all install help devhelp short_help cleaninstall gvsync depends \
-	dependsgraph vet lint \
-	perform-shuffle check-no-GOPATH shuffle-and-build setgo-and-build
+.PHONY : all install help devhelp short_help cleaninstall \
+	dep dependsgraph vet lint \
+	check-no-GOPATH
 .DEFAULT_GOAL := helpful_all
 
 # first build target references hint to extra help
@@ -80,9 +79,7 @@ help:
 	@echo "The following targets are available:"
 	@echo " 'all': make all programs"
 	@echo " 'install': install, currently just program, via go install"
-	@echo " 'gvsync': fetch dependencies at locked versions (govendor)"
-	@echo " 'depends': fetch dependencies at locked versions (deppy)"
-	@echo " 'shuffle-and-build': build without a GOPATH setup"
+	@echo " 'dep': fetch dependencies at locked versions (go dep)"
 	@echo " 'help': you're looking at it"
 	@echo " 'clean': remove outputs in source dir"
 	@echo " 'cleaninstall': try to remove installed locations"
@@ -93,10 +90,8 @@ devhelp:
 	@echo " 'vet': go vet"
 	@echo " 'lint': golint"
 	@echo " 'test': go test, unit-tests"
-	@echo " 'gopathupdate': update dependencies in non-vendored GOPATH"
-	@echo " 'depsync': sync various dependency files"
 
-$(BINARIES): $(TOP_SOURCE) $(SOURCES)
+$(BINARIES): $(TOP_SOURCE) $(SOURCES) dep
 ifeq ($(REPO_VERSION),)
 	@echo "Missing a REPO_VERSION"
 	@false
@@ -113,11 +108,8 @@ endif
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
 	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "$(GO_LDFLAGS)" -v $(REPO_PATH)
 
-gvsync:
-	govendor sync +vendor +missing
-
-depends:
-	deppy restore
+dep:
+	dep ensure
 
 dependsgraph: dependency-graph.png
 ifeq ($(PLATFORM),Darwin)
@@ -160,43 +152,17 @@ else
 	@false
 endif
 
-# govendor has nicer tooling, let's treat that as authoritative
+vendor: Gopkg.lock
+	dep ensure
 
-depsync: LICENSES_all.txt Deps
-	@true
-
-LICENSES_all.txt: LICENSE.txt vendor/vendor.json
-	@# `govendor license` picks up the empty (freshly-truncated) file. If
-	@# not truncated, would recurse. So just nuke the file before generation
-	@# and ensure during-generation the filename doesn't match license-based
-	@# naming
-	rm -f ./LICENSES_all.txt
-	govendor license > ./tmplic
-	mv ./tmplic ./LICENSES_all.txt
-
-Deps: vendor/vendor.json
-	mv vendor vendor.-
-	deppy save
-	mv vendor.- vendor
-
-vendor/vendor.json: $(SOURCES)
-	govendor update +vendor
-
-gopathupdate:
-	mv vendor vendor.-
-	go get -d -u -v
-	mv vendor.- vendor
+LICENSES_all.txt: LICENSE.txt Gopkg.lock vendor
+	rm -f ./LICENSES_all.txt tmplicpart tmplic
+	for DIR in $$(dep status -f '{{.ProjectRoot}}{{"\n"}}'); do ( cd "vendor/$$DIR"; for F in NOTICE* LICEN[SC]E* PATENTS; do test -s "$$F" || continue; echo "~~~ $$F - $$DIR ~~~"; cat "./$$F"; done; ) > tmplicpart ; test -s tmplicpart || continue; echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; cat tmplicpart; echo; done > tmplic
+	( echo "~~~ $(REPO_PATH) ~~~"; cat LICENSE.txt tmplic ; ) > ./LICENSES_all.txt
+	@rm -f tmplicpart tmplic
 
 check-no-GOPATH:
 	@if test -n "$(GOPATH)"; then echo >&2 "make: GOPATH is set, can't use this target"; exit 1; fi
-
-perform-shuffle: check-no-GOPATH
-	sh -x ./.shuffle-gopath
-
-setgo-and-build:
-	sh ./.shuffle-env-run make gvsync all
-
-shuffle-and-build: perform-shuffle setgo-and-build
 
 show-versions:
 	date
@@ -204,10 +170,7 @@ show-versions:
 	git version
 	go version
 	./.version
-	govendor -version || true
-	# Assume git for everything
-	for DIR in $$(go list -f '{{range .Deps}}{{.}}{{"\n"}}{{end}}' | egrep '^[^/.]+\..*/' | xargs go list -f '{{.Dir}}' | xargs -I {} git -C {} rev-parse --show-toplevel | sort -u); do echo $$DIR; git -C $$DIR describe --always --dirty --tags ; done
-
+	dep status
 
 # Where BSD lets you `make -V VARNAME` to print the value of a variable instead
 # of building a target, this gives GNU make a target `print-VARNAME` to print

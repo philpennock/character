@@ -73,3 +73,9 @@ func (t *Table) AlignColumn(column int, align Alignment) {
 		panic("unhandled column alignment")
 	}
 }
+
+// SetSkipableColumn sets a column as skipable in some contexts (typically if
+// every entry is empty).  In this implementation, it is ignored.
+func (t *Table) SetSkipableColumn(column int) {
+	_ = column
+}
