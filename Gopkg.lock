@@ -3,68 +3,89 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:f06367e46fad737b4eabdd21093ade373557a6ad34fbea3a845576c84712caa4"
   name = "github.com/apcera/termtables"
   packages = [
     ".",
-    "term"
+    "term",
   ]
+  pruneopts = "UT"
   revision = "bcbc5dc54055d14996b256d348fb75cc6debe282"
 
 [[projects]]
   branch = "master"
+  digest = "1:a011ba1af23f931b2935da0eef5566f8744fcc77e65f9479bff2a56e1a45a744"
   name = "github.com/argusdusty/Ferret"
   packages = ["."]
+  pruneopts = "UT"
   revision = "02a5189c6f9eb01b7f0b278bd26a99f7c871cc80"
 
 [[projects]]
   branch = "master"
+  digest = "1:dd1417c60900a2be6d1653e90306614657761fc9c3066eccc558ae432b31aa60"
   name = "github.com/atotto/clipboard"
   packages = ["."]
+  pruneopts = "UT"
   revision = "5e2c7bddca04488284428a201e4a15615f7a5074"
 
 [[projects]]
+  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
+  pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:c2c0d13925bea841b72cc3ea6675b22fb469d0e67fba2f9e6282bf08761f6b2e"
   name = "github.com/kisielk/godepgraph"
   packages = ["."]
+  pruneopts = "UT"
   revision = "d8ba729f24e071b660e74d8176a63f87224d6746"
 
 [[projects]]
   branch = "master"
+  digest = "1:4334fcee980bd1faefc3775cde866c0e61fd24a98d3a4b3966b47344da51030a"
   name = "github.com/liquidgecka/testlib"
   packages = ["."]
+  pruneopts = "UT"
   revision = "561e6b271c638ea95c75ab7be0f38d1f48d60910"
 
 [[projects]]
+  digest = "1:e2d1d410fb367567c2b53ed9e2d719d3c1f0891397bb2fa49afd747cfbf1e8e4"
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
+  pruneopts = "UT"
   revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
   version = "v0.0.2"
 
 [[projects]]
   branch = "master"
+  digest = "1:9bb0d1774266ec2e824a89b126fae80464dc58ac72929ac907185860a25f5eff"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
+  pruneopts = "UT"
   revision = "d5dd8a50526aadb3d5f2c9b5233277bc2db90e88"
 
 [[projects]]
+  digest = "1:982714fa3eaafd4251f5ccf3d133b706ad742b86c195d594e1a86050a02f87a8"
   name = "github.com/spf13/cobra"
   packages = ["."]
+  pruneopts = "UT"
   revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
   version = "v0.0.2"
 
 [[projects]]
+  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
   name = "github.com/spf13/pflag"
   packages = ["."]
+  pruneopts = "UT"
   revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:0d96083a7da6d5e0d7afbc28bcffe2bc8da63a318d2dc1fc679c46caf7fa774e"
   name = "go.pennock.tech/tabular"
   packages = [
     ".",
@@ -77,18 +98,22 @@
     "properties",
     "properties/align",
     "texttable",
-    "texttable/decoration"
+    "texttable/decoration",
   ]
+  pruneopts = "UT"
   revision = "6625cb299db708fb7e803efaf98d3f1793cd0d5a"
   version = "v1.1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:82491a0790e0945762096c875e2e14932a5d7b37a7ce3e83ef3b50437a71e09a"
   name = "golang.org/x/net"
   packages = ["idna"]
+  pruneopts = "UT"
   revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
 
 [[projects]]
+  digest = "1:025ed02c882eae827eb5700efbd1a138bcb0927947485a43ff50057695d6fc7e"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -111,14 +136,36 @@
     "unicode/bidi",
     "unicode/cldr",
     "unicode/norm",
-    "unicode/rangetable"
+    "unicode/rangetable",
   ]
+  pruneopts = "UT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b7da1528f4b15e67bcc5291fff44d9145a3f21edc7f42b6ad36def7df6ffe666"
+  input-imports = [
+    "github.com/apcera/termtables",
+    "github.com/argusdusty/Ferret",
+    "github.com/atotto/clipboard",
+    "github.com/kisielk/godepgraph",
+    "github.com/liquidgecka/testlib",
+    "github.com/mattn/go-runewidth",
+    "github.com/olekukonko/tablewriter",
+    "github.com/spf13/cobra",
+    "github.com/spf13/pflag",
+    "go.pennock.tech/tabular",
+    "go.pennock.tech/tabular/auto",
+    "go.pennock.tech/tabular/properties",
+    "go.pennock.tech/tabular/properties/align",
+    "golang.org/x/net/idna",
+    "golang.org/x/text/encoding",
+    "golang.org/x/text/encoding/japanese",
+    "golang.org/x/text/encoding/korean",
+    "golang.org/x/text/encoding/simplifiedchinese",
+    "golang.org/x/text/encoding/traditionalchinese",
+    "golang.org/x/text/unicode/norm",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
