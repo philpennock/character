@@ -88,12 +88,14 @@ var emojiable = map[rune]struct{}{
 	9809:   struct{}{},
 	9810:   struct{}{},
 	9811:   struct{}{},
+	9823:   struct{}{},
 	9824:   struct{}{},
 	9827:   struct{}{},
 	9829:   struct{}{},
 	9830:   struct{}{},
 	9832:   struct{}{},
 	9851:   struct{}{},
+	9854:   struct{}{},
 	9855:   struct{}{},
 	9874:   struct{}{},
 	9875:   struct{}{},
@@ -356,4 +358,4 @@ var emojiable = map[rune]struct{}{
 	128755: struct{}{},
 }
 
-const emojiableTotalCount = 351
+const emojiableTotalCount = 353
