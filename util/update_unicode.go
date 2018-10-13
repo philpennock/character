@@ -1,4 +1,4 @@
-// Copyright © 2017 Phil Pennock.
+// Copyright © 2017,2018 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -377,10 +377,17 @@ ReadLoop:
 			continue
 		}
 
-		fields := bytes.FieldsFunc(line, func(r rune) bool { return r == ';' })
+		// nb: FieldsFunc collapses sequences of the separator and elides them
+		// we want the simpler hard-delimiter split
+		fields := bytes.Split(line, []byte{';'})
 
 		r := aux.RuneFromHexField(fields[0])
 		name := string(fields[1])
+		if name == "<control>" {
+			if len(fields) >= 11 && len(fields[10]) > 0 {
+				name += " [" + string(fields[10]) + "]"
+			}
+		}
 		ci := unicode.CharInfo{
 			Number: r,
 			Name:   name,
