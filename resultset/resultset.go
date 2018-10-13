@@ -46,6 +46,7 @@ const (
 	PRINT_RUNE_ISOLATED
 	PRINT_RUNE_PRESENT_TEXT
 	PRINT_RUNE_PRESENT_EMOJI
+	PRINT_RUNE__RENDERERS // items before this render the rune itself
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX     // raw hex
 	PRINT_RUNE_JSON    // surrogate pair in JSON syntax
@@ -283,10 +284,21 @@ func (rs *ResultSet) LenItemCount() int {
 
 // RenderCharInfoItem converts a charItem and an attribute selector into a string or Stringer
 func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{} {
-	// we use 0 as a special-case for things like combinations, where there's only a name
+	// Exceptional cases first:
+	//
+	// We use 0 as a special-case for things like combinations, where there's only a name:
 	if ci.unicode.Number == 0 && what != PRINT_NAME {
 		return " "
 	}
+	// Some other substitutions:
+	if what < PRINT_RUNE__RENDERERS && !strconv.IsGraphic(ci.unicode.Number) {
+		switch {
+		case ci.unicode.Number < 0x20:
+			return string(rune(0x2400 + ci.unicode.Number)) // 'Control Pictures' block
+		}
+	}
+
+	// Normal handling:
 	switch what {
 	case PRINT_RUNE:
 		s := string(ci.unicode.Number)
