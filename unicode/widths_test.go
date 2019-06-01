@@ -9,6 +9,7 @@ package unicode
 import (
 	"fmt"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/liquidgecka/testlib"
 
@@ -19,7 +20,7 @@ func TestDisplayCellWidth(t *testing.T) {
 	T := testlib.NewT(t)
 	defer T.Finish()
 
-	for _, tuple := range []struct {
+	for itemNum, tuple := range []struct {
 		in        string
 		needWidth int
 	}{
@@ -28,10 +29,11 @@ func TestDisplayCellWidth(t *testing.T) {
 		{"🤞", 1}, // Supplemental Symbols and Pictographs
 		{"🌮", 1}, // Miscellaneous Symbols and Pictographs
 		{"€", 1},
-		{"☺", 1},
+		{"☺", 2}, // go-runewidth commit afa37cd0 reclassified as emoji, width 2
 		{"😇", 1},
 	} {
 		haveWidth, _ := aux.DisplayCellWidth(tuple.in)
-		T.Equal(haveWidth, tuple.needWidth, fmt.Sprintf("width of %q should be %d but got %d", tuple.in, tuple.needWidth, haveWidth))
+		testedRune, _ := utf8.DecodeRuneInString(tuple.in)
+		T.Equal(haveWidth, tuple.needWidth, fmt.Sprintf("test %d: width of %q [%#x] should be %d but got %d", itemNum, tuple.in, testedRune, tuple.needWidth, haveWidth))
 	}
 }
