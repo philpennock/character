@@ -56,25 +56,18 @@ library dependencies which have been confirmed to work.  If you encounter
 problems, please try one of the vendored library mechanisms listed below
 instead.
 
+This code is also now a “Go Module”, so can be built without GOPATH; with a
+sufficiently recent Go (1.12 or newer is best, 1.11 with enabling
+non-defaults) you can clone this repo anywhere and not worry about `$GOPATH`.
+
 So `go get github.com/philpennock/character` should download and install the
 tool into the `bin` dir inside the first directory listed in `$GOPATH`, which
-defaults to being `$HOME/go`.
+defaults to being `$HOME/go`.  Clone as a git repo anywhere outside `$GOPATH`
+to build in the newfangled module system; the install step will still place
+the resulting binary into the same place.
 
 With no Go environment variables set, that go command should thus give you an
 output executable at `$HOME/go/bin/character`.
-
-
-### GOPATH avoidance
-
-At present, we require that the code be checked out "correctly", per Go, which
-probably means (if you've not set Go-specific environment variables, etc) that
-it should be checked out into `~/go/src/github.com/philpennock/character/`.
-
-We had some shuffle logic, I've removed it.  If this affects you, please open
-an issue.
-
-My intention is to move to Go's new workspace system, when that's published,
-which gets rid of the need for `GOPATH`, as this is an end tool.
 
 
 ### Dependencies and vendoring.
@@ -118,6 +111,12 @@ And then build.
 
 ### godep
 
+_This will go away: there's a limit to how many I want to maintain.  The Go
+ecosystem is maturing and I don't want to continue to spend time dealing with
+variants tools without a compelling reason._
+
+For now ...
+
 `dep` is a vendor-locking tool which uses human directives in `Gopkg.toml` to
 let the maintainer update known versions in the tooling file `Gopkg.lock`,
 which is used to check out content and make it available in the `vendor`
@@ -136,9 +135,10 @@ $ make || go build
 
 ### Another dependency version manager
 
-I'm happy to supply dependency versioning lock-files for more tools, as
-long as they don't conflict with any other tool, and they don't pull code
-maintained by others into this repository.
+With the advent of Go Modules, I'd very much prefer to settle on just that
+system.  Given a sufficiently compelling reason, I can consider other tools
+thought, provided that they don't conflict with any other tool, and they don't
+pull code maintained by others into this repository.
 
 I don't want code of multiple copyrights and licenses in one git repository.
 I don't want someone else's misbehaviour coming to light to force me to

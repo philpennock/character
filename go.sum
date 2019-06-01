@@ -19,4 +19,5 @@ go.pennock.tech/tabular v1.1.1 h1:4rOvuIknLxpugj1w7PfV67uzJ3Ive8vRA8d3a678tmQ=
 go.pennock.tech/tabular v1.1.1/go.mod h1:5SJ7B5t5u6z2+mN9dIN3I4MoI2InSiRSOz0H8+cKmrI=
 golang.org/x/net v0.0.0-20180502164142-640f4622ab69 h1:+Ybm3UzSfPpp+Hlr62ZTCtbC9DmCKX61f0r74+peGts=
 golang.org/x/net v0.0.0-20180502164142-640f4622ab69/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
