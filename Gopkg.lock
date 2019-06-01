@@ -53,12 +53,12 @@
   revision = "561e6b271c638ea95c75ab7be0f38d1f48d60910"
 
 [[projects]]
-  digest = "1:e2d1d410fb367567c2b53ed9e2d719d3c1f0891397bb2fa49afd747cfbf1e8e4"
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
-  version = "v0.0.2"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
 
 [[projects]]
   branch = "master"
@@ -69,23 +69,23 @@
   revision = "d5dd8a50526aadb3d5f2c9b5233277bc2db90e88"
 
 [[projects]]
-  digest = "1:982714fa3eaafd4251f5ccf3d133b706ad742b86c195d594e1a86050a02f87a8"
+  digest = "1:22799aea8fe96dd5693abdd1eaa14b1b29e3eafbdc7733fa155b3cb556c8a7ae"
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
-  version = "v0.0.2"
+  revision = "67fc4837d267bc9bfd6e47f77783fcc3dffc68de"
+  version = "v0.0.4"
 
 [[projects]]
-  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
+  digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
-  digest = "1:0d96083a7da6d5e0d7afbc28bcffe2bc8da63a318d2dc1fc679c46caf7fa774e"
+  digest = "1:6067ffc6779315a291541c752e6161b6ac59eccc9a71b6834f2c6fbe29c8a46f"
   name = "go.pennock.tech/tabular"
   packages = [
     ".",
@@ -101,8 +101,8 @@
     "texttable/decoration",
   ]
   pruneopts = "UT"
-  revision = "6625cb299db708fb7e803efaf98d3f1793cd0d5a"
-  version = "v1.1.0"
+  revision = "4c40eb23654b0d9d6d22d8c5c3eae8cc48dd35a7"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -113,7 +113,7 @@
   revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
 
 [[projects]]
-  digest = "1:025ed02c882eae827eb5700efbd1a138bcb0927947485a43ff50057695d6fc7e"
+  digest = "1:77c8372321f8096ce528f8f01cf56cdec9a173a33ae587517dd89914d3306f3c"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -127,6 +127,8 @@
     "encoding/traditionalchinese",
     "internal/colltab",
     "internal/gen",
+    "internal/language",
+    "internal/language/compact",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
@@ -139,8 +141,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
-  version = "v0.3.0"
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
 
 [solve-meta]
   analyzer-name = "dep"

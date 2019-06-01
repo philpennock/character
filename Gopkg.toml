@@ -17,7 +17,7 @@ required = [
 
 [[constraint]]
   name = "go.pennock.tech/tabular"
-  version = "1.1.0"
+  version = "1.1.1"
 
 [[constraint]]
   branch = "master"
@@ -52,17 +52,17 @@ required = [
 # How wide characters are.  Probably.  We have some overrides.
 [[constraint]]
   name = "github.com/mattn/go-runewidth"
-  version = "0.0.2"
+  version = "0.0.4"
 
 # Our CLI command definition
 [[constraint]]
   name = "github.com/spf13/cobra"
-  version = "0.0.2"
+  version = "0.0.4"
 
 # The flags package used by cobra.
 [[constraint]]
   name = "github.com/spf13/pflag"
-  version = "1.0.1"
+  version = "1.0.3"
 
 # Needed for IDNA (punycode et al)
 [[constraint]]
@@ -72,7 +72,7 @@ required = [
 # Unicode normalization & character set conversions
 [[constraint]]
   name = "golang.org/x/text"
-  version = "0.3.0"
+  version = "0.3.2"
 
 [prune]
   go-tests = true
