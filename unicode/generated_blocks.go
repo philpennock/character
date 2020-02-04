@@ -210,6 +210,7 @@ const (
 	BlockRumiNumeralSymbols
 	BlockOldSogdian
 	BlockSogdian
+	BlockElymaic
 	BlockBrahmi
 	BlockKaithi
 	BlockSoraSompeng
@@ -230,6 +231,7 @@ const (
 	BlockAhom
 	BlockDogra
 	BlockWarangCiti
+	BlockNandinagari
 	BlockZanabazarSquare
 	BlockSoyombo
 	BlockPauCinHau
@@ -238,10 +240,12 @@ const (
 	BlockMasaramGondi
 	BlockGunjalaGondi
 	BlockMakasar
+	BlockTamilSupplement
 	BlockCuneiform
 	BlockCuneiformNumbersandPunctuation
 	BlockEarlyDynasticCuneiform
 	BlockEgyptianHieroglyphs
+	BlockEgyptianHieroglyphFormatControls
 	BlockAnatolianHieroglyphs
 	BlockBamumSupplement
 	BlockMro
@@ -254,6 +258,7 @@ const (
 	BlockTangutComponents
 	BlockKanaSupplement
 	BlockKanaExtendedA
+	BlockSmallKanaExtension
 	BlockNushu
 	BlockDuployan
 	BlockShorthandFormatControls
@@ -266,9 +271,12 @@ const (
 	BlockMathematicalAlphanumericSymbols
 	BlockSuttonSignWriting
 	BlockGlagoliticSupplement
+	BlockNyiakengPuachueHmong
+	BlockWancho
 	BlockMendeKikakui
 	BlockAdlam
 	BlockIndicSiyaqNumbers
+	BlockOttomanSiyaqNumbers
 	BlockArabicMathematicalAlphabeticSymbols
 	BlockMahjongTiles
 	BlockDominoTiles
@@ -284,6 +292,7 @@ const (
 	BlockSupplementalArrowsC
 	BlockSupplementalSymbolsandPictographs
 	BlockChessSymbols
+	BlockSymbolsandPictographsExtendedA
 	BlockCJKUnifiedIdeographsExtensionB
 	BlockCJKUnifiedIdeographsExtensionC
 	BlockCJKUnifiedIdeographsExtensionD
@@ -504,6 +513,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 69216, Max: 69247, ID: BlockRumiNumeralSymbols, Name: "Rumi Numeral Symbols"},
 	BlockInfo{Min: 69376, Max: 69423, ID: BlockOldSogdian, Name: "Old Sogdian"},
 	BlockInfo{Min: 69424, Max: 69487, ID: BlockSogdian, Name: "Sogdian"},
+	BlockInfo{Min: 69600, Max: 69631, ID: BlockElymaic, Name: "Elymaic"},
 	BlockInfo{Min: 69632, Max: 69759, ID: BlockBrahmi, Name: "Brahmi"},
 	BlockInfo{Min: 69760, Max: 69839, ID: BlockKaithi, Name: "Kaithi"},
 	BlockInfo{Min: 69840, Max: 69887, ID: BlockSoraSompeng, Name: "Sora Sompeng"},
@@ -524,6 +534,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 71424, Max: 71487, ID: BlockAhom, Name: "Ahom"},
 	BlockInfo{Min: 71680, Max: 71759, ID: BlockDogra, Name: "Dogra"},
 	BlockInfo{Min: 71840, Max: 71935, ID: BlockWarangCiti, Name: "Warang Citi"},
+	BlockInfo{Min: 72096, Max: 72191, ID: BlockNandinagari, Name: "Nandinagari"},
 	BlockInfo{Min: 72192, Max: 72271, ID: BlockZanabazarSquare, Name: "Zanabazar Square"},
 	BlockInfo{Min: 72272, Max: 72367, ID: BlockSoyombo, Name: "Soyombo"},
 	BlockInfo{Min: 72384, Max: 72447, ID: BlockPauCinHau, Name: "Pau Cin Hau"},
@@ -532,10 +543,12 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 72960, Max: 73055, ID: BlockMasaramGondi, Name: "Masaram Gondi"},
 	BlockInfo{Min: 73056, Max: 73135, ID: BlockGunjalaGondi, Name: "Gunjala Gondi"},
 	BlockInfo{Min: 73440, Max: 73471, ID: BlockMakasar, Name: "Makasar"},
+	BlockInfo{Min: 73664, Max: 73727, ID: BlockTamilSupplement, Name: "Tamil Supplement"},
 	BlockInfo{Min: 73728, Max: 74751, ID: BlockCuneiform, Name: "Cuneiform"},
 	BlockInfo{Min: 74752, Max: 74879, ID: BlockCuneiformNumbersandPunctuation, Name: "Cuneiform Numbers and Punctuation"},
 	BlockInfo{Min: 74880, Max: 75087, ID: BlockEarlyDynasticCuneiform, Name: "Early Dynastic Cuneiform"},
 	BlockInfo{Min: 77824, Max: 78895, ID: BlockEgyptianHieroglyphs, Name: "Egyptian Hieroglyphs"},
+	BlockInfo{Min: 78896, Max: 78911, ID: BlockEgyptianHieroglyphFormatControls, Name: "Egyptian Hieroglyph Format Controls"},
 	BlockInfo{Min: 82944, Max: 83583, ID: BlockAnatolianHieroglyphs, Name: "Anatolian Hieroglyphs"},
 	BlockInfo{Min: 92160, Max: 92735, ID: BlockBamumSupplement, Name: "Bamum Supplement"},
 	BlockInfo{Min: 92736, Max: 92783, ID: BlockMro, Name: "Mro"},
@@ -548,6 +561,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 100352, Max: 101119, ID: BlockTangutComponents, Name: "Tangut Components"},
 	BlockInfo{Min: 110592, Max: 110847, ID: BlockKanaSupplement, Name: "Kana Supplement"},
 	BlockInfo{Min: 110848, Max: 110895, ID: BlockKanaExtendedA, Name: "Kana Extended-A"},
+	BlockInfo{Min: 110896, Max: 110959, ID: BlockSmallKanaExtension, Name: "Small Kana Extension"},
 	BlockInfo{Min: 110960, Max: 111359, ID: BlockNushu, Name: "Nushu"},
 	BlockInfo{Min: 113664, Max: 113823, ID: BlockDuployan, Name: "Duployan"},
 	BlockInfo{Min: 113824, Max: 113839, ID: BlockShorthandFormatControls, Name: "Shorthand Format Controls"},
@@ -560,9 +574,12 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 119808, Max: 120831, ID: BlockMathematicalAlphanumericSymbols, Name: "Mathematical Alphanumeric Symbols"},
 	BlockInfo{Min: 120832, Max: 121519, ID: BlockSuttonSignWriting, Name: "Sutton SignWriting"},
 	BlockInfo{Min: 122880, Max: 122927, ID: BlockGlagoliticSupplement, Name: "Glagolitic Supplement"},
+	BlockInfo{Min: 123136, Max: 123215, ID: BlockNyiakengPuachueHmong, Name: "Nyiakeng Puachue Hmong"},
+	BlockInfo{Min: 123584, Max: 123647, ID: BlockWancho, Name: "Wancho"},
 	BlockInfo{Min: 124928, Max: 125151, ID: BlockMendeKikakui, Name: "Mende Kikakui"},
 	BlockInfo{Min: 125184, Max: 125279, ID: BlockAdlam, Name: "Adlam"},
 	BlockInfo{Min: 126064, Max: 126143, ID: BlockIndicSiyaqNumbers, Name: "Indic Siyaq Numbers"},
+	BlockInfo{Min: 126208, Max: 126287, ID: BlockOttomanSiyaqNumbers, Name: "Ottoman Siyaq Numbers"},
 	BlockInfo{Min: 126464, Max: 126719, ID: BlockArabicMathematicalAlphabeticSymbols, Name: "Arabic Mathematical Alphabetic Symbols"},
 	BlockInfo{Min: 126976, Max: 127023, ID: BlockMahjongTiles, Name: "Mahjong Tiles"},
 	BlockInfo{Min: 127024, Max: 127135, ID: BlockDominoTiles, Name: "Domino Tiles"},
@@ -578,6 +595,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 129024, Max: 129279, ID: BlockSupplementalArrowsC, Name: "Supplemental Arrows-C"},
 	BlockInfo{Min: 129280, Max: 129535, ID: BlockSupplementalSymbolsandPictographs, Name: "Supplemental Symbols and Pictographs"},
 	BlockInfo{Min: 129536, Max: 129647, ID: BlockChessSymbols, Name: "Chess Symbols"},
+	BlockInfo{Min: 129648, Max: 129791, ID: BlockSymbolsandPictographsExtendedA, Name: "Symbols and Pictographs Extended-A"},
 	BlockInfo{Min: 131072, Max: 173791, ID: BlockCJKUnifiedIdeographsExtensionB, Name: "CJK Unified Ideographs Extension B"},
 	BlockInfo{Min: 173824, Max: 177983, ID: BlockCJKUnifiedIdeographsExtensionC, Name: "CJK Unified Ideographs Extension C"},
 	BlockInfo{Min: 177984, Max: 178207, ID: BlockCJKUnifiedIdeographsExtensionD, Name: "CJK Unified Ideographs Extension D"},
