@@ -8,9 +8,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 
+	"github.com/philpennock/character/internal/clipboard"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"

@@ -24,7 +24,7 @@ rwildnovendor=$(filter-out vendor/%,$(call rwildcard,$1,$2))
 
 SOURCES=	$(call rwildnovendor,,*.go)
 TOP_SOURCE=	main.go
-BINARIES=	character
+BINARIES?=	character
 CRUFT=		dependency-graph.png
 
 # The go binary to use; you might override on the command-line to be 'gotip'
@@ -43,8 +43,12 @@ BIN_DIR_TOP := $(firstword $(subst :, ,$(GOPATH)))/bin
 # Which platform are we on?
 PLATFORM := $(shell uname -s)
 
+# Constraints for certain targets
+TAGS_FOR_WASM= noclipboard
+
 # Collect the build-tags we want
 BUILD_TAGS:=
+
 ifeq ($(TABLES),apcera)
 BUILD_TAGS+= termtables
 else ifeq ($(TABLES),termtables)
@@ -73,7 +77,11 @@ GO_LDFLAGS+= -X $(TABULAR_VERSION_VAR)=$(TABULAR_VERSION_VALUE)
 endif
 endif
 
-.PHONY : all install help devhelp short_help cleaninstall \
+ifeq ($(GOARCH),wasm)
+BUILD_TAGS+= $(TAGS_FOR_WASM)
+endif
+
+.PHONY : all install wasm help devhelp short_help cleaninstall \
 	dep dependsgraph vet lint \
 	check-no-GOPATH
 .DEFAULT_GOAL := helpful_all
@@ -119,6 +127,9 @@ endif
 	@echo "Installing version $(REPO_VERSION) ..."
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
 	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "$(GO_LDFLAGS)" -v $(REPO_PATH)
+
+wasm: $(TOP_SOURCE) $(SOURCES)
+	$(MAKE) GOOS=js GOARCH=wasm BINARIES=wasm/main.wasm -rR --no-print-directory all
 
 dep:
 	dep ensure

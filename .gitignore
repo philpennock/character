@@ -1,3 +1,4 @@
 character
 dependency-graph.png
 /vendor
+/wasm

@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
+
+	"github.com/philpennock/character/internal/clipboard"
 
 	"github.com/philpennock/character/commands/root"
 )
