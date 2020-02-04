@@ -150,8 +150,8 @@ lint:
 test:
 	@go test ./...
 
-versiontag:
-	git tag -s -m "Version $(TAGVERSION)" "v$(TAGVERSION)"
+tag-version:
+	git tag -s -m "$(REPO_PATH) Version $(TAG_VERSION)" "v$(TAG_VERSION)"
 
 clean:
 	rm -fv $(BINARIES) $(CRUFT)
