@@ -3,30 +3,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f06367e46fad737b4eabdd21093ade373557a6ad34fbea3a845576c84712caa4"
-  name = "github.com/apcera/termtables"
-  packages = [
-    ".",
-    "term",
-  ]
-  pruneopts = "UT"
-  revision = "bcbc5dc54055d14996b256d348fb75cc6debe282"
-
-[[projects]]
-  branch = "master"
-  digest = "1:a011ba1af23f931b2935da0eef5566f8744fcc77e65f9479bff2a56e1a45a744"
+  digest = "0:"
   name = "github.com/argusdusty/Ferret"
   packages = ["."]
   pruneopts = "UT"
-  revision = "02a5189c6f9eb01b7f0b278bd26a99f7c871cc80"
+  revision = "14de0b6c044512adfb53edf8f2b1578a621280fa"
 
 [[projects]]
   branch = "master"
-  digest = "1:dd1417c60900a2be6d1653e90306614657761fc9c3066eccc558ae432b31aa60"
+  digest = "0:"
   name = "github.com/atotto/clipboard"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5e2c7bddca04488284428a201e4a15615f7a5074"
+  revision = "579379fa8ff8a6d3fa979cec107f8f6d7f8fde90"
 
 [[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
@@ -38,11 +27,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c2c0d13925bea841b72cc3ea6675b22fb469d0e67fba2f9e6282bf08761f6b2e"
+  digest = "0:"
   name = "github.com/kisielk/godepgraph"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d8ba729f24e071b660e74d8176a63f87224d6746"
+  revision = "57a7e4a651a9a9a586a847994e32dbcda4ce364d"
 
 [[projects]]
   branch = "master"
@@ -53,36 +42,44 @@
   revision = "561e6b271c638ea95c75ab7be0f38d1f48d60910"
 
 [[projects]]
-  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  digest = "0:"
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
-  version = "v0.0.4"
+  revision = "a4df4ddbff020e131056d91f580a1cdcd806e3ae"
+  version = "v0.0.8"
 
 [[projects]]
   branch = "master"
-  digest = "1:9bb0d1774266ec2e824a89b126fae80464dc58ac72929ac907185860a25f5eff"
+  digest = "0:"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d5dd8a50526aadb3d5f2c9b5233277bc2db90e88"
+  revision = "f8b8fe49672f7ca1a169825af9e45f1fd9e0d053"
 
 [[projects]]
-  digest = "1:22799aea8fe96dd5693abdd1eaa14b1b29e3eafbdc7733fa155b3cb556c8a7ae"
+  digest = "0:"
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = "UT"
-  revision = "67fc4837d267bc9bfd6e47f77783fcc3dffc68de"
-  version = "v0.0.4"
+  revision = "f2b07da1e2c38d5f12845a4f607e2e1018cbb1f5"
+  version = "v0.0.5"
 
 [[projects]]
-  digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
+  digest = "0:"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
-  version = "v1.0.3"
+  revision = "2e9d26c8c37aae03e3f9d4e90b7116f5accb7cab"
+  version = "v1.0.5"
+
+[[projects]]
+  branch = "master"
+  digest = "0:"
+  name = "github.com/xlab/tablewriter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "80b567a11ad5f14be3e044545e463d16f0a91d78"
 
 [[projects]]
   digest = "1:6067ffc6779315a291541c752e6161b6ac59eccc9a71b6834f2c6fbe29c8a46f"
@@ -106,11 +103,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:82491a0790e0945762096c875e2e14932a5d7b37a7ce3e83ef3b50437a71e09a"
+  digest = "0:"
   name = "golang.org/x/net"
   packages = ["idna"]
   pruneopts = "UT"
-  revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
+  revision = "16171245cfb220d5317888b716d69c1fb4e7992b"
 
 [[projects]]
   digest = "1:77c8372321f8096ce528f8f01cf56cdec9a173a33ae587517dd89914d3306f3c"
@@ -148,7 +145,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/apcera/termtables",
     "github.com/argusdusty/Ferret",
     "github.com/atotto/clipboard",
     "github.com/kisielk/godepgraph",
@@ -157,6 +153,7 @@
     "github.com/olekukonko/tablewriter",
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",
+    "github.com/xlab/tablewriter",
     "go.pennock.tech/tabular",
     "go.pennock.tech/tabular/auto",
     "go.pennock.tech/tabular/properties",

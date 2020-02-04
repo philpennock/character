@@ -4,13 +4,17 @@
 
 // We want `termtables` to activate us, and to be the default if no other
 // implementation is provided
+//
+// 2020: apcera/termtables has gone, github.com/xlab/tablewriter is a
+// widespread fork which ripped out the terminal querying and locale handling.
+// Not bumping the copyright year for replacing one import path string.
 
 // +build termtables
 
 package table
 
 import (
-	"github.com/apcera/termtables"
+	"github.com/xlab/tablewriter"
 )
 
 // Supported indicates that we have a terminal table provider loaded.

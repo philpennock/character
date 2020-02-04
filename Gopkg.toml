@@ -5,7 +5,7 @@
 required = [
   # All three text table implementations
   "go.pennock.tech/tabular",
-  "github.com/apcera/termtables",
+  "github.com/xlab/tablewriter",
   "github.com/olekukonko/tablewriter",
   # Graphing dependencies
   "github.com/kisielk/godepgraph",
@@ -21,7 +21,7 @@ required = [
 
 [[constraint]]
   branch = "master"
-  name = "github.com/apcera/termtables"
+  name = "github.com/xlab/tablewriter"
 
 [[constraint]]
   branch = "master"

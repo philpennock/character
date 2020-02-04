@@ -155,6 +155,9 @@ package, `go.pennock.tech/tabular`.  We originally used
 `github.com/apcera/termtables` and briefly tried
 `github.com/olekukonko/tablewriter` before switching to writing my own.
 
+(Apcera's repositories have disappeared, the most widespread fork of
+`termtables` appears to be `github.com/xlab/tablewriter`).
+
 You can use Go build tags to switch the table package used.  I might remove
 support for this in the future.
 
