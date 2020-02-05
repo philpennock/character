@@ -69,6 +69,28 @@ the resulting binary into the same place.
 With no Go environment variables set, that go command should thus give you an
 output executable at `$HOME/go/bin/character`.
 
+### WASM
+
+Using `make wasm` a directory `wasm` will be created; the `character` binary
+will be compiled into there, a supporting HTML page will be copied in, as well
+as the Golang `wasm_exec.js` support page.
+
+Run a web-server which serves up the content of the `wasm/` directory and see
+how it works.  We should perhaps have a way to default to verbose mode (for
+tables) to better support this use-case.
+
+**SECURITY NOTE**: Note: to have tables work, I switched from `innerText` to
+`innerHTML`, but this early proof-of-concept is not escaping output to be
+proof against HTML injection attacks.  In particular, an unknown command will
+be echo'd back in the error message, as is fairly common for Unix CLI tools.
+We could use a separate output area for errors and use `innerText` for that,
+but that doesn't solve, eg, the output of transform commands which
+deliberately make reversible changes to input and displays it.
+
+So don't put this up somewhere public, at least not in a domain with access to
+any cookies or other credentials worth stealing.  But it's a useful toy to
+explore with.  Well, it was for me: "My First WASM".
+
 
 ### Dependencies and vendoring.
 

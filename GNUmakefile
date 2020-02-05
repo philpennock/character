@@ -130,6 +130,8 @@ endif
 
 wasm: $(TOP_SOURCE) $(SOURCES)
 	$(MAKE) GOOS=js GOARCH=wasm BINARIES=wasm/main.wasm -rR --no-print-directory all
+	cp -v $(shell go env GOROOT)/misc/wasm/wasm_exec.js wasm/
+	cp -v extra/index.html wasm/
 
 dep:
 	dep ensure
