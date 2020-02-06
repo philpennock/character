@@ -195,3 +195,9 @@ might.
 * `go get -v github.com/golang/lint/golint`  
   Linter for Go
 
+
+Alternatives
+------------
+
+* `uni` by Martin Tournoij: <https://github.com/arp242/uni>,
+  `go get arp242.net/uni`
