@@ -50,12 +50,11 @@ else ifeq ($(TABLES),tabular)
 BUILD_TAGS+= tabular
 TABULAR_PKG:=go.pennock.tech/tabular
 ifneq "$(shell go env GOMOD)" ""
-# I don't currently know of a way to extract the version without instead
-# rewriting the build system for the dependency to write out the version
-# before signing the commit.  We lose access to git-derived version strings
-# with Go modules.  Which is unfortunate.
+TABULAR_VERSION_VAR=$(shell go list -m -f '{{.Path}}' $(TABULAR_PKG)).LinkerSpecifiedVersion
+TABULAR_VERSION_VALUE=$(shell go list -m -f '{{.Version}}' $(TABULAR_PKG))
+GO_LDFLAGS+= -X $(TABULAR_VERSION_VAR)=$(TABULAR_VERSION_VALUE)
 else ifneq "$(wildcard vendor/$(TABULAR_PKG) )" ""
-TABULAR_DIR=vendor/$(TABULAR_PKG)
+TABULAR_DIR=./vendor/$(TABULAR_PKG)
 TABULAR_VERSION_VAR=$(shell go list $(TABULAR_DIR)).LinkerSpecifiedVersion
 # dep removes the git metadata we want
 TABULAR_VERSION_VALUE=$(shell dep status -f '{{if eq .ProjectRoot "go.pennock.tech/tabular"}}{{.Version}}{{end}}')
