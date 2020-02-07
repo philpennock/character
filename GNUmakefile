@@ -5,15 +5,6 @@
 # logic around as needed.  Although at this point I'm inclined to nuke the
 # makefile entirely.
 
-# Use CANONICAL_CHARACTER_REPO in environ to override where this is checked out
-# You'll probably also need to bulk-edit the Go src.
-
-ifdef CANONICAL_CHARACTER_REPO
-REPO_PATH=	$(CANONICAL_CHARACTER_REPO)
-else
-REPO_PATH=	github.com/philpennock/character
-endif
-
 # Set this via the cmdline to change the tables backend
 TABLES=		tabular
 
@@ -34,7 +25,7 @@ GO_LDFLAGS:=
 ifndef REPO_VERSION
 REPO_VERSION := $(shell ./.version)
 endif
-GO_LDFLAGS+= -X $(REPO_PATH)/commands/version.VersionString=$(REPO_VERSION)
+GO_LDFLAGS+= -X $(shell go list ./commands/version).VersionString=$(REPO_VERSION)
 
 # Where various files are installed
 PKG_DIR_TOP := $(firstword $(subst :, ,$(GOPATH)))/pkg/$(shell go env GOOS)_$(shell go env GOARCH)
@@ -65,13 +56,13 @@ ifneq "$(shell go env GOMOD)" ""
 # with Go modules.  Which is unfortunate.
 else ifneq "$(wildcard vendor/$(TABULAR_PKG) )" ""
 TABULAR_DIR=vendor/$(TABULAR_PKG)
-TABULAR_VERSION_VAR=$(REPO_PATH)/$(TABULAR_DIR).LinkerSpecifiedVersion
+TABULAR_VERSION_VAR=$(shell go list $(TABULAR_DIR)).LinkerSpecifiedVersion
 # dep removes the git metadata we want
 TABULAR_VERSION_VALUE=$(shell dep status -f '{{if eq .ProjectRoot "go.pennock.tech/tabular"}}{{.Version}}{{end}}')
 GO_LDFLAGS+= -X $(TABULAR_VERSION_VAR)=$(TABULAR_VERSION_VALUE)
 else
 TABULAR_DIR=../../../$(TABULAR_PKG)
-TABULAR_VERSION_VAR=$(TABULAR_PKG).LinkerSpecifiedVersion
+TABULAR_VERSION_VAR=$(shell go list $(TABULAR_PKG)).LinkerSpecifiedVersion
 TABULAR_VERSION_VALUE=$(shell $(TABULAR_DIR)/.version)
 GO_LDFLAGS+= -X $(TABULAR_VERSION_VAR)=$(TABULAR_VERSION_VALUE)
 endif
@@ -126,7 +117,7 @@ ifeq ($(REPO_VERSION),)
 endif
 	@echo "Installing version $(REPO_VERSION) ..."
 	rm -f "$(BIN_DIR_TOP)/$(BINARIES)"
-	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "$(GO_LDFLAGS)" -v $(REPO_PATH)
+	$(GO_CMD) install -tags "$(BUILD_TAGS)" -ldflags "$(GO_LDFLAGS)" -v .
 
 wasm: $(TOP_SOURCE) $(SOURCES)
 	$(MAKE) GOOS=js GOARCH=wasm BINARIES=wasm/main.wasm -rR --no-print-directory all
@@ -164,18 +155,13 @@ test:
 	@go test ./...
 
 tag-version:
-	git tag -s -m "$(REPO_PATH) Version $(TAG_VERSION)" "v$(TAG_VERSION)"
+	git tag -s -m "$(shell go list .) Version $(TAG_VERSION)" "v$(TAG_VERSION)"
 
 clean:
 	rm -fv $(BINARIES) $(CRUFT)
 
 cleaninstall:
-ifdef REPO_PATH
-	rm -rfv "$(PKG_DIR_TOP)/$(REPO_PATH)" "$(BIN_DIR_TOP)/$(BINARIES)"
-else
-	@echo "MISSING REPO_PATH DEFINITION"
-	@false
-endif
+	rm -rfv "$(BIN_DIR_TOP)/$(BINARIES)"
 
 vendor: Gopkg.lock
 	dep ensure
@@ -183,7 +169,7 @@ vendor: Gopkg.lock
 LICENSES_all.txt: LICENSE.txt Gopkg.lock vendor
 	rm -f ./LICENSES_all.txt tmplicpart tmplic
 	for DIR in $$(dep status -f '{{.ProjectRoot}}{{"\n"}}'); do ( cd "vendor/$$DIR"; for F in NOTICE* LICEN[SC]E* PATENTS; do test -s "$$F" || continue; echo "~~~ $$F - $$DIR ~~~"; cat "./$$F"; done; ) > tmplicpart ; test -s tmplicpart || continue; echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; cat tmplicpart; echo; done > tmplic
-	( echo "~~~ $(REPO_PATH) ~~~"; cat LICENSE.txt tmplic ; ) > ./LICENSES_all.txt
+	( echo "~~~ $(shell go list .) ~~~"; cat LICENSE.txt tmplic ; ) > ./LICENSES_all.txt
 	@rm -f tmplicpart tmplic
 
 check-no-GOPATH:
