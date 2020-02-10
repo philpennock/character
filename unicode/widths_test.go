@@ -26,11 +26,11 @@ func TestDisplayCellWidth(t *testing.T) {
 	}{
 		{"", 0},
 		{"a", 1},
-		{"🤞", 1}, // Supplemental Symbols and Pictographs
-		{"🌮", 1}, // Miscellaneous Symbols and Pictographs
+		{"🤞", 2}, // Supplemental Symbols and Pictographs
+		{"🌮", 2}, // Miscellaneous Symbols and Pictographs
 		{"€", 1},
-		{"☺", 2}, // go-runewidth commit afa37cd0 reclassified as emoji, width 2
-		{"😇", 1},
+		{"☺", 1},
+		{"😇", 2},
 	} {
 		haveWidth, _ := aux.DisplayCellWidth(tuple.in)
 		testedRune, _ := utf8.DecodeRuneInString(tuple.in)
