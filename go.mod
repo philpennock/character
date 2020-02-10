@@ -1,6 +1,6 @@
 module github.com/philpennock/character
 
-go 1.12
+go 1.13
 
 require (
 	github.com/argusdusty/Ferret v0.0.0-20170417033527-02a5189c6f9e
