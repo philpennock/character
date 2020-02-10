@@ -42,51 +42,16 @@ the modified character, so `-1c` _should_ show you the same thing that is
 copied to the clipboard where `-c` on its own would show you the individual
 parts while copying the modified/combined whole to the clipboard.
 
-```console
-% character named -v/ smiling
-┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━━┳━━━━━┓
-┃ C  ┃ Name                                                   ┃   Hex ┃    Dec ┃ Block                                ┃ Vim ┃ HTML ┃ XML ┃
-┣━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━━╇━━━━━┫
-┃ ☺  │ WHITE SMILING FACE                                     │  263a │   9786 │ Miscellaneous Symbols                │ 0u  │      │     ┃
-┃ ☻  │ BLACK SMILING FACE                                     │  263b │   9787 │ Miscellaneous Symbols                │ 0U  │      │     ┃
-┃ 😁 │ GRINNING FACE WITH SMILING EYES                        │ 1f601 │ 128513 │ Emoticons                            │     │      │     ┃
-┃ 😃 │ SMILING FACE WITH OPEN MOUTH                           │ 1f603 │ 128515 │ Emoticons                            │     │      │     ┃
-┃ 😄 │ SMILING FACE WITH OPEN MOUTH AND SMILING EYES          │ 1f604 │ 128516 │ Emoticons                            │     │      │     ┃
-┃ 😅 │ SMILING FACE WITH OPEN MOUTH AND COLD SWEAT            │ 1f605 │ 128517 │ Emoticons                            │     │      │     ┃
-┃ 😆 │ SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES   │ 1f606 │ 128518 │ Emoticons                            │     │      │     ┃
-┃ 😇 │ SMILING FACE WITH HALO                                 │ 1f607 │ 128519 │ Emoticons                            │     │      │     ┃
-┃ 😈 │ SMILING FACE WITH HORNS                                │ 1f608 │ 128520 │ Emoticons                            │     │      │     ┃
-┃ 😊 │ SMILING FACE WITH SMILING EYES                         │ 1f60a │ 128522 │ Emoticons                            │     │      │     ┃
-┃ 😍 │ SMILING FACE WITH HEART-SHAPED EYES                    │ 1f60d │ 128525 │ Emoticons                            │     │      │     ┃
-┃ 😎 │ SMILING FACE WITH SUNGLASSES                           │ 1f60e │ 128526 │ Emoticons                            │     │      │     ┃
-┃ 😙 │ KISSING FACE WITH SMILING EYES                         │ 1f619 │ 128537 │ Emoticons                            │     │      │     ┃
-┃ 😸 │ GRINNING CAT FACE WITH SMILING EYES                    │ 1f638 │ 128568 │ Emoticons                            │     │      │     ┃
-┃ 😺 │ SMILING CAT FACE WITH OPEN MOUTH                       │ 1f63a │ 128570 │ Emoticons                            │     │      │     ┃
-┃ 😻 │ SMILING CAT FACE WITH HEART-SHAPED EYES                │ 1f63b │ 128571 │ Emoticons                            │     │      │     ┃
-┃ 🙂 │ SLIGHTLY SMILING FACE                                  │ 1f642 │ 128578 │ Emoticons                            │     │      │     ┃
-┃ 🤭 │ SMILING FACE WITH SMILING EYES AND HAND COVERING MOUTH │ 1f92d │ 129325 │ Supplemental Symbols and Pictographs │     │      │     ┃
-┃ 🥰 │ SMILING FACE WITH SMILING EYES AND THREE HEARTS        │ 1f970 │ 129392 │ Supplemental Symbols and Pictographs │     │      │     ┃
-┗━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━┷━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━┷━━━━━━┷━━━━━┛
+<img src=".web-assets/images/character-smiling_4bfca881.png"
+     alt="character named -v/ smiling"
+     title="character named -v/ smiling"
+     width="900" height="312">
 
-% character named -Jj SMILING CAT FACE WITH OPEN MOUTH
-{
-  "characters": [
-    {
-      "display": "😺",
-      "displayText": "😺︎",
-      "displayEmoji": "😺️",
-      "name": "SMILING CAT FACE WITH OPEN MOUTH",
-      "hex": "1f63a",
-      "decimal": "128570",
-      "block": "Emoticons",
-      "utf8": "%F0%9F%98%BA",
-      "jsonEscape": "\\uD83D\\uDE3A",
-      "renderWidth": 2,
-      "puny": "xn--138h"
-    }
-  ]
-}
-```
+<img src=".web-assets/images/smiling-json_71ca3acd.png"
+     alt="character named -Jj SMILING CAT FACE WITH OPEN MOUTH"
+     title="character named -Jj SMILING CAT FACE WITH OPEN MOUTH"
+     width="400" height="266">
+
 
 [Licensed](./LICENSE.txt) under a MIT-style license.  
 [Accumulated licenses of all dependencies](./LICENSES_all.txt) are available
