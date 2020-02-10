@@ -8,6 +8,8 @@ github.com/liquidgecka/testlib v0.0.0-20180123051607-561e6b271c63 h1:E1gsAMD4Tys
 github.com/liquidgecka/testlib v0.0.0-20180123051607-561e6b271c63/go.mod h1:vwMPvLIhXhkJaBfsk/6l+eDuiQaIVHC0b6eCvUVBsB0=
 github.com/mattn/go-runewidth v0.0.4 h1:2BvfKmzob6Bmd4YsL0zygOqfdFnK7GR4QL06Do4/p7Y=
 github.com/mattn/go-runewidth v0.0.4/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
+github.com/mattn/go-runewidth v0.0.8 h1:3tS41NlGYSmhhe/8fhGRzc+z3AYCw1Fe1WAyLuujKs0=
+github.com/mattn/go-runewidth v0.0.8/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/olekukonko/tablewriter v0.0.0-20180418011723-d5dd8a50526a h1:wHDmMQT1L8SloVcCB3MUrNV2+VgC8geTmrOV0+cxmxo=
 github.com/olekukonko/tablewriter v0.0.0-20180418011723-d5dd8a50526a/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/spf13/cobra v0.0.2 h1:NfkwRbgViGoyjBKsLI0QMDcuMnhM+SBg3T0cGfpvKDE=
@@ -18,6 +20,8 @@ github.com/xlab/tablewriter v0.0.0-20160610135559-80b567a11ad5 h1:gmD7q6cCJfBbcu
 github.com/xlab/tablewriter v0.0.0-20160610135559-80b567a11ad5/go.mod h1:fVwOndYN3s5IaGlMucfgxwMhqwcaJtlGejBU6zX6Yxw=
 go.pennock.tech/tabular v1.1.1 h1:4rOvuIknLxpugj1w7PfV67uzJ3Ive8vRA8d3a678tmQ=
 go.pennock.tech/tabular v1.1.1/go.mod h1:5SJ7B5t5u6z2+mN9dIN3I4MoI2InSiRSOz0H8+cKmrI=
+go.pennock.tech/tabular v1.1.2 h1:YYFiuFHWBnT92CPU+tSjiOsAlIaFdjc/qsKxLy5HEQU=
+go.pennock.tech/tabular v1.1.2/go.mod h1:8RB3RGEsOfbEUovkQ35zmRamjevSxcRHeZjagZihiSc=
 golang.org/x/net v0.0.0-20180502164142-640f4622ab69 h1:+Ybm3UzSfPpp+Hlr62ZTCtbC9DmCKX61f0r74+peGts=
 golang.org/x/net v0.0.0-20180502164142-640f4622ab69/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=

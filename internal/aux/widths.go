@@ -44,7 +44,7 @@ func DisplayCellWidth(s string) (width int, isOverride bool) {
 	case OverrideWidthSSPMin != 0 && OverrideWidthSSPMin <= r && r <= OverrideWidthSSPMax:
 		fallthrough
 	case OverrideWidthEmoticonsMin != 0 && OverrideWidthEmoticonsMin <= r && r <= OverrideWidthEmoticonsMax:
-		return 1, true
+		return 2, true
 	default:
 		return runewidth.StringWidth(s), false
 	}

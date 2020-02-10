@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Phil Pennock.
+// Copyright © 2015-2017,2020 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -106,6 +106,10 @@ type fixedWidthCell struct {
 
 func (fwc fixedWidthCell) String() string         { return fwc.s }
 func (fwc fixedWidthCell) TerminalCellWidth() int { return fwc.w }
+
+type tcWidther interface {
+	TerminalCellWidth() int
+}
 
 // A ResultSet is the collection of unicode characters (or near facsimiles thereof)
 // about which we wish to see data.  Various front-end commands just figure out which
@@ -307,8 +311,9 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 		}
 		return s
 	case PRINT_RUNE_ISOLATED: // BROKEN
+		sInner := string(ci.unicode.Number)
 		// FIXME: None of these are actually working
-		return fmt.Sprintf("%c%c%c",
+		sOuter := fmt.Sprintf("%c%c%c",
 			0x202A, // LEFT-TO-RIGHT EMBEDDING
 			// 0x202D, // LEFT-TO-RIGHT OVERRIDE
 			// 0x2066, // LEFT-TO-RIGHT ISOLATE
@@ -316,6 +321,10 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 			// 0x2069, // POP DIRECTIONAL ISOLATE
 			0x202C, // POP DIRECTIONAL FORMATTING
 		)
+		if w, override := aux.DisplayCellWidth(sInner); override {
+			return fixedWidthCell{s: sOuter, w: w}
+		}
+		return sOuter
 	case PRINT_RUNE_PRESENT_TEXT: // text presentation selector, UTS#51 §1.4.3 ED-8
 		s := string(ci.unicode.Number)
 		w, _ := aux.DisplayCellWidth(s)
@@ -404,6 +413,7 @@ type JItem struct {
 	XMLEntities  []string `json:"xmlEntities,omitempty"`
 	UTF8         string   `json:"utf8"`
 	JSONEscape   string   `json:"jsonEscape"`
+	RenderWidth  int      `json:"renderWidth"`
 	Puny         string   `json:"puny"`
 	PartOf       string   `json:"part-of,omitempty"`
 }
@@ -424,6 +434,22 @@ func S(x interface{}) string {
 		return s.String()
 	default:
 		return ""
+	}
+}
+
+// JItemWidth converts to a width, for JSON
+func JItemWidth(x interface{}) int {
+	switch s := x.(type) {
+	case string:
+		width, _ := aux.DisplayCellWidth(s)
+		return width
+	case tcWidther:
+		return s.TerminalCellWidth()
+	case fmt.Stringer:
+		width, _ := aux.DisplayCellWidth(s.String())
+		return width
+	default:
+		return 0
 	}
 }
 
@@ -449,6 +475,7 @@ func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
 		XMLEntities:  xml,
 		UTF8:         S(rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC)),
 		JSONEscape:   S(rs.RenderCharInfoItem(ci, PRINT_RUNE_JSON)),
+		RenderWidth:  JItemWidth(rs.RenderCharInfoItem(ci, PRINT_RUNE)),
 		Puny:         S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY)),
 		PartOf:       S(rs.RenderCharInfoItem(ci, PRINT_PART_OF)),
 	}
@@ -546,7 +573,7 @@ func (rs *ResultSet) detailsHeaders() []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
-			"C", "Name", "Hex", "Dec", "Block", "Vim", "HTML", "XML", "Of",
+			"C", "Name", "Hex", "Dec", "Block", "Vim", "HTML", "XML",
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
@@ -554,7 +581,7 @@ func (rs *ResultSet) detailsHeaders() []interface{} {
 		}
 	case FIELD_SET_DEBUG:
 		return []interface{}{
-			"C", "Width", "Hex", "Name",
+			"C", "Width", "Hex", "Name", "C-Type",
 		}
 	}
 	return nil
@@ -575,7 +602,6 @@ func (rs *ResultSet) detailsColumnProperties() []columnProperties {
 			{6, table.UNSET, true},  // Vim
 			{7, table.UNSET, true},  // HTML
 			{8, table.UNSET, true},  // XML
-			{9, table.UNSET, true},  // Of
 		}
 	case FIELD_SET_NET:
 		return []columnProperties{
@@ -613,7 +639,8 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 			rs.sources.Vim.DigraphsFor(ci.unicode.Number),
 			rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
 			rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
-			rs.RenderCharInfoItem(ci, PRINT_PART_OF),
+			// PRINT_PART_OF is almost always empty and while important, it
+			// annoys me, so I've removed it from my most-common view.
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
@@ -631,6 +658,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_WIDTH),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
+			func(c charItem) string { t := rs.RenderCharInfoItem(ci, runeDisplay); return fmt.Sprintf("%T", t) }(ci),
 		}
 	}
 	return nil
