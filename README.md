@@ -69,6 +69,11 @@ the resulting binary into the same place.
 With no Go environment variables set, that go command should thus give you an
 output executable at `$HOME/go/bin/character`.
 
+Note: A future release will transition entirely to “Go Module” mode and remove
+the GNUmakefile.  (After I figure out a sane way to build `LICENSES_all.txt`
+without godep).
+
+
 ### WASM
 
 Using `make wasm` a directory `wasm` will be created; the `character` binary
@@ -158,15 +163,22 @@ $ make || go build
 ### Another dependency version manager
 
 With the advent of Go Modules, I'd very much prefer to settle on just that
-system.  Given a sufficiently compelling reason, I can consider other tools
-thought, provided that they don't conflict with any other tool, and they don't
-pull code maintained by others into this repository.
+system.  I intend to remove support for other dependency tools.
+
+### Vendoring or lack thereof
 
 I don't want code of multiple copyrights and licenses in one git repository.
 I don't want someone else's misbehaviour coming to light to force me to
 rewrite my git history to remove copyright violating code: that's worse for
 provenance than having to hunt around for another clone of a dependency which
 does at least match the available checksums.
+
+A version release will include vendored code, but that doesn't mean it needs
+to be part of the git repo.  If truly needed, a second repository of
+dependencies can be used, as the vendor tree.
+
+But really, no.  Please don't patch around your lack of dependency stashing by
+asking others to assume licensing liability for you.
 
 
 Table packages

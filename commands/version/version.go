@@ -7,10 +7,12 @@ package version
 import (
 	"fmt"
 	"runtime"
+	"runtime/debug"
 
 	"github.com/spf13/cobra"
 
 	"github.com/philpennock/character/commands/root"
+	"github.com/philpennock/character/internal/table"
 )
 
 // SourceURL is so that the version command identifies where this came from.
@@ -37,6 +39,9 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Much of this will probably go away, leaving only the
+		// debug.ReadBuildInfo approach, which will let us junk the Makefile
+		// logic.
 		if VersionString == "" {
 			VersionString = "<unknown>"
 		}
@@ -53,6 +58,31 @@ var versionCmd = &cobra.Command{
 			}
 		}
 		fmt.Printf("%s: Source URL <%s>\n", cmd.Root().Name(), SourceURL)
+
+		// It amuses me that our existing --table-style top-level option comes
+		// along for free and this can be HTML, JSON, whatever.  Just need to
+		// junk all of the above.
+		if buildInfo, ok := debug.ReadBuildInfo(); ok {
+			// Built with module support
+			fmt.Printf("\n%s: Built with Go Module support.\n", cmd.Root().Name())
+			t := table.New()
+			t.AddHeaders("Module Path", "Version", "Sum", "Replaced")
+			m := &buildInfo.Main
+			t.AddRow(m.Path, m.Version, m.Sum, m.Replace != nil)
+			for m.Replace != nil {
+				m = m.Replace
+				t.AddRow(m.Path, m.Version, m.Sum, m.Replace != nil)
+			}
+			for _, m := range buildInfo.Deps {
+				t.AddRow(m.Path, m.Version, m.Sum, m.Replace != nil)
+				for m.Replace != nil {
+					m = m.Replace
+					t.AddRow(m.Path, m.Version, m.Sum, m.Replace != nil)
+				}
+			}
+			// sigh, if I junk the other table interfaces, I can add RenderTo instead of using this.
+			fmt.Printf(t.Render())
+		}
 	},
 }
 
