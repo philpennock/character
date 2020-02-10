@@ -42,6 +42,52 @@ the modified character, so `-1c` _should_ show you the same thing that is
 copied to the clipboard where `-c` on its own would show you the individual
 parts while copying the modified/combined whole to the clipboard.
 
+```console
+% character named -v/ smiling
+┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━━┳━━━━━┓
+┃ C  ┃ Name                                                   ┃   Hex ┃    Dec ┃ Block                                ┃ Vim ┃ HTML ┃ XML ┃
+┣━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━━╇━━━━━┫
+┃ ☺  │ WHITE SMILING FACE                                     │  263a │   9786 │ Miscellaneous Symbols                │ 0u  │      │     ┃
+┃ ☻  │ BLACK SMILING FACE                                     │  263b │   9787 │ Miscellaneous Symbols                │ 0U  │      │     ┃
+┃ 😁 │ GRINNING FACE WITH SMILING EYES                        │ 1f601 │ 128513 │ Emoticons                            │     │      │     ┃
+┃ 😃 │ SMILING FACE WITH OPEN MOUTH                           │ 1f603 │ 128515 │ Emoticons                            │     │      │     ┃
+┃ 😄 │ SMILING FACE WITH OPEN MOUTH AND SMILING EYES          │ 1f604 │ 128516 │ Emoticons                            │     │      │     ┃
+┃ 😅 │ SMILING FACE WITH OPEN MOUTH AND COLD SWEAT            │ 1f605 │ 128517 │ Emoticons                            │     │      │     ┃
+┃ 😆 │ SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES   │ 1f606 │ 128518 │ Emoticons                            │     │      │     ┃
+┃ 😇 │ SMILING FACE WITH HALO                                 │ 1f607 │ 128519 │ Emoticons                            │     │      │     ┃
+┃ 😈 │ SMILING FACE WITH HORNS                                │ 1f608 │ 128520 │ Emoticons                            │     │      │     ┃
+┃ 😊 │ SMILING FACE WITH SMILING EYES                         │ 1f60a │ 128522 │ Emoticons                            │     │      │     ┃
+┃ 😍 │ SMILING FACE WITH HEART-SHAPED EYES                    │ 1f60d │ 128525 │ Emoticons                            │     │      │     ┃
+┃ 😎 │ SMILING FACE WITH SUNGLASSES                           │ 1f60e │ 128526 │ Emoticons                            │     │      │     ┃
+┃ 😙 │ KISSING FACE WITH SMILING EYES                         │ 1f619 │ 128537 │ Emoticons                            │     │      │     ┃
+┃ 😸 │ GRINNING CAT FACE WITH SMILING EYES                    │ 1f638 │ 128568 │ Emoticons                            │     │      │     ┃
+┃ 😺 │ SMILING CAT FACE WITH OPEN MOUTH                       │ 1f63a │ 128570 │ Emoticons                            │     │      │     ┃
+┃ 😻 │ SMILING CAT FACE WITH HEART-SHAPED EYES                │ 1f63b │ 128571 │ Emoticons                            │     │      │     ┃
+┃ 🙂 │ SLIGHTLY SMILING FACE                                  │ 1f642 │ 128578 │ Emoticons                            │     │      │     ┃
+┃ 🤭 │ SMILING FACE WITH SMILING EYES AND HAND COVERING MOUTH │ 1f92d │ 129325 │ Supplemental Symbols and Pictographs │     │      │     ┃
+┃ 🥰 │ SMILING FACE WITH SMILING EYES AND THREE HEARTS        │ 1f970 │ 129392 │ Supplemental Symbols and Pictographs │     │      │     ┃
+┗━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━┷━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━┷━━━━━━┷━━━━━┛
+
+% character named -Jj SMILING CAT FACE WITH OPEN MOUTH
+{
+  "characters": [
+    {
+      "display": "😺",
+      "displayText": "😺︎",
+      "displayEmoji": "😺️",
+      "name": "SMILING CAT FACE WITH OPEN MOUTH",
+      "hex": "1f63a",
+      "decimal": "128570",
+      "block": "Emoticons",
+      "utf8": "%F0%9F%98%BA",
+      "jsonEscape": "\\uD83D\\uDE3A",
+      "renderWidth": 2,
+      "puny": "xn--138h"
+    }
+  ]
+}
+```
+
 [Licensed](./LICENSE.txt) under a MIT-style license.  
 [Accumulated licenses of all dependencies](./LICENSES_all.txt) are available
 too.  
@@ -51,33 +97,22 @@ Patches welcome.
 Building
 --------
 
-This code should be `go get` compatible, if you don't care about versions of
-library dependencies which have been confirmed to work.  If you encounter
-problems, please try one of the vendored library mechanisms listed below
-instead.
+Run: `go build`
 
-This code is also now a “Go Module”, so can be built without GOPATH; with a
-sufficiently recent Go (1.12 or newer is best, 1.11 with enabling
-non-defaults) you can clone this repo anywhere and not worry about `$GOPATH`.
+Assuming defaults, install into `~/go/bin/` with: `go build`
 
-So `go get github.com/philpennock/character` should download and install the
-tool into the `bin` dir inside the first directory listed in `$GOPATH`, which
-defaults to being `$HOME/go`.  Clone as a git repo anywhere outside `$GOPATH`
-to build in the newfangled module system; the install step will still place
-the resulting binary into the same place.
+This software uses Go Modules and requires a sufficiently recent version of
+Go.  Clone this repo anywhere, don't worry about `$GOPATH` or such things
+(assuming Go 1.12 or newer).
 
-With no Go environment variables set, that go command should thus give you an
-output executable at `$HOME/go/bin/character`.
-
-Note: A future release will transition entirely to “Go Module” mode and remove
-the GNUmakefile.  (After I figure out a sane way to build `LICENSES_all.txt`
-without godep).
-
+If you are on an older Go, look for the last release in the `v0.3.x` series.
 
 ### WASM
 
-Using `make wasm` a directory `wasm` will be created; the `character` binary
-will be compiled into there, a supporting HTML page will be copied in, as well
+Run: `./util/make_wasm.sh`
+
+A directory `wasm` will be created; the `character` binary will be compiled
+into there as `main.wasm`; a supporting HTML page will be copied in, as well
 as the Golang `wasm_exec.js` support page.
 
 Run a web-server which serves up the content of the `wasm/` directory and see
@@ -97,89 +132,6 @@ any cookies or other credentials worth stealing.  But it's a useful toy to
 explore with.  Well, it was for me: "My First WASM".
 
 
-### Dependencies and vendoring.
-
-The dependent code is not checked into this repository, for various
-philosophical reasons which I hold to be good.  If one of the dependencies
-disappears, please file an Issue and I'll take care of managing the
-dependency.
-
-This is Golang, the binaries shouldn't be built live from source in
-Production, it's acceptable for the disappearance of a project to make the
-code briefly harder to compile.  Reproducible builds are only guaranteed for
-official non-git releases, which _will_ include all dependencies.
-
-Specifics available below, after the Building sub-section
-
-
-### Building
-
-Two simple options, in preference order:
-
-1. Run `make` (or `gmake`) -- using GNU make, build with any extra steps such
-   as embedding version identifiers in the resulting binary.
-2. Run `go build` -- idiomatic Go, should always work.
-
-You're done.
-
-
-### go get
-
-This is the "roll the dice and gamble" approach, which _usually_ works, but
-not always.  Just fetch the current dependencies, whatever version they might
-be, and build.
-
-```console
-$ go get -v
-```
-
-And then build.
-
-
-### godep
-
-_This will go away: there's a limit to how many I want to maintain.  The Go
-ecosystem is maturing and I don't want to continue to spend time dealing with
-variants tools without a compelling reason._
-
-For now ...
-
-`dep` is a vendor-locking tool which uses human directives in `Gopkg.toml` to
-let the maintainer update known versions in the tooling file `Gopkg.lock`,
-which is used to check out content and make it available in the `vendor`
-directory.
-
-Note that `dep ensure` checks out the repositories in a common area,
-`~/go/pkg/dep/sources` (or elsewhere with `$GOPATH` set) and copies in the
-specific files for this revision.  Thus there will be no git/mercurial
-repository data within the vendor tree.
-
-```console
-$ dep ensure
-$ make || go build
-```
-
-
-### Another dependency version manager
-
-With the advent of Go Modules, I'd very much prefer to settle on just that
-system.  I intend to remove support for other dependency tools.
-
-### Vendoring or lack thereof
-
-I don't want code of multiple copyrights and licenses in one git repository.
-I don't want someone else's misbehaviour coming to light to force me to
-rewrite my git history to remove copyright violating code: that's worse for
-provenance than having to hunt around for another clone of a dependency which
-does at least match the available checksums.
-
-A version release will include vendored code, but that doesn't mean it needs
-to be part of the git repo.  If truly needed, a second repository of
-dependencies can be used, as the vendor tree.
-
-But really, no.  Please don't patch around your lack of dependency stashing by
-asking others to assume licensing liability for you.
-
 
 Table packages
 --------------
@@ -194,18 +146,6 @@ package, `go.pennock.tech/tabular`.  We originally used
 
 You can use Go build tags to switch the table package used.  I might remove
 support for this in the future.
-
-
-Optional Tools
---------------
-
-If you're just installing, you don't need these.  If you're developing, you
-might.
-
-* `go get -v github.com/kisielk/godepgraph`  
-   Dependency graphing tool
-* `go get -v github.com/golang/lint/golint`  
-  Linter for Go
 
 
 Alternatives

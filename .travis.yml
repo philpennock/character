@@ -12,16 +12,10 @@ go:
 # 2020-02-05: removed prior-to-1.13, because of changes in rune display width
 # calculations and the values we're trying to assert depending upon Go version
 
-install:
-  # This is evil and wrong, but it's a container managed by Travis, and this is testing,
-  # not CI which generates artifacts which we deploy, so can't leak out:
-  - dep version || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - make dep
-
 script:
-  - make show-versions
-  - make all
-  - make vet
-  - make test
+  - ./util/show_versions.sh
+  - go build
+  - go vet ./...
+  - go test ./...
 
 # vim: set sw=2 et :
