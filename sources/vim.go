@@ -75,7 +75,7 @@ func loadVimDigraphs() VimData {
 		}
 	}
 
-	return loadVimDigraphsFromBuffer(b)
+	return loadVimDigraphsFromBuffer(filterAnsiEscapesFrom(b))
 }
 
 func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
@@ -145,6 +145,38 @@ func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
 	//	len(results.DigraphByRune), broken)
 
 	return results
+}
+
+// filterAnsiEscapesFrom strips ANSI escapes from vim's output, which some
+// versions of vim, in some compilation modes, insert.  So far, I've just seen
+// CSI-introduced sequences, so we're only filtering those, but if more
+// sequences are seen then we'll filter them out too.
+func filterAnsiEscapesFrom(in *bytes.Buffer) (out *bytes.Buffer) {
+	out = &bytes.Buffer{}
+	out.Grow(in.Len())
+	fullRaw := in.Bytes()
+	max := len(fullRaw)
+	i := 0
+OutsideEscape:
+	for ; i < max; i++ {
+		ch := fullRaw[i]
+		if ch == '\x1b' {
+			i += 1
+			goto InsideEscape
+		}
+		_ = out.WriteByte(ch)
+	}
+	goto AfterData
+InsideEscape:
+	for ; i < max; i++ {
+		ch := fullRaw[i]
+		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') {
+			i += 1
+			goto OutsideEscape
+		}
+	}
+AfterData:
+	return
 }
 
 func loadStaticVimDigraphs() VimData {
