@@ -151,6 +151,9 @@ func loadVimDigraphsFromBuffer(b *bytes.Buffer) VimData {
 // versions of vim, in some compilation modes, insert.  So far, I've just seen
 // CSI-introduced sequences, so we're only filtering those, but if more
 // sequences are seen then we'll filter them out too.
+// Actually, I wrote this to filter "anything starting with escape", not just CSI
+// of "\e[" ... I meant to implement CSI but frankly, this seems to work well
+// enough for the vim digraph data, so I'm sticking with it.
 func filterAnsiEscapesFrom(in *bytes.Buffer) (out *bytes.Buffer) {
 	out = &bytes.Buffer{}
 	out.Grow(in.Len())
