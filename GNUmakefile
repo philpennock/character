@@ -165,11 +165,8 @@ cleaninstall:
 vendor: Gopkg.lock
 	dep ensure
 
-LICENSES_all.txt: LICENSE.txt Gopkg.lock vendor
-	rm -f ./LICENSES_all.txt tmplicpart tmplic
-	for DIR in $$(dep status -f '{{.ProjectRoot}}{{"\n"}}'); do ( cd "vendor/$$DIR"; for F in NOTICE* LICEN[SC]E* PATENTS; do test -s "$$F" || continue; echo "~~~ $$F - $$DIR ~~~"; cat "./$$F"; done; ) > tmplicpart ; test -s tmplicpart || continue; echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; cat tmplicpart; echo; done > tmplic
-	( echo "~~~ $(shell go list .) ~~~"; cat LICENSE.txt tmplic ; ) > ./LICENSES_all.txt
-	@rm -f tmplicpart tmplic
+LICENSES_all.txt: LICENSE.txt go.mod go.sum
+	./util/update_license.sh
 
 check-no-GOPATH:
 	@if test -n "$(GOPATH)"; then echo >&2 "make: GOPATH is set, can't use this target"; exit 1; fi
