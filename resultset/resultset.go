@@ -409,6 +409,7 @@ type JItem struct {
 	Dec          string   `json:"decimal"`
 	Block        string   `json:"block"`
 	VIMDigraphs  []string `json:"vimDigraphs,omitempty"`
+	X11Digraphs  []string `json:"x11Digraphs,omitempty"`
 	HTMLEntities []string `json:"htmlEntities,omitempty"`
 	XMLEntities  []string `json:"xmlEntities,omitempty"`
 	UTF8         string   `json:"utf8"`
@@ -471,6 +472,7 @@ func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
 		Dec:          S(rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC)),
 		Block:        S(rs.RenderCharInfoItem(ci, PRINT_BLOCK)),
 		VIMDigraphs:  rs.sources.Vim.DigraphsSliceFor(ci.unicode.Number),
+		X11Digraphs:  rs.sources.X11.DigraphsSliceFor(ci.unicode.Number),
 		HTMLEntities: html,
 		XMLEntities:  xml,
 		UTF8:         S(rs.RenderCharInfoItem(ci, PRINT_RUNE_UTF8ENC)),
@@ -573,7 +575,7 @@ func (rs *ResultSet) detailsHeaders() []interface{} {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
 		return []interface{}{
-			"C", "Name", "Hex", "Dec", "Block", "Vim", "HTML", "XML",
+			"C", "Name", "Hex", "Dec", "Block", "Vim", "X11", "HTML", "XML",
 		}
 	case FIELD_SET_NET:
 		return []interface{}{
@@ -600,8 +602,9 @@ func (rs *ResultSet) detailsColumnProperties() []columnProperties {
 			{3, table.RIGHT, false}, // Hex
 			{4, table.RIGHT, false}, // Dec
 			{6, table.UNSET, true},  // Vim
-			{7, table.UNSET, true},  // HTML
-			{8, table.UNSET, true},  // XML
+			{7, table.UNSET, true},  // X11
+			{8, table.UNSET, true},  // HTML
+			{9, table.UNSET, true},  // XML
 		}
 	case FIELD_SET_NET:
 		return []columnProperties{
@@ -637,6 +640,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_BLOCK),
 			// We might put Info in here, to match old Perl script behaviour
 			rs.sources.Vim.DigraphsFor(ci.unicode.Number),
+			rs.sources.X11.DigraphsFor(ci.unicode.Number),
 			rs.RenderCharInfoItem(ci, PRINT_HTML_ENTITIES),
 			rs.RenderCharInfoItem(ci, PRINT_XML_ENTITIES),
 			// PRINT_PART_OF is almost always empty and while important, it

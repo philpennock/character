@@ -13,6 +13,7 @@ type Sources struct {
 	Unicode unicode.Unicode
 	UBlocks unicode.Blocks
 	Vim     VimData
+	X11     X11Data
 }
 
 // NewEmpty gives us a Sources item with no data loaded.
@@ -60,13 +61,19 @@ func (s *Sources) LoadStaticVim() *Sources {
 	return s
 }
 
+// LoadStaticX11 gives us the X11 compose sequences built into character.
+func (s *Sources) LoadStaticX11() *Sources {
+	s.X11 = loadStaticX11Digraphs()
+	return s
+}
+
 // NewFast gives us a Sources item which has the fast data; no search, no live vim
 func NewFast() *Sources {
-	return NewEmpty().LoadUnicode().LoadUnicodeBlocks().LoadStaticVim()
+	return NewEmpty().LoadUnicode().LoadUnicodeBlocks().LoadStaticVim().LoadStaticX11()
 }
 
 // NewAll gives us a Sources item which has had loaded all the data sources
 // that we know about.
 func NewAll() *Sources {
-	return NewEmpty().LoadUnicode().LoadUnicodeSearch().LoadStaticVim().LoadLiveVim()
+	return NewEmpty().LoadUnicode().LoadUnicodeSearch().LoadStaticVim().LoadLiveVim().LoadStaticX11()
 }

@@ -7,6 +7,7 @@ package main
 //go:generate go run ./util/update_entities.go
 //go:generate go run ./util/update_unicode.go
 //go:generate ./util/update_static_vim
+//go:generate go run ./util/update_x11_compose.go
 
 import (
 	"os"

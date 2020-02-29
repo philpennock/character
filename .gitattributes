@@ -1,0 +1,7 @@
+# GitHub determines file-types using <https://github.com/github/linguist>
+# which can override the determinations using Git Attributes.
+
+/sources/*.txt			linguist-vendored
+/sources/generated_*.go		linguist-generated
+/unicode/*.txt			linguist-vendored
+/unicode/generated_*.go		linguist-generated
