@@ -296,9 +296,20 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 	}
 	// Some other substitutions:
 	if what < PRINT_RUNE__RENDERERS && !strconv.IsGraphic(ci.unicode.Number) {
+		// We need controls to not be printed, such as 0x98 "START OF STRING"
+		// The first 20 points are easy, there are replacements for them.
+		// strconv.IsGraphic is false for codepoints in newer Unicode than Go
+		// stdlib handles, so we can't just default to the replacement
+		// character.
+		// We probably need to encode "control" etc as bits in a bitfield in ci.unicode.
+		// For now, let's use a heuristic: all the "real" control characters are in
+		// "Basic Latin" or "Latin-1 Supplement" and Unicode won't be assigning new
+		// code-points there which Go won't recognise as non-graphic.
 		switch {
 		case ci.unicode.Number < 0x20:
 			return string(rune(0x2400 + ci.unicode.Number)) // 'Control Pictures' block
+		case ci.unicode.Number <= 0xFF:
+			return string(rune(0xFFFD)) // "REPLACEMENT CHARACTER"
 		}
 	}
 
