@@ -52,7 +52,7 @@ table tbody td {
       window.output.innerHTML = '';
 
       const go = new Go();
-      go.argv = ['character', '--table-style', 'html'].concat(this.value.split(' '));
+      go.argv = ['character', '--table-style', 'html', '--shell-parse-argv', this.value];
       // Don't reset, make it easier to edit previous values
       // this.value = '';
 

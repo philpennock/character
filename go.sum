@@ -8,6 +8,8 @@ github.com/liquidgecka/testlib v0.0.0-20180123051607-561e6b271c63 h1:E1gsAMD4Tys
 github.com/liquidgecka/testlib v0.0.0-20180123051607-561e6b271c63/go.mod h1:vwMPvLIhXhkJaBfsk/6l+eDuiQaIVHC0b6eCvUVBsB0=
 github.com/mattn/go-runewidth v0.0.8 h1:3tS41NlGYSmhhe/8fhGRzc+z3AYCw1Fe1WAyLuujKs0=
 github.com/mattn/go-runewidth v0.0.8/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
+github.com/mattn/go-shellwords v1.0.10 h1:Y7Xqm8piKOO3v10Thp7Z36h4FYFjt5xB//6XvOrs2Gw=
+github.com/mattn/go-shellwords v1.0.10/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lLtQsUlTZDWQ8Y=
 github.com/olekukonko/tablewriter v0.0.0-20180418011723-d5dd8a50526a h1:wHDmMQT1L8SloVcCB3MUrNV2+VgC8geTmrOV0+cxmxo=
 github.com/olekukonko/tablewriter v0.0.0-20180418011723-d5dd8a50526a/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/spf13/cobra v0.0.2 h1:NfkwRbgViGoyjBKsLI0QMDcuMnhM+SBg3T0cGfpvKDE=

@@ -8,6 +8,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/liquidgecka/testlib v0.0.0-20180123051607-561e6b271c63
 	github.com/mattn/go-runewidth v0.0.8
+	github.com/mattn/go-shellwords v1.0.10
 	github.com/olekukonko/tablewriter v0.0.0-20180418011723-d5dd8a50526a
 	github.com/spf13/cobra v0.0.2
 	github.com/spf13/pflag v1.0.1

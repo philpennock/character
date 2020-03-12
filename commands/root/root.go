@@ -10,13 +10,22 @@ import (
 	"runtime/pprof"
 	"sync"
 
+	"github.com/mattn/go-shellwords"
 	"github.com/spf13/cobra"
 )
 
 var globalFlags struct {
 	profileCPUFile string
 	version        bool
+	shellParseArgv string
 }
+
+type reExecTrigger struct {
+	originalArgs []string
+	newArgs      []string
+}
+
+func (e reExecTrigger) Error() string { return "re-exec" }
 
 var characterCmd = &cobra.Command{
 	Use:   "character",
@@ -28,6 +37,20 @@ var characterCmd = &cobra.Command{
 				return err
 			}
 			pprof.StartCPUProfile(f)
+		}
+		if globalFlags.shellParseArgv != "" {
+			// This is so that the WASM version doesn't need JavaScript to
+			// understand how to split apart shell quoting.
+			newArgs, err := shellwords.Parse(globalFlags.shellParseArgv)
+			if err != nil {
+				return err
+			}
+			cmd.SilenceErrors = true
+			cmd.SilenceUsage = true
+			return reExecTrigger{
+				originalArgs: args,
+				newArgs:      newArgs,
+			}
 		}
 		return nil
 	},
@@ -58,6 +81,7 @@ func init() {
 	flagSet.StringVar(&globalFlags.profileCPUFile, "profile-cpu-file", "", "write CPU profile to file")
 	flagSet.BoolVar(&globalFlags.version, "version", false, "alias for version sub-command")
 	characterCmd.MarkFlagFilename("profile-cpu-file")
+	flagSet.StringVar(&globalFlags.shellParseArgv, "shell-parse-argv", "", "replace argv with shell-split of this string")
 }
 
 var errorCount struct {
@@ -90,6 +114,15 @@ func GetErrorCount() int {
 // registered their availability via AddCommand calls in their init functions.
 func Start() {
 	err := characterCmd.Execute()
+	if err != nil {
+		if reExec, ok := err.(reExecTrigger); ok {
+			characterCmd.SilenceErrors = false
+			characterCmd.SilenceUsage = false
+			characterCmd.SetArgs(reExec.newArgs)
+			globalFlags.shellParseArgv = ""
+			err = characterCmd.Execute()
+		}
+	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "command failed: %s\n", err)
 		Errored()
