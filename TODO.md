@@ -6,9 +6,17 @@
 * switch CharInfo to be an interface, so that stuff like regional indicators
   can supply another object, satisfying that interface but also others; lets
   the default Unicode characters not have widths, etc.
-* RFC 1345 mnemonic digraphs as a column
+* ~~RFC 1345 mnemonic digraphs as a column~~
+  + have this now via X11 which is a superset of RFC 1345
 * Rework to generate fields and be able to loop to see if a field is present
   at all, so that the `Of` column can usually disappear.
+* Bits in a bitfield per CharInfo, representing attributes such as control
+  + if marked as combining, combine with flag-specified char, by default SPACE.
+    - will repair another column alignment bug
+    - make sure to handle RTL combining, for 0x656 inter alia
+* Emoji-mode is messing with display-width calculations, but is not always
+  supported, so how do we determine those which are?
+  + at what point do we surrender and have tabular use terminfo movements?
 
 ### Known Issues
 
