@@ -81,7 +81,21 @@ var punyCmd = &cobra.Command{
 				if strings.HasPrefix(argUTF8, p) {
 					argPrefix = p
 					argUTF8 = argUTF8[len(p):]
+					break
 				}
+			}
+
+			// For foo@bar@baz, we consider all elements to the right of the
+			// first @ to be potentially a domain part and we exclude only the
+			// first part.
+			// However, idna.ToUnicode()/.ToASCII() do not split on @ so such
+			// sequences will probably fail.  I haven't yet decided what, if
+			// anything, should be done about that.  In practice, I expect
+			// simple email addresses (or http auth inside URLs) to be
+			// significantly more prevalent and the only aspect I care about.
+			if i := strings.Index(argUTF8, "@"); i >= 0 {
+				argPrefix += argUTF8[:i+1]
+				argUTF8 = argUTF8[i+1:]
 			}
 
 			if !flags.punyOut {
