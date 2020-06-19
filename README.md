@@ -1,7 +1,7 @@
 character
 =========
 
-[![Continuous Integration](https://secure.travis-ci.org/philpennock/character.svg?branch=master)](http://travis-ci.org/philpennock/character)
+[![Continuous Integration](https://secure.travis-ci.org/philpennock/character.svg?branch=main)](http://travis-ci.org/philpennock/character)
 
 This is a tool for various manipulations on characters, as characters rather
 than full strings, to show names, encodings and more.
