@@ -46,6 +46,8 @@ const (
 	PRINT_RUNE_ISOLATED
 	PRINT_RUNE_PRESENT_TEXT
 	PRINT_RUNE_PRESENT_EMOJI
+	PRINT_RUNE_PRESENT_LEFT
+	PRINT_RUNE_PRESENT_RIGHT
 	PRINT_RUNE__RENDERERS // items before this render the rune itself
 	PRINT_RUNE_DEC
 	PRINT_RUNE_HEX     // raw hex
@@ -76,6 +78,8 @@ const (
 	runeRenderUnspecified runeRenderBiasType = iota
 	runeRenderText
 	runeRenderEmoji
+	runeRenderLeft
+	runeRenderRight
 )
 
 type errorItem struct {
@@ -155,6 +159,12 @@ func New(s *sources.Sources, sizeHint int) *ResultSet {
 	if ResultCmdFlags.Emoji {
 		r.runeBias = runeRenderEmoji
 	}
+	if ResultCmdFlags.Left {
+		r.runeBias = runeRenderLeft
+	}
+	if ResultCmdFlags.Right {
+		r.runeBias = runeRenderRight
+	}
 	return r
 }
 
@@ -180,6 +190,10 @@ func (rs *ResultSet) RunePrintType() printItem {
 		return PRINT_RUNE_PRESENT_TEXT
 	case runeRenderEmoji:
 		return PRINT_RUNE_PRESENT_EMOJI
+	case runeRenderLeft:
+		return PRINT_RUNE_PRESENT_LEFT
+	case runeRenderRight:
+		return PRINT_RUNE_PRESENT_RIGHT
 	default:
 		panic("unhandled internal runeBias")
 	}
@@ -336,20 +350,54 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 			return fixedWidthCell{s: sOuter, w: w}
 		}
 		return sOuter
+
+	// These next four demonstrate that we need a bit of a design rethink here, because
+	// "2.11 Order of Emoji ZWJ Sequences" of
+	// <http://unicode.org/reports/tr51/> demonstrates that we've got a cascade
+	// of modifiers we could be applying:
+	//
+	// > When representing emoji ZWJ sequences for an individual person, the following order should be used:
+	// > Order	Category										Section
+	// > 1		Base											Section 1.4.1 Emoji Characters
+	// > 2		Emoji modifier or emoji presentation selector	Section 2.4 Diversity
+	// > 3		Hair component									Section 2.8 Hair Component
+	// > 4		Color											Section 2.9, Color
+	// > 5		Gender sign or object							Section 2.3.1, Gender-Neutral Emoji
+	// > 6		Direction indicator								Section 2.10, Emoji Glyph Facing Direction
+	//
+	// Fortunately for me right now, the Emoji Glyph Facing Direction sequences
+	// end with the emoji presentation selector so I don't need to rewrite for
+	// the bits we support here.
+
 	case PRINT_RUNE_PRESENT_TEXT: // text presentation selector, UTS#51 §1.4.3 ED-8
 		s := string(ci.unicode.Number)
 		w, _ := aux.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
-			s = s + "\uFE0E"
+			s = s + "\uFE0E" // VARIATION SELECTOR-15
 		}
 		return fixedWidthCell{s: s, w: w}
 	case PRINT_RUNE_PRESENT_EMOJI: // emoji presentation selector, UTS#51 §1.4.3 ED-9
 		s := string(ci.unicode.Number)
 		w, _ := aux.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
-			s = s + "\uFE0F"
+			s = s + "\uFE0F" // VARIATION SELECTOR-16
 		}
 		return fixedWidthCell{s: s, w: w}
+	case PRINT_RUNE_PRESENT_LEFT: // emoji glyph facing direction UTS#51 §2.10
+		s := string(ci.unicode.Number)
+		w, _ := aux.DisplayCellWidth(s)
+		if unicode.Emojiable(ci.unicode.Number) {
+			s = s + "\u200D\u2B05\uFE0F" // ZERO WIDTH JOINER, LEFTWARDS BLACK ARROW, VARIATION SELECTOR-16
+		}
+		return fixedWidthCell{s: s, w: w}
+	case PRINT_RUNE_PRESENT_RIGHT: // emoji glyph facing direction UTS#51 §2.10
+		s := string(ci.unicode.Number)
+		w, _ := aux.DisplayCellWidth(s)
+		if unicode.Emojiable(ci.unicode.Number) {
+			s = s + "\u200D\u27A1\uFE0F" // ZERO WIDTH JOINER, BLACK RIGHTWARDS ARROW, VARIATION SELECTOR-16
+		}
+		return fixedWidthCell{s: s, w: w}
+
 	case PRINT_RUNE_HEX:
 		return strconv.FormatUint(uint64(ci.unicode.Number), 16)
 	case PRINT_RUNE_DEC:
@@ -415,6 +463,8 @@ type JItem struct {
 	Display      string   `json:"display"`
 	DisplayText  string   `json:"displayText"`
 	DisplayEmoji string   `json:"displayEmoji"`
+	DisplayLeft  string   `json:"displayLeft"`
+	DisplayRight string   `json:"displayRight"`
 	Name         string   `json:"name"`
 	Hex          string   `json:"hex"`
 	Dec          string   `json:"decimal"`
@@ -478,6 +528,8 @@ func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
 		Display:      S(rs.RenderCharInfoItem(ci, PRINT_RUNE)),
 		DisplayText:  S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_TEXT)),
 		DisplayEmoji: S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_EMOJI)),
+		DisplayLeft:  S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_LEFT)),
+		DisplayRight: S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_RIGHT)),
 		Name:         S(rs.RenderCharInfoItem(ci, PRINT_NAME)),
 		Hex:          S(rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX)),
 		Dec:          S(rs.RenderCharInfoItem(ci, PRINT_RUNE_DEC)),
@@ -640,6 +692,11 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 		runeDisplay = PRINT_RUNE_PRESENT_TEXT
 	case runeRenderEmoji:
 		runeDisplay = PRINT_RUNE_PRESENT_EMOJI
+	case runeRenderLeft:
+		runeDisplay = PRINT_RUNE_PRESENT_LEFT
+	case runeRenderRight:
+		runeDisplay = PRINT_RUNE_PRESENT_RIGHT
+
 	}
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:

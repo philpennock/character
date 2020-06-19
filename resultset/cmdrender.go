@@ -5,7 +5,6 @@
 package resultset
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -21,6 +20,8 @@ var ResultCmdFlags struct {
 	Verbose       bool
 	Emoji         bool
 	Text          bool
+	Left          bool
+	Right         bool
 }
 
 // RegisterCmdFlags adds the --verbose/--net-verbose/--internal-debug flags to a Cobra cmd.
@@ -38,6 +39,8 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Verbose, "verbose", "v", false, "show information about the character")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Emoji, "emoji-presentation", "E", false, "force emoji presentation")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Text, "text-presentation", "T", false, "force text presentation")
+	cmd.Flags().BoolVarP(&ResultCmdFlags.Left, "left", "L", false, "emoji facing left")
+	cmd.Flags().BoolVarP(&ResultCmdFlags.Right, "right", "R", false, "emoji facing right")
 }
 
 // CmdVerbose indicates if a documented verbose flag was set; occasionally commands want to know
@@ -47,29 +50,56 @@ func CmdVerbose() bool {
 }
 
 // ErrIncompatibleFlags indicates that multiple types of verboseness were simultaneously requested.
-var ErrIncompatibleFlags = errors.New("incompatible table-rendering flags")
+type ErrIncompatibleFlags []string
+
+func (e ErrIncompatibleFlags) Error() string {
+	return fmt.Sprintf("incompatible table-rendering flags: %v", []string(e))
+}
 
 // FlagsOkay returns either ErrIncompatibleFlags or nil
 func FlagsOkay() error {
-	c := 0
+	onlyOne := make([]string, 0, 5)
 	if ResultCmdFlags.internalDebug {
-		c++
+		onlyOne = append(onlyOne, "--internal-debug")
 	}
 	if ResultCmdFlags.NetVerbose {
-		c++
+		onlyOne = append(onlyOne, "--net-verbose|-N")
 	}
 	if ResultCmdFlags.Verbose {
-		c++
+		onlyOne = append(onlyOne, "--verbose|-v")
 	}
 	if ResultCmdFlags.Oneline {
-		c++
+		onlyOne = append(onlyOne, "--oneline|-1")
 	}
 	if ResultCmdFlags.JSON {
-		c++
+		onlyOne = append(onlyOne, "--json|-J")
 	}
-	if c > 1 {
-		return ErrIncompatibleFlags
+	if len(onlyOne) > 1 {
+		return ErrIncompatibleFlags(onlyOne)
 	}
+
+	// The left/right direction indicator sequences end with the emoji
+	// presentation selector, so emoji is implicit for those, and not
+	// incompatible; we do need to ensure we're not pre-empted.
+	onlyOne = make([]string, 0, 5)
+	if ResultCmdFlags.Left {
+		onlyOne = append(onlyOne, "--left|-L")
+		ResultCmdFlags.Emoji = false // implicit
+	}
+	if ResultCmdFlags.Right {
+		onlyOne = append(onlyOne, "--right|-R")
+		ResultCmdFlags.Emoji = false // implicit
+	}
+	if ResultCmdFlags.Text {
+		onlyOne = append(onlyOne, "--text|-T")
+	}
+	if ResultCmdFlags.Emoji && ResultCmdFlags.Text {
+		onlyOne = append(onlyOne, "--emoji|-E")
+	}
+	if len(onlyOne) > 1 {
+		return ErrIncompatibleFlags(onlyOne)
+	}
+
 	return nil
 }
 
@@ -82,6 +112,12 @@ func (rs *ResultSet) RenderPerCmdline(defaultPI printItem) {
 	}
 	if ResultCmdFlags.Text && defaultPI == PRINT_RUNE {
 		defaultPI = PRINT_RUNE_PRESENT_TEXT
+	}
+	if ResultCmdFlags.Left && defaultPI == PRINT_RUNE {
+		defaultPI = PRINT_RUNE_PRESENT_LEFT
+	}
+	if ResultCmdFlags.Right && defaultPI == PRINT_RUNE {
+		defaultPI = PRINT_RUNE_PRESENT_RIGHT
 	}
 	if ResultCmdFlags.Verbose {
 		rs.PrintTables()
