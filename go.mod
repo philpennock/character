@@ -9,10 +9,10 @@ require (
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/spf13/cobra v1.0.0
+	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	github.com/xlab/tablewriter v0.0.0-20160610135559-80b567a11ad5
 	go.pennock.tech/tabular v1.1.2
-	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
-	golang.org/x/text v0.3.2
+	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
+	golang.org/x/text v0.3.4
 )

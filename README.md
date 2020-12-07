@@ -15,6 +15,8 @@ $ character help
 [... lists all available sub-commands ...]
 $ character version
 [...]
+$ character search check
+[... table of results; search is convenience alias ...]
 $ character name ✓
 CHECK MARK
 $ character named -h
