@@ -1,4 +1,4 @@
-// Copyright © 2017 Phil Pennock.
+// Copyright © 2017,2020 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -13,15 +13,16 @@ import (
 // Rather than repeat verbose/net-verbose/etc in each command, have flags here
 
 var ResultCmdFlags struct {
-	internalDebug bool
-	JSON          bool
-	Oneline       bool
-	NetVerbose    bool
-	Verbose       bool
-	Emoji         bool
-	Text          bool
-	Left          bool
-	Right         bool
+	internalDebug   bool
+	implicitVerbose bool
+	JSON            bool
+	Oneline         bool
+	NetVerbose      bool
+	Verbose         bool
+	Emoji           bool
+	Text            bool
+	Left            bool
+	Right           bool
 }
 
 // RegisterCmdFlags adds the --verbose/--net-verbose/--internal-debug flags to a Cobra cmd.
@@ -41,6 +42,9 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Text, "text-presentation", "T", false, "force text presentation")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Left, "left", "L", false, "emoji facing left")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Right, "right", "R", false, "emoji facing right")
+
+	cmd.Flags().BoolVarP(&ResultCmdFlags.implicitVerbose, "internal-implicit-verbose", "", false, "")
+	cmd.Flags().MarkHidden("internal-implicit-verbose")
 }
 
 // CmdVerbose indicates if a documented verbose flag was set; occasionally commands want to know
@@ -76,6 +80,9 @@ func FlagsOkay() error {
 	}
 	if len(onlyOne) > 1 {
 		return ErrIncompatibleFlags(onlyOne)
+	}
+	if len(onlyOne) == 0 && ResultCmdFlags.implicitVerbose {
+		ResultCmdFlags.Verbose = true
 	}
 
 	// The left/right direction indicator sequences end with the emoji

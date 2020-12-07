@@ -1,4 +1,4 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2015,2016,2020 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -14,6 +14,7 @@ import (
 
 	"github.com/philpennock/character/commands/root"
 
+	_ "github.com/philpennock/character/commands/aliases"
 	_ "github.com/philpennock/character/commands/browse"
 	_ "github.com/philpennock/character/commands/code"
 	_ "github.com/philpennock/character/commands/known"
