@@ -25,6 +25,13 @@ go mod download -json | jq -r '"\(.Path):\(.Dir)"' | while read pair; do
       test -s "$F" || continue
       echo "~~~ $F - $modpath ~~~"
       cat "./$F"
+      # shell strips final newline and we're looking for a newline, so
+      # really this will end up as the empty string when the file ends in a
+      # POSIX full line:
+      last_char="$(tail -c 1 "./$F")"
+      if [[ "$last_char" != $'\n' && "$last_char" != "" ]]; then
+        echo
+      fi
     done
   ) > "$tmpstage"
   test -s "$tmpstage" || continue
