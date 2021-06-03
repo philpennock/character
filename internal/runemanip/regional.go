@@ -1,8 +1,8 @@
-// Copyright © 2016-2017 Phil Pennock.
+// Copyright © 2016-2017,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-package aux
+package runemanip
 
 // IsPairCode indicates if the passed run is part of a pairing code designed
 // for extensible lookup.  This is used for national flags.

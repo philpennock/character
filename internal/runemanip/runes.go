@@ -1,8 +1,8 @@
-// Copyright © 2015 Phil Pennock.
+// Copyright © 2015,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
-package aux
+package runemanip
 
 // RuneFromHexField converts a hex field, perhaps of odd length, to a rune
 func RuneFromHexField(bb []byte) rune {

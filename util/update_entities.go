@@ -1,4 +1,4 @@
-// Copyright © 2015 Phil Pennock.
+// Copyright © 2015,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/runemanip"
 )
 
 func processEntityDirTo(entityFiles []string, outfile string, pkg, mapName string) error {
@@ -46,7 +46,7 @@ func processEntityDirTo(entityFiles []string, outfile string, pkg, mapName strin
 			entity := string(got[1])
 			var r rune
 			if len(got[2]) > 0 {
-				r = aux.RuneFromHexField(got[3])
+				r = runemanip.RuneFromHexField(got[3])
 			} else {
 				i64, err := strconv.ParseInt(string(got[3]), 10, 32)
 				if err != nil {
@@ -156,9 +156,9 @@ var setOfEntities = []struct {
 		"entities/generated_html.go",
 		"HTMLEntities",
 		[]string{
-			"/usr/local/share/sgml/html/4.01",                                                      // FreeBSD textproc/html
-			"/opt/local/share/OpenSP",                                                              // MacOS(MacPorts)
-			"/usr/share/sgml/html/entities",                                                        // Debian/Ubuntu
+			"/usr/local/share/sgml/html/4.01", // FreeBSD textproc/html
+			"/opt/local/share/OpenSP",         // MacOS(MacPorts)
+			"/usr/share/sgml/html/entities",   // Debian/Ubuntu
 			"/System/Library/PrivateFrameworks/CoreProfile.framework/Versions/A/Resources/Devices", // MacOS
 			// note that the files are copyright ISO, not Apple property, so okay to parse them for making our derived code
 		},

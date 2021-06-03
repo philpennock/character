@@ -1,4 +1,4 @@
-// Copyright © 2015,2016 Phil Pennock.
+// Copyright © 2015,2016,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -7,7 +7,7 @@ package unicode
 import (
 	"strings"
 
-	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/runemanip"
 )
 
 // What we need is a SegmentTreeMap, such that lookup of a key matches an entry
@@ -107,11 +107,11 @@ func LoadBlocks() Blocks {
 }
 
 func init() {
-	// We depend upon aux for regional.go and it's supposed to be stub within us,
+	// We depend upon runemanip for regional.go and it's supposed to be stub within us,
 	// but we want width override logic to depend upon some block information.
 	// Suck it up.
-	aux.OverrideWidthMSPMin, aux.OverrideWidthMSPMax, _ = FindBlockById(BlockMiscellaneousSymbolsandPictographs)
-	aux.OverrideWidthSSPMin, aux.OverrideWidthSSPMax, _ = FindBlockById(BlockSupplementalSymbolsandPictographs)
-	aux.OverrideWidthEmoticonsMin, aux.OverrideWidthEmoticonsMax, _ = FindBlockById(BlockEmoticons)
+	runemanip.OverrideWidthMSPMin, runemanip.OverrideWidthMSPMax, _ = FindBlockById(BlockMiscellaneousSymbolsandPictographs)
+	runemanip.OverrideWidthSSPMin, runemanip.OverrideWidthSSPMax, _ = FindBlockById(BlockSupplementalSymbolsandPictographs)
+	runemanip.OverrideWidthEmoticonsMin, runemanip.OverrideWidthEmoticonsMax, _ = FindBlockById(BlockEmoticons)
 	// These are also re-used for Emojiable() in emoji.go
 }

@@ -1,11 +1,11 @@
-// Copyright © 2017 Phil Pennock.
+// Copyright © 2017,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
 package unicode
 
 import (
-	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/runemanip"
 )
 
 // Emojiable indicates whether or not a given rune might be an emoji and so can
@@ -26,13 +26,13 @@ func Emojiable(r rune) bool {
 	if ok {
 		return ok
 	}
-	if aux.OverrideWidthEmoticonsMin <= r && r <= aux.OverrideWidthEmoticonsMax {
+	if runemanip.OverrideWidthEmoticonsMin <= r && r <= runemanip.OverrideWidthEmoticonsMax {
 		return true
 	}
-	if aux.OverrideWidthMSPMin <= r && r <= aux.OverrideWidthMSPMax {
+	if runemanip.OverrideWidthMSPMin <= r && r <= runemanip.OverrideWidthMSPMax {
 		return true
 	}
-	if aux.OverrideWidthSSPMin <= r && r <= aux.OverrideWidthSSPMax {
+	if runemanip.OverrideWidthSSPMin <= r && r <= runemanip.OverrideWidthSSPMax {
 		return true
 	}
 	return false

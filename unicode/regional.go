@@ -1,4 +1,4 @@
-// Copyright © 2016-2017 Phil Pennock.
+// Copyright © 2016-2017,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -7,14 +7,14 @@ package unicode
 import (
 	"fmt"
 
-	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/runemanip"
 )
 
 // PairCharInfo returns a faked-up CharInfo which is for rune 0 but with an informative name.
 func PairCharInfo(r1, r2 rune) (CharInfo, bool) {
 	name := fmt.Sprintf("%c%c  - %s + %s", r1, r2, labelOf(r1), labelOf(r2))
-	// aux.DisplayCellWidth decays to regular rune-based counting for lengths greater than 1
-	width, _ := aux.DisplayCellWidth(name)
+	// runemanip.DisplayCellWidth decays to regular rune-based counting for lengths greater than 1
+	width, _ := runemanip.DisplayCellWidth(name)
 	// In testing, the go-runewidth based stuff does not handle regional indicators.
 	width -= 3
 

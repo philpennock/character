@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Phil Pennock.
+// Copyright © 2015-2017,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -11,8 +11,8 @@ import (
 	"golang.org/x/net/idna"
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/philpennock/character/internal/aux"
 	"github.com/philpennock/character/internal/encodings"
+	"github.com/philpennock/character/internal/runemanip"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"
@@ -68,7 +68,7 @@ var nameCmd = &cobra.Command{
 		// non-UTF8 in UTF8 environments.
 		if flags.hexInput {
 			var errList []error
-			args, errList = aux.HexDecodeArgs(args)
+			args, errList = runemanip.HexDecodeArgs(args)
 			for _, e := range errList {
 				results.AddError("", e)
 			}
@@ -132,7 +132,7 @@ func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *
 
 	results.AddCharInfoDerivedFrom(ci, originalRune)
 	// Ancillary extra data if warranted
-	if aux.IsPairCode(ci.Number) {
+	if runemanip.IsPairCode(ci.Number) {
 		if *pairedCodepoint != 0 {
 			if ci2, ok := unicode.PairCharInfo(*pairedCodepoint, ci.Number); ok {
 				results.AddCharInfoDerivedFrom(ci2, originalRune)

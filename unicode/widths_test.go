@@ -1,4 +1,4 @@
-// Copyright © 2017,2020 Phil Pennock.
+// Copyright © 2017,2020-2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -13,7 +13,7 @@ import (
 
 	"github.com/liquidgecka/testlib"
 
-	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/runemanip"
 )
 
 func TestDisplayCellWidth(t *testing.T) {
@@ -32,7 +32,7 @@ func TestDisplayCellWidth(t *testing.T) {
 		{"☺", 1},
 		{"😇", 2},
 	} {
-		haveWidth, _ := aux.DisplayCellWidth(tuple.in)
+		haveWidth, _ := runemanip.DisplayCellWidth(tuple.in)
 		testedRune, _ := utf8.DecodeRuneInString(tuple.in)
 		T.Equal(haveWidth, tuple.needWidth, fmt.Sprintf("test %d: width of %q [%#x] should be %d but got %d", itemNum, tuple.in, testedRune, tuple.needWidth, haveWidth))
 	}

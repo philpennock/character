@@ -1,4 +1,4 @@
-// Copyright © 2015-2017,2020 Phil Pennock.
+// Copyright © 2015-2017,2020-2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -16,7 +16,7 @@ import (
 	"golang.org/x/net/idna"
 
 	"github.com/philpennock/character/entities"
-	"github.com/philpennock/character/internal/aux"
+	"github.com/philpennock/character/internal/runemanip"
 	"github.com/philpennock/character/internal/table"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"
@@ -331,7 +331,7 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 	switch what {
 	case PRINT_RUNE:
 		s := string(ci.unicode.Number)
-		if w, override := aux.DisplayCellWidth(s); override {
+		if w, override := runemanip.DisplayCellWidth(s); override {
 			return fixedWidthCell{s: s, w: w}
 		}
 		return s
@@ -346,7 +346,7 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 			// 0x2069, // POP DIRECTIONAL ISOLATE
 			0x202C, // POP DIRECTIONAL FORMATTING
 		)
-		if w, override := aux.DisplayCellWidth(sInner); override {
+		if w, override := runemanip.DisplayCellWidth(sInner); override {
 			return fixedWidthCell{s: sOuter, w: w}
 		}
 		return sOuter
@@ -371,28 +371,28 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 
 	case PRINT_RUNE_PRESENT_TEXT: // text presentation selector, UTS#51 §1.4.3 ED-8
 		s := string(ci.unicode.Number)
-		w, _ := aux.DisplayCellWidth(s)
+		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
 			s = s + "\uFE0E" // VARIATION SELECTOR-15
 		}
 		return fixedWidthCell{s: s, w: w}
 	case PRINT_RUNE_PRESENT_EMOJI: // emoji presentation selector, UTS#51 §1.4.3 ED-9
 		s := string(ci.unicode.Number)
-		w, _ := aux.DisplayCellWidth(s)
+		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
 			s = s + "\uFE0F" // VARIATION SELECTOR-16
 		}
 		return fixedWidthCell{s: s, w: w}
 	case PRINT_RUNE_PRESENT_LEFT: // emoji glyph facing direction UTS#51 §2.10
 		s := string(ci.unicode.Number)
-		w, _ := aux.DisplayCellWidth(s)
+		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
 			s = s + "\u200D\u2B05\uFE0F" // ZERO WIDTH JOINER, LEFTWARDS BLACK ARROW, VARIATION SELECTOR-16
 		}
 		return fixedWidthCell{s: s, w: w}
 	case PRINT_RUNE_PRESENT_RIGHT: // emoji glyph facing direction UTS#51 §2.10
 		s := string(ci.unicode.Number)
-		w, _ := aux.DisplayCellWidth(s)
+		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
 			s = s + "\u200D\u27A1\uFE0F" // ZERO WIDTH JOINER, BLACK RIGHTWARDS ARROW, VARIATION SELECTOR-16
 		}
@@ -427,7 +427,7 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 	case PRINT_RUNE_WIDTH:
 		// If we supported color etc, then this would be a good opportunity to
 		// use the override return bool to color red or something.
-		width, _ := aux.DisplayCellWidth(string(ci.unicode.Number))
+		width, _ := runemanip.DisplayCellWidth(string(ci.unicode.Number))
 		return strconv.FormatUint(uint64(width), 10)
 	case PRINT_NAME:
 		if ci.unicode.NameWidth == 0 {
@@ -503,12 +503,12 @@ func S(x interface{}) string {
 func JItemWidth(x interface{}) int {
 	switch s := x.(type) {
 	case string:
-		width, _ := aux.DisplayCellWidth(s)
+		width, _ := runemanip.DisplayCellWidth(s)
 		return width
 	case tcWidther:
 		return s.TerminalCellWidth()
 	case fmt.Stringer:
-		width, _ := aux.DisplayCellWidth(s.String())
+		width, _ := runemanip.DisplayCellWidth(s.String())
 		return width
 	default:
 		return 0

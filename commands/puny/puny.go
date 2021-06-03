@@ -1,4 +1,4 @@
-// Copyright © 2017 Phil Pennock.
+// Copyright © 2017,2021 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/idna"
 
-	"github.com/philpennock/character/internal/aux"
 	"github.com/philpennock/character/internal/encodings"
+	"github.com/philpennock/character/internal/runemanip"
 
 	"github.com/philpennock/character/commands/root"
 )
@@ -54,7 +54,7 @@ var punyCmd = &cobra.Command{
 		// non-UTF8 in UTF8 environments.
 		if flags.hexInput {
 			var errList []error
-			args, errList = aux.HexDecodeArgs(args)
+			args, errList = runemanip.HexDecodeArgs(args)
 			for _, e := range errList {
 				root.Errorf("error decoding hex: %s\n", e)
 			}

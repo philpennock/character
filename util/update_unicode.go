@@ -20,9 +20,8 @@ import (
 	"strings"
 
 	// hrm, depending upon a package within which we're generating files
+	"github.com/philpennock/character/internal/runemanip"
 	"github.com/philpennock/character/unicode"
-
-	"github.com/philpennock/character/internal/aux"
 )
 
 var flags struct {
@@ -321,8 +320,8 @@ ReadLoop:
 		}
 
 		bi := unicode.BlockInfo{
-			Min:  aux.RuneFromHexField(got[1]),
-			Max:  aux.RuneFromHexField(got[2]),
+			Min:  runemanip.RuneFromHexField(got[1]),
+			Max:  runemanip.RuneFromHexField(got[2]),
 			Name: string(got[3]),
 		}
 		if bi.Max < maxKnownBlockRune {
@@ -381,7 +380,7 @@ ReadLoop:
 		// we want the simpler hard-delimiter split
 		fields := bytes.Split(line, []byte{';'})
 
-		r := aux.RuneFromHexField(fields[0])
+		r := runemanip.RuneFromHexField(fields[0])
 		name := string(fields[1])
 		if name == "<control>" {
 			if len(fields) >= 11 && len(fields[10]) > 0 {
@@ -450,8 +449,8 @@ ReadLoop:
 			continue
 		}
 
-		baseRune := aux.RuneFromHexField(got[1])
-		variationSelector := aux.RuneFromHexField(got[2])
+		baseRune := runemanip.RuneFromHexField(got[1])
+		variationSelector := runemanip.RuneFromHexField(got[2])
 		switch variationSelector {
 		case textSelect:
 			if textSeen != 0 {
