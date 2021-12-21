@@ -84,7 +84,8 @@ func showGoModuleVersions(programName string) {
 			}
 		}
 		// sigh, if I junk the other table interfaces, I can add RenderTo instead of using this.
-		fmt.Printf(t.Render())
+		fmt.Print(t.Render())
+		showBuildSettings(buildInfo)
 	}
 }
 
