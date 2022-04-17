@@ -39,6 +39,8 @@ func DisplayCellWidth(s string) (width int, isOverride bool) {
 		return 1, true
 	case IsPairCode(r):
 		return 1, true
+	case IsVariationSelector(r):
+		return 0, true
 	case OverrideWidthMSPMin != 0 && OverrideWidthMSPMin <= r && r <= OverrideWidthMSPMax:
 		fallthrough
 	case OverrideWidthSSPMin != 0 && OverrideWidthSSPMin <= r && r <= OverrideWidthSSPMax:

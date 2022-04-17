@@ -34,6 +34,7 @@ type selector int
 // These constants dictate what is being added to a ResultSet.
 const (
 	_ITEM selector = iota
+	_STRSEQ
 	_ERROR
 	_DIVIDER
 )
@@ -91,9 +92,11 @@ type errorItem struct {
 // we support normalization handling, we also want to record where an item came
 // from, because it might not be obvious from what was typed at the
 // command-line.
+// strseq is used only for _STRSEQ types
 type charItem struct {
 	unicode unicode.CharInfo
 	partOf  rune
+	strseq  string
 }
 
 // fixedWidthCell satisfies an interface used by the tabular table provider, to
@@ -211,6 +214,12 @@ func (rs *ResultSet) AddCharInfo(ci unicode.CharInfo) {
 	rs.which = append(rs.which, _ITEM)
 }
 
+// AddStringSequence is used where we have some combining sequence to be rendered as one
+func (rs *ResultSet) AddStringSequence(s string) {
+	rs.items = append(rs.items, charItem{strseq: s})
+	rs.which = append(rs.which, _STRSEQ)
+}
+
 // AddCharInfoDerivedFrom is used when the character was decomposed by us, so
 // that we can display original input if requested.
 func (rs *ResultSet) AddCharInfoDerivedFrom(ci unicode.CharInfo, from rune) {
@@ -248,6 +257,9 @@ func (rs *ResultSet) PrintPlain(what printItem) {
 		case _ITEM:
 			fmt.Fprintf(rs.OutputStream, "%s\n", rs.RenderCharInfoItem(rs.items[ii], what))
 			ii++
+		case _STRSEQ:
+			fmt.Fprintf(rs.OutputStream, "%s\n", rs.items[ii].strseq)
+			ii++
 		case _ERROR:
 			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei++
@@ -278,6 +290,9 @@ func (rs *ResultSet) StringPlain(what printItem) string {
 				out = append(out, fmt.Sprintf("%v", item))
 			}
 			ii++
+		case _STRSEQ:
+			// We don't double-print, the items in this should already have been emitted
+			ii++
 		case _ERROR:
 			fmt.Fprintf(rs.ErrorStream, "looking up %q: %s\n", rs.errors[ei].input, rs.errors[ei].err)
 			ei++
@@ -305,8 +320,20 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{}
 	// Exceptional cases first:
 	//
 	// We use 0 as a special-case for things like combinations, where there's only a name:
-	if ci.unicode.Number == 0 && what != PRINT_NAME {
-		return " "
+	if ci.unicode.Number == 0 {
+		if ci.strseq != "" {
+			switch what {
+			case PRINT_RUNE, PRINT_RUNE_PRESENT_TEXT, PRINT_RUNE_PRESENT_EMOJI, PRINT_RUNE_PRESENT_LEFT, PRINT_RUNE_PRESENT_RIGHT:
+				return ci.strseq
+			case PRINT_NAME:
+				return "(derived sequence)"
+			default:
+				return " "
+			}
+		}
+		if what != PRINT_NAME {
+			return " "
+		}
 	}
 	// Some other substitutions:
 	if what < PRINT_RUNE__RENDERERS && !strconv.IsGraphic(ci.unicode.Number) {
@@ -485,6 +512,12 @@ type JInfo struct {
 	Comment string `json:"comment"`
 }
 
+// JCombination is something which might be shown instead of JItem
+type JCombination struct {
+	Display string `json:"display"`
+	Derived bool   `json:"derived"`
+}
+
 // S converts to a string, for JSON
 func S(x interface{}) string {
 	switch s := x.(type) {
@@ -520,8 +553,13 @@ func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
 	html, _ := entities.HTMLEntitiesReverse[ci.unicode.Number]
 	xml, _ := entities.XMLEntitiesReverse[ci.unicode.Number]
 
-	if ci.unicode.Number == 0 && ci.unicode.Name != "" {
-		return &JInfo{Comment: ci.unicode.Name}
+	if ci.unicode.Number == 0 {
+		if ci.unicode.Name != "" {
+			return &JInfo{Comment: ci.unicode.Name}
+		}
+		if ci.strseq != "" {
+			return &JCombination{Display: ci.strseq, Derived: true}
+		}
 	}
 
 	return &JItem{
@@ -569,7 +607,7 @@ func (rs *ResultSet) PrintJSON() {
 		ii := 0
 		for _, s := range rs.which {
 			switch s {
-			case _ITEM:
+			case _ITEM, _STRSEQ:
 				output.Characters = append(output.Characters, rs.JSONEntry(rs.items[ii]))
 				ii++
 			case _ERROR:
@@ -605,7 +643,7 @@ func (rs *ResultSet) PrintTables() {
 		ii := 0
 		for _, s := range rs.which {
 			switch s {
-			case _ITEM:
+			case _ITEM, _STRSEQ:
 				t.AddRow(rs.detailsFor(rs.items[ii])...)
 				ii++
 			case _ERROR:

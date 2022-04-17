@@ -63,6 +63,7 @@ var nameCmd = &cobra.Command{
 		results := resultset.New(srcs, approxCharCount)
 
 		var pairedCodepoint rune = 0
+		var priorCodepoint rune = 0
 
 		// We first handle hex encoding, as being the most likely source of
 		// non-UTF8 in UTF8 environments.
@@ -90,7 +91,7 @@ var nameCmd = &cobra.Command{
 			}
 			pairedCodepoint = 0
 			for _, r := range argUTF8 {
-				convertRune(r, &pairedCodepoint, srcs, results, 0)
+				convertRune(r, &pairedCodepoint, &priorCodepoint, srcs, results, 0)
 			}
 		}
 
@@ -112,7 +113,7 @@ func init() {
 	root.AddCommand(nameCmd)
 }
 
-func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *resultset.ResultSet, originalRune rune) {
+func convertRune(r rune, pairedCodepoint *rune, priorCodepoint *rune, srcs *sources.Sources, results *resultset.ResultSet, originalRune rune) {
 	ci, ok := srcs.Unicode.ByRune[r]
 	if !ok {
 		if originalRune == 0 {
@@ -120,7 +121,7 @@ func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *
 			decomp := norm.NFD.String(rs)
 			if decomp != rs {
 				for _, r2 := range decomp {
-					convertRune(r2, pairedCodepoint, srcs, results, r)
+					convertRune(r2, pairedCodepoint, priorCodepoint, srcs, results, r)
 				}
 				return
 			}
@@ -132,7 +133,12 @@ func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *
 
 	results.AddCharInfoDerivedFrom(ci, originalRune)
 	// Ancillary extra data if warranted
-	if runemanip.IsPairCode(ci.Number) {
+	if runemanip.IsVariationSelector(ci.Number) {
+		if *priorCodepoint != 0 {
+			results.AddStringSequence(string(*priorCodepoint) + string(ci.Number))
+		}
+		*priorCodepoint = 0
+	} else if runemanip.IsPairCode(ci.Number) {
 		if *pairedCodepoint != 0 {
 			if ci2, ok := unicode.PairCharInfo(*pairedCodepoint, ci.Number); ok {
 				results.AddCharInfoDerivedFrom(ci2, originalRune)
@@ -143,5 +149,8 @@ func convertRune(r rune, pairedCodepoint *rune, srcs *sources.Sources, results *
 		} else {
 			*pairedCodepoint = ci.Number
 		}
+		*priorCodepoint = 0
+	} else {
+		*priorCodepoint = ci.Number
 	}
 }
