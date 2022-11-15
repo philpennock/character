@@ -2,6 +2,7 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -37,14 +38,14 @@ var flags struct {
 var warningCount int
 
 const (
-	stableUnicodeBaseURL    = "http://www.unicode.org/Public/UCD/latest/ucd/"
-	unstableUnicodeBaseURL  = "http://www.unicode.org/Public/10.0.0/ucd/"
+	stableUnicodeBaseURL    = "https://www.unicode.org/Public/UCD/latest/ucd/"
+	unstableUnicodeBaseURL  = "https://www.unicode.org/Public/15.0.0/ucd/"
 	emojiVariationsURL      = "http://unicode.org/Public/emoji/latest/emoji-variation-sequences.txt"
 	blocksFilename          = "Blocks.txt"
-	unstableBlocksFilename  = "Blocks-10.0.0d2.txt"
+	unstableBlocksFilename  = "Blocks-15.0.0.txt"
 	blocksOutFilename       = "generated_blocks.go"
 	unidataFilename         = "UnicodeData.txt"
-	unstableUnidataFilename = "UnicodeData-10.0.0d5.txt"
+	unstableUnidataFilename = "UnicodeData-15.0.0.txt"
 	unidataOutFilename      = "generated_data.go"
 	emojiVariationsFilename = "emoji-variation-sequences.txt"
 	emojiOutFilename        = "generated_emoji.go"
