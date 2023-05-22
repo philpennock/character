@@ -1,4 +1,5 @@
 * Add enough tests to not be embarrassed
+* Adapt to Unicode 13+ emoji-sequences.txt instead of emoji-variation-sequences.txt
 * Implement missing features:
   + other lookup sources
 * Full strings of characters, and transformations?

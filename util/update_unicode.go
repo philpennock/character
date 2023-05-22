@@ -38,9 +38,10 @@ var flags struct {
 var warningCount int
 
 const (
-	stableUnicodeBaseURL    = "https://www.unicode.org/Public/UCD/latest/ucd/"
-	unstableUnicodeBaseURL  = "https://www.unicode.org/Public/15.0.0/ucd/"
-	emojiVariationsURL      = "http://unicode.org/Public/emoji/latest/emoji-variation-sequences.txt"
+	stableUnicodeBaseURL   = "https://www.unicode.org/Public/UCD/latest/ucd/"
+	unstableUnicodeBaseURL = "https://www.unicode.org/Public/15.0.0/ucd/"
+	// FIXME: from Unicode 13.0 onwards, we have "emoji-sequences.txt" instead, in a different format.
+	emojiVariationsURL      = "https://unicode.org/Public/emoji/12.1/emoji-variation-sequences.txt"
 	blocksFilename          = "Blocks.txt"
 	unstableBlocksFilename  = "Blocks-15.0.0.txt"
 	blocksOutFilename       = "generated_blocks.go"
