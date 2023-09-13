@@ -323,6 +323,7 @@ const (
 	BlockCJKUnifiedIdeographsExtensionD
 	BlockCJKUnifiedIdeographsExtensionE
 	BlockCJKUnifiedIdeographsExtensionF
+	BlockCJKUnifiedIdeographsExtensionI
 	BlockCJKCompatibilityIdeographsSupplement
 	BlockCJKUnifiedIdeographsExtensionG
 	BlockCJKUnifiedIdeographsExtensionH
@@ -653,6 +654,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 177984, Max: 178207, ID: BlockCJKUnifiedIdeographsExtensionD, Name: "CJK Unified Ideographs Extension D"},
 	BlockInfo{Min: 178208, Max: 183983, ID: BlockCJKUnifiedIdeographsExtensionE, Name: "CJK Unified Ideographs Extension E"},
 	BlockInfo{Min: 183984, Max: 191471, ID: BlockCJKUnifiedIdeographsExtensionF, Name: "CJK Unified Ideographs Extension F"},
+	BlockInfo{Min: 191472, Max: 192095, ID: BlockCJKUnifiedIdeographsExtensionI, Name: "CJK Unified Ideographs Extension I"},
 	BlockInfo{Min: 194560, Max: 195103, ID: BlockCJKCompatibilityIdeographsSupplement, Name: "CJK Compatibility Ideographs Supplement"},
 	BlockInfo{Min: 196608, Max: 201551, ID: BlockCJKUnifiedIdeographsExtensionG, Name: "CJK Unified Ideographs Extension G"},
 	BlockInfo{Min: 201552, Max: 205743, ID: BlockCJKUnifiedIdeographsExtensionH, Name: "CJK Unified Ideographs Extension H"},
