@@ -2,6 +2,7 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -41,7 +42,7 @@ const (
 
 func init() {
 	flag.StringVar(&flags.locale, "x11-locale", x11DefaultLocale, "X11 locale to use")
-	flag.Uint64Var(&flags.minComposeFetchSize, "min-x11-fetchsize", 500*1024, "minimum size of Compose to not be an error")
+	flag.Uint64Var(&flags.minComposeFetchSize, "min-x11-fetchsize", 400*1024, "minimum size of Compose to not be an error")
 	flag.StringVar(&flags.outDir, "output-dir", "sources", "directory to create files in")
 	flag.StringVar(&flags.packageName, "package", "sources", "package to name generated files")
 	flag.BoolVar(&flags.noFetch, "no-fetch", false, "do not retrieve current files, regenerate from local only")
@@ -234,20 +235,39 @@ ReadLoop:
 			counts.unhandled += 1
 			continue
 		}
+		// There doesn't, apparently, need to be space between <keys>, so this whole logic needs a rework.
+		// As of 2023-09-13, this affects one multi-key sequence, which has a dead_ element anyway, so
+		// not yet breaking.
+		// FIXME: rewrite this
 		fields := bytes.Fields(line)
 		indexColon := -1
 		var indexReplacement int
 		for i := range fields {
 			if bytes.Equal(fields[i], []byte{':'}) {
 				indexColon = i
-				if len(fields) < i+2 {
-					Trace("compose: malformed line %d, nothing after colon", lineNum)
-					counts.malformed += 1
-					continue ReadLoop
+			} else if bytes.HasSuffix(fields[i], []byte{':'}) {
+				f2 := make([][]byte, i+1, len(fields)+1)
+				if i > 1 {
+					copy(f2, fields[:i])
 				}
-				indexReplacement = i + 1
-				break
+				f2[i] = fields[i][:len(fields[i])-1] // drop the trailing colon
+				f2 = append(f2, []byte{':'})
+				if len(fields) > i+1 {
+					f2 = append(f2, fields[i+1:]...)
+				}
+				fields = f2
+				indexColon = i + 1
+			} else {
+				continue
 			}
+			if len(fields) < indexColon+2 {
+				Trace("compose: malformed line %d, nothing after colon", lineNum)
+				counts.malformed += 1
+				continue ReadLoop
+			}
+			indexReplacement = indexColon + 1
+			break
+
 		}
 		if indexColon < 0 {
 			Trace("compose: malformed line %d, no colon present", lineNum)
