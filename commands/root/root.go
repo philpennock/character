@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const StaticProgramName = "character"
+
 var globalFlags struct {
 	profileCPUFile string
 	version        bool
@@ -28,7 +30,7 @@ type reExecTrigger struct {
 func (e reExecTrigger) Error() string { return "re-exec" }
 
 var characterCmd = &cobra.Command{
-	Use:   "character",
+	Use:   StaticProgramName,
 	Short: "character performs character lookups and conversions",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if globalFlags.profileCPUFile != "" {

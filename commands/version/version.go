@@ -1,11 +1,14 @@
-// Copyright © 2015,2016,2020,2022 Phil Pennock.
+// Copyright © 2015,2016,2020,2022,2024 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
 package version
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 
@@ -36,6 +39,7 @@ func addLibraryVersionFunc(f func() (string, []string)) {
 }
 
 var flags struct {
+	json    bool
 	verbose bool
 }
 
@@ -43,6 +47,10 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
 	Run: func(cmd *cobra.Command, args []string) {
+		if flags.json {
+			emitJSONVersionData(cmd.Root().Name())
+			return
+		}
 		showGoModuleVersions(cmd.Root().Name())
 		if flags.verbose {
 			// keep this after the GoModule one, it mutates the VersionString
@@ -54,7 +62,73 @@ var versionCmd = &cobra.Command{
 
 func init() {
 	versionCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show extra stuff")
+	versionCmd.Flags().BoolVarP(&flags.json, "json", "", false, "emit JSON version information")
 	root.AddCommand(versionCmd)
+}
+
+// This JSON data should be usable by tools without those tools breaking for us, ever.
+func emitJSONVersionData(programName string) {
+	jv := JSONVersion{
+		Name:    programName,
+		Version: VersionString,
+		URL:     SourceURL,
+	}
+	if len(os.Args) > 0 {
+		jv.ArgvInvokedName = filepath.Base(os.Args[0])
+	}
+	jv.Go.Runtime = runtime.Version()
+	jv.Library = make(map[string]LibraryDetailsJSON, len(libraryVersionFuncs))
+
+	for _, f := range libraryVersionFuncs {
+		name, infoLines := f()
+		jv.Library[name] = LibraryDetailsJSON{Lines: infoLines}
+	}
+	if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		jv.ModuleVersion = make(map[string]string, len(buildInfo.Deps))
+		jv.BuildSetting = make(map[string]string, len(buildInfo.Settings))
+		for i := range buildInfo.Deps {
+			jv.ModuleVersion[buildInfo.Deps[i].Path] = buildInfo.Deps[i].Version
+		}
+		for i := range buildInfo.Settings {
+			jv.BuildSetting[buildInfo.Settings[i].Key] = buildInfo.Settings[i].Value
+		}
+	}
+
+	jout := json.NewEncoder(os.Stdout)
+	jout.SetIndent("", "  ")
+	if err := jout.Encode(jv); err != nil {
+		panic(err.Error())
+	}
+}
+
+// JSONVersion provides a publicly guaranteed backwards-compatible
+// machine-parseable JSON version.  Fields can be added, but must not be removed,
+// and must not be frivolously switched to be empty.
+type JSONVersion struct {
+	Version         string `json:"version"`
+	Name            string `json:"name"`
+	ArgvInvokedName string `json:"argv_invoked_name"`
+	URL             string `json:"url"`
+
+	Go struct {
+		Runtime string `json:"runtime"`
+	} `json:"go"`
+
+	// The Library is keyed by the name of a library and each item includes
+	// unstructed lines of version data from that library; we wrap it in an
+	// extra layer so that if there's more per-library structure _available_
+	// for some libraries in future, we don't need to restructure our output.
+	//
+	// Theoretically two functions might report the same name, but since that's
+	// from our library handling, that would be our mistake.
+	Library map[string]LibraryDetailsJSON `json:"library"`
+
+	ModuleVersion map[string]string `json:"module_version"`
+	BuildSetting  map[string]string `json:"build_setting"`
+}
+
+type LibraryDetailsJSON struct {
+	Lines []string `json:"lines"`
 }
 
 func showGoModuleVersions(programName string) {
