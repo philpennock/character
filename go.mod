@@ -13,8 +13,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/xlab/tablewriter v0.0.0-20160610135559-80b567a11ad5
 	go.pennock.tech/tabular v1.1.3
-	golang.org/x/net v0.17.0
-	golang.org/x/text v0.13.0
+	golang.org/x/net v0.23.0
+	golang.org/x/text v0.14.0
 )
 
 require (
