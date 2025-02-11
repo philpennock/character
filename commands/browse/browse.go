@@ -49,7 +49,7 @@ Use "known -bv/-bn" to list known blocks for "browse -b".
 
 		// We always display a table; documented as doing so, makes most sense
 		// Temporarily lost that after moving to common display flags handling.
-		if !resultset.CmdVerbose() {
+		if !resultset.CmdVerbose() && !resultset.ResultCmdFlags.JSON {
 			resultset.ResultCmdFlags.Verbose = true
 		}
 
