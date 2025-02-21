@@ -25,14 +25,6 @@ jobs:
       checks: write
       statuses: write
 
-    strategy:
-      matrix:
-        include:
-          - go: 'stable'
-            canonical: true
-          - go: 'oldstable'
-            canonical: false
-
     steps:
 
       - name: Checkout
@@ -44,7 +36,7 @@ jobs:
         name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version: 'stable'
           check-latest: true
 
       - id: go-settings
@@ -79,15 +71,3 @@ jobs:
         with:
           path-to-profile: ${{ runner.temp }}/profile.cov
           flag-name: ${{ steps.go-settings.outputs.go-version }}
-          parallel: true
-
-  finish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: coveralls.io completion notification
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          parallel-finished: true
-
