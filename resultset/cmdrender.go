@@ -43,6 +43,15 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Left, "left", "L", false, "emoji facing left")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Right, "right", "R", false, "emoji facing right")
 
+	cmd.MarkFlagsMutuallyExclusive("left", "right", "text-presentation", "emoji-presentation")
+	// does --internal-debug show up?  do we mind?
+	if supportOneline {
+		// runtime panic if we unilaterally include --oneline here
+		cmd.MarkFlagsMutuallyExclusive("internal-debug", "net-verbose", "verbose", "oneline", "json")
+	} else {
+		cmd.MarkFlagsMutuallyExclusive("internal-debug", "net-verbose", "verbose", "json")
+	}
+
 	cmd.Flags().BoolVarP(&ResultCmdFlags.implicitVerbose, "internal-implicit-verbose", "", false, "")
 	cmd.Flags().MarkHidden("internal-implicit-verbose")
 }
@@ -61,6 +70,7 @@ func (e ErrIncompatibleFlags) Error() string {
 }
 
 // FlagsOkay returns either ErrIncompatibleFlags or nil
+// This should go away, now that cobra supports MarkFlagsMutuallyExclusive
 func FlagsOkay() error {
 	onlyOne := make([]string, 0, 5)
 	if ResultCmdFlags.internalDebug {
@@ -98,10 +108,10 @@ func FlagsOkay() error {
 		ResultCmdFlags.Emoji = false // implicit
 	}
 	if ResultCmdFlags.Text {
-		onlyOne = append(onlyOne, "--text|-T")
+		onlyOne = append(onlyOne, "--text-presentation|-T")
 	}
 	if ResultCmdFlags.Emoji && ResultCmdFlags.Text {
-		onlyOne = append(onlyOne, "--emoji|-E")
+		onlyOne = append(onlyOne, "--emoji-presentation|-E")
 	}
 	if len(onlyOne) > 1 {
 		return ErrIncompatibleFlags(onlyOne)

@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Phil Pennock.
+// Copyright © 2015-2017,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -6,10 +6,12 @@ package named
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/philpennock/character/entities"
 	"github.com/philpennock/character/internal/clipboard"
 	"github.com/philpennock/character/resultset"
 	"github.com/philpennock/character/sources"
@@ -19,11 +21,13 @@ import (
 )
 
 var flags struct {
-	clipboard bool
-	join      bool
-	livevim   bool
-	search    bool
-	unsorted  bool
+	clipboard  bool
+	join       bool
+	livevim    bool
+	search     bool
+	unsorted   bool
+	htmlEntity bool
+	xmlEntity  bool
 }
 
 // FIXME: make dedicated type, embed search info
@@ -33,6 +37,18 @@ var ErrUnknownCharacterName = errors.New("unknown character name")
 
 // ErrNoSearchResults means you're unlucky
 var ErrNoSearchResults = errors.New("no search results")
+
+type ErrorUnknownEntity string
+
+func (e ErrorUnknownEntity) Error() string {
+	return "unknown entity " + strconv.Quote(string(e))
+}
+
+type ErrorEntityNotKnownToUnicode rune
+
+func (e ErrorEntityNotKnownToUnicode) Error() string {
+	return "entity rune not in our Unicode tables, is 0x" + strconv.FormatInt(int64(e), 16)
+}
 
 var namedCmd = &cobra.Command{
 	Use:   "named [name of character]",
@@ -89,6 +105,29 @@ var namedCmd = &cobra.Command{
 				}
 				continue
 			}
+			var entityMap map[string]rune
+			if flags.xmlEntity {
+				entityMap = entities.XMLEntities
+			} else if flags.htmlEntity {
+				entityMap = entities.HTMLEntities
+			}
+			if entityMap != nil {
+				// XML entity names are case-sensitive
+				ciRune, ok := entityMap[arg]
+				if !ok {
+					root.Errored()
+					results.AddError(arg, ErrorUnknownEntity(arg))
+					continue
+				}
+				ci, ok := srcs.Unicode.ByRune[ciRune]
+				if !ok {
+					root.Errored()
+					results.AddError(arg, ErrorEntityNotKnownToUnicode(ciRune))
+					continue
+				}
+				results.AddCharInfo(ci)
+				continue
+			}
 			ci, err := findCharInfoByName(srcs.Unicode, arg)
 			if err != nil {
 				root.Errored()
@@ -116,6 +155,8 @@ func init() {
 	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
+	namedCmd.Flags().BoolVarP(&flags.htmlEntity, "html-entity", "H", false, "input words are HTML entity names")
+	namedCmd.Flags().BoolVarP(&flags.xmlEntity, "xml-entity", "X", false, "input words are XML entity names")
 	resultset.RegisterCmdFlags(namedCmd, true) // verbose v | net-verbose N | internal-debug; enable oneline
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
@@ -124,12 +165,14 @@ func init() {
 		// though we'll accept the option (and show an error) if given.
 		namedCmd.Flags().MarkHidden("clipboard")
 	}
+	namedCmd.MarkFlagsMutuallyExclusive("search", "html-entity", "xml-entity")
 	// FIXME: support verbose results without tables
 	root.AddCommand(namedCmd)
 }
 
 func findCharInfoByName(u unicode.Unicode, needle string) (unicode.CharInfo, error) {
 	n := strings.ToUpper(needle)
+	// FIXME: wait, linear scan for each name?  Seriously?
 	for k := range u.ByName {
 		if k == n {
 			return u.ByName[k], nil
