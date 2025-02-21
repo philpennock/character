@@ -1,4 +1,4 @@
-// Copyright © 2016 Phil Pennock.
+// Copyright © 2016,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -25,12 +25,14 @@ var flags struct {
 
 type transformer func(args []string) (result string, err error)
 type lister func(w io.Writer, verbose bool, args []string) error
+type flagRegisterer func(*cobra.Command)
 
 type transformCobraCommand struct {
 	Use         string
 	Short       string
 	Transformer transformer
 	List        lister
+	DoFlags     flagRegisterer
 }
 
 var transformCmd = &cobra.Command{
@@ -77,7 +79,7 @@ func init() {
 	transformCmd.PersistentFlags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	transformCmd.PersistentFlags().BoolVarP(&flags.list, "list", "l", false, "list target variants; -v for table, args for exemplar")
 	transformCmd.PersistentFlags().BoolVarP(&flags.preserveOrder, "preserve-order", "p", false, "keep characters in original order")
-	transformCmd.PersistentFlags().StringVarP(&flags.target, "target", "t", "", "map characters to this type")
+	transformCmd.PersistentFlags().StringVarP(&flags.target, "target", "t", "", "map characters to this type (see --list)")
 	transformCmd.PersistentFlags().BoolVarP(&flags.verbose, "verbose", "v", false, "show more details, in a table")
 	if clipboard.Unsupported {
 		// We don't want to only register the flag if clipboard is supported,
@@ -91,15 +93,20 @@ func init() {
 		turnSubcommand,
 		frakturSubcommand,
 		mathSubcommand,
+		screamSubCommand,
 	} {
 		c := subCommand
-		transformCmd.AddCommand(&cobra.Command{
+		cobraC := &cobra.Command{
 			Use:   c.Use,
 			Short: c.Short,
 			Run: func(cmd *cobra.Command, args []string) {
 				transformWrapper(cmd, args, c.Transformer, c.List)
 			},
-		})
+		}
+		if c.DoFlags != nil {
+			c.DoFlags(cobraC)
+		}
+		transformCmd.AddCommand(cobraC)
 	}
 
 	root.AddCommand(transformCmd)
