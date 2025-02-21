@@ -2,6 +2,7 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
+//go:build tabular || (!tablewriter && !termtables)
 // +build tabular !tablewriter,!termtables
 
 // See also version command's tabular.go and replicate build tag constraints there.
