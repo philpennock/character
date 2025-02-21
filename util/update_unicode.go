@@ -240,12 +240,12 @@ func generateUnicodeDataFromTo(inFn, outFn string) error {
 	fmt.Fprintf(out, "// So we move that part back to being constructed at runtime.\n\n")
 
 	fmt.Fprintf(out, "\tlinearNames: []string{\n")
-	for i, _ := range extra.linearNames {
+	for i := range extra.linearNames {
 		fmt.Fprintf(out, "\t\t%q,\n", extra.linearNames[i])
 	}
 	fmt.Fprintf(out, "\t},\n")
 	fmt.Fprintf(out, "\tlinearCI: []CharInfo{\n")
-	for i, _ := range extra.linearCI {
+	for i := range extra.linearCI {
 		fmt.Fprintf(out, "\t\t%s,\n", fmtCharInfo(extra.linearCI[i]))
 	}
 	fmt.Fprintf(out, "\t},\n")

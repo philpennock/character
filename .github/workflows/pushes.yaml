@@ -25,14 +25,6 @@ jobs:
       checks: write
       statuses: write
 
-    strategy:
-      matrix:
-        include:
-          - go: 'stable'
-            canonical: true
-          - go: 'oldstable'
-            canonical: false
-
     steps:
 
       - name: Checkout
@@ -44,7 +36,7 @@ jobs:
         name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version: 'stable'
           check-latest: true
 
       - id: go-settings
@@ -62,8 +54,9 @@ jobs:
           go list all
 
       - name: Basic Go integrity checks
+        # We don't use `gofmt -s` because it complains about some of the _generated_ blocks
         run: |
-          t="$(gofmt -s -l .)"
+          t="$(gofmt -l .)"
           if [ ".$t" != "." ]; then printf 'gofmt would modify files:\n%s\n' "$t"; exit 1; fi
           go vet ./...
           t="$(go list -m -retracted -f '{{if .Retracted}}::error file=go.mod::{{.Path}} is retracted{{end}}' all)"
@@ -79,15 +72,3 @@ jobs:
         with:
           path-to-profile: ${{ runner.temp }}/profile.cov
           flag-name: ${{ steps.go-settings.outputs.go-version }}
-          parallel: true
-
-  finish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: coveralls.io completion notification
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          parallel-finished: true
-

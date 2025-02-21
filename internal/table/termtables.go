@@ -9,6 +9,7 @@
 // widespread fork which ripped out the terminal querying and locale handling.
 // Not bumping the copyright year for replacing one import path string.
 
+//go:build termtables
 // +build termtables
 
 package table

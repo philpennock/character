@@ -2,18 +2,19 @@
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
+//go:build tablewriter
 // +build tablewriter
 
 /*
 This implementation uses tablewriter for layout;
 this is nice, but has some issues:
 
-* Alignment is only per-table, not per-column
-* Auto-detected alignment differs for decimal numbers from anything else, so a
-  column of hex values will have varying alignments, unless we coerce
-  everything in one way; this is a limitation of per-table alignment
-* Limited styling doesn't provide enough access points for UTF-8 boxes
-* No in-table separator rows
+  - Alignment is only per-table, not per-column
+  - Auto-detected alignment differs for decimal numbers from anything else, so a
+    column of hex values will have varying alignments, unless we coerce
+    everything in one way; this is a limitation of per-table alignment
+  - Limited styling doesn't provide enough access points for UTF-8 boxes
+  - No in-table separator rows
 
 The tablewriter package only takes strings; our wrapper at present only needs
 to support strings in, so inserting any other type will result in replacement
