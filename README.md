@@ -1,7 +1,7 @@
 character
 =========
 
-[![Continuous Integration](https://secure.travis-ci.org/philpennock/character.svg?branch=main)](http://travis-ci.org/philpennock/character)
+[![Continuous Integration](https://github.com/philpennock/character/actions/workflows/pushes.yaml/badge.svg)](https://github.com/philpennock/character/actions/workflows/pushes.yaml)
 
 This is a tool for various manipulations on characters, as characters rather
 than full strings, to show names, encodings and more.
@@ -31,6 +31,11 @@ $ character browse -b 'Alchemical Symbols'
 [... table of results; browse is always a table ...]
 $ character transform fraktur Hello world
 ℌ𝔢𝔩𝔩𝔬 𝔴𝔬𝔯𝔩𝔡
+$ character transform scream Hello world
+A̰áăăå ȁåȃăa̱
+$ character transform scream --decode \
+    $(character transform scream Hello world)
+Hello world
 $ character named -1c 'INFORMATION DESK PERSON' \
     'EMOJI MODIFIER FITZPATRICK TYPE-5'
 💁🏾
@@ -63,6 +68,14 @@ Patches welcome.
 
 Building
 --------
+
+Install without downloading manually with `go install`:
+
+```sh
+go install -v github.com/philpennock/character@latest
+```
+
+--------------------------------------------------
 
 Run: `go build`
 

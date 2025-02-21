@@ -1,0 +1,93 @@
+name: Actions CI
+# This `name:` is used in the badge.svg rendering in the README.md.
+
+permissions: {}
+
+on:
+  push:
+    branches-ignore:
+      - 'exp'
+      - 'exp/*'
+      - 'exp-*'
+      - 'exp_*'
+      - 'wip'
+      - 'wip/*'
+      - 'wip-*'
+      - 'wip_*'
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      statuses: write
+
+    strategy:
+      matrix:
+        include:
+          - go: 'stable'
+            canonical: true
+          - go: 'oldstable'
+            canonical: false
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - id: setup-go
+        name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+
+      - id: go-settings
+        name: Export Go environment to Actions outputs
+        run: |
+          echo >> "$GITHUB_OUTPUT" "arch=$(go env GOARCH)"
+          echo >> "$GITHUB_OUTPUT" "hostarch=$(go env GOHOSTARCH)"
+          echo >> "$GITHUB_OUTPUT" "os=$(go env GOOS)"
+          echo >> "$GITHUB_OUTPUT" "hostos=$(go env GOHOSTOS)"
+          echo >> "$GITHUB_OUTPUT" "go-version=$(go env GOVERSION)"
+
+      - id: go-dependencies
+        name: Download all Go dependencies
+        run: |
+          go list all
+
+      - name: Basic Go integrity checks
+        run: |
+          t="$(gofmt -s -l .)"
+          if [ ".$t" != "." ]; then printf 'gofmt would modify files:\n%s\n' "$t"; exit 1; fi
+          go vet ./...
+          t="$(go list -m -retracted -f '{{if .Retracted}}::error file=go.mod::{{.Path}} is retracted{{end}}' all)"
+          if [ ".$t" != "." ]; then printf '%s\n' "$t"; exit 1; fi
+
+      - name: Go build & test
+        run: |
+          go build ./...
+          go test -v -coverprofile=${{ runner.temp }}/profile.cov -coverpkg ./... ./...
+
+      - name: Send coverage
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: ${{ runner.temp }}/profile.cov
+          flag-name: ${{ steps.go-settings.outputs.go-version }}
+          parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: coveralls.io completion notification
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          parallel-finished: true
+
