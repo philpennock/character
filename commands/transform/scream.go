@@ -15,6 +15,7 @@ import (
 )
 
 var UnicodeToScream map[rune]string
+var AdditionalDecodes map[string]rune
 
 func init() {
 	// For the reverse direction, how do we deal with normalization forms and making sure we can handle any?
@@ -73,6 +74,14 @@ func init() {
 		'Y': "A̦", // character named -1c 'LATIN CAPITAL LETTER A' 'COMBINING COMMA BELOW' (renders the comma far to the right for me
 		'Z': "Ⱥ",  // LATIN CAPITAL LETTER A WITH STROKE
 	}
+
+	AdditionalDecodes = map[string]rune{
+		// Wikifunctions has also introduced an encoder, at <https://www.wikifunctions.org/view/en/Z22725>
+		// Feeding it `The quick brown fox jumped over the lazy dog` it converted to upper-case and when decoding,
+		// we hit one missed decode:
+		"A̯": 'P', // LATIN CAPITAL LETTER A, COMBINING INVERTED BREVE BELOW
+		// Looking at <https://xkcd.com/3054/> 'P' closely, there is a sharp point so I'm sticking to my interpretation as a circumflex, not an inverted breve.
+	}
 }
 
 var screamOptions struct {
@@ -100,6 +109,15 @@ func NewDecoder() *StreamCoder {
 	for Rune, Scream := range UnicodeToScream {
 		bare := string(Rune)
 		// without the t!=bare check, the decode will see A->A (0x41 -> 0x41) and this will preempt other longer strings
+		for _, f := range []func(string) string{norm.NFC.String, norm.NFD.String, norm.NFKC.String, norm.NFKD.String} {
+			t := f(Scream)
+			if t != bare {
+				replacerArgs = append(replacerArgs, t, bare)
+			}
+		}
+	}
+	for Scream, Rune := range AdditionalDecodes {
+		bare := string(Rune)
 		for _, f := range []func(string) string{norm.NFC.String, norm.NFD.String, norm.NFKC.String, norm.NFKD.String} {
 			t := f(Scream)
 			if t != bare {
