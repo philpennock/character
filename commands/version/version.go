@@ -1,4 +1,4 @@
-// Copyright © 2015,2016,2020,2022,2024 Phil Pennock.
+// Copyright © 2015,2016,2020,2022,2024,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -40,6 +40,7 @@ func addLibraryVersionFunc(f func() (string, []string)) {
 
 var flags struct {
 	json    bool
+	short   bool
 	verbose bool
 }
 
@@ -47,6 +48,14 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
 	Run: func(cmd *cobra.Command, args []string) {
+		if flags.short {
+			if flags.json {
+				json.NewEncoder(os.Stdout).Encode(JSONShortVersion{Version: VersionString})
+			} else {
+				fmt.Println(VersionString)
+			}
+			return
+		}
 		if flags.json {
 			emitJSONVersionData(cmd.Root().Name())
 			return
@@ -61,8 +70,9 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	versionCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show extra stuff")
 	versionCmd.Flags().BoolVarP(&flags.json, "json", "", false, "emit JSON version information")
+	versionCmd.Flags().BoolVarP(&flags.short, "short", "s", false, "only show the program version string")
+	versionCmd.Flags().BoolVarP(&flags.verbose, "verbose", "v", false, "show extra stuff")
 	root.AddCommand(versionCmd)
 }
 
@@ -99,6 +109,10 @@ func emitJSONVersionData(programName string) {
 	if err := jout.Encode(jv); err != nil {
 		panic(err.Error())
 	}
+}
+
+type JSONShortVersion struct {
+	Version string `json:"version"`
 }
 
 // JSONVersion provides a publicly guaranteed backwards-compatible
