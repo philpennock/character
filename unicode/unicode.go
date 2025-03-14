@@ -51,7 +51,7 @@ func LoadSearch() Unicode {
 }
 
 func addSearch() {
-	linearIfaceCI := make([]interface{}, len(global.linearCI))
+	linearIfaceCI := make([]any, len(global.linearCI))
 	for i := range global.linearCI {
 		linearIfaceCI[i] = global.linearCI[i]
 	}

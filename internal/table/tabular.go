@@ -45,12 +45,12 @@ func New() *Table {
 
 // AddHeaders takes a sequence of header-names for each column, and configures
 // them as the header row.
-func (t *Table) AddHeaders(headers ...interface{}) {
+func (t *Table) AddHeaders(headers ...any) {
 	t.t.AddHeaders(headers...)
 }
 
 // AddRow takes a sequence of cells for one table body row.
-func (t *Table) AddRow(cells ...interface{}) {
+func (t *Table) AddRow(cells ...any) {
 	t.t.AddRowItems(cells...)
 	t.rowCount++
 }

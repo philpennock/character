@@ -199,7 +199,7 @@ func mathListCommands(w io.Writer, verbose bool, args []string) error {
 		return nil
 	}
 	t := table.New()
-	columns := make([]interface{}, 0, 3)
+	columns := make([]any, 0, 3)
 	columns = append(columns, "Name", "Rendered Name")
 	var exemplar string
 	if len(args) > 0 {
@@ -208,7 +208,7 @@ func mathListCommands(w io.Writer, verbose bool, args []string) error {
 	}
 	t.AddHeaders(columns...)
 	for _, item := range avail {
-		row := make([]interface{}, 2, 3)
+		row := make([]any, 2, 3)
 		row[0] = item
 		row[1] = strings.Map(conversions[item], item)
 		if exemplar != "" {

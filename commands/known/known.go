@@ -54,7 +54,7 @@ var knownCmd = &cobra.Command{
 		if flags.encodings {
 			Fill(&lister{
 				nonTableLabel: "know %d encoding names (and some more aliases)",
-				columnTitles:  []interface{}{"Encoding"},
+				columnTitles:  []any{"Encoding"},
 			}).Each(encodings.ListKnownCharsets())
 			doneSomething = true
 		}
@@ -62,7 +62,7 @@ var knownCmd = &cobra.Command{
 		if flags.tableStyles {
 			Fill(&lister{
 				nonTableLabel: "table provider supports %d styles",
-				columnTitles:  []interface{}{"Style"},
+				columnTitles:  []any{"Style"},
 			}).Each(table.AvailableStyles)
 			doneSomething = true
 		}
@@ -70,10 +70,10 @@ var knownCmd = &cobra.Command{
 		if flags.blocks {
 			Fill(&lister{
 				nonTableLabel: "know of %d Unicode block names",
-				columnTitles:  []interface{}{"Name", "From", "To"},
-				fieldsExtract: func(row interface{}) []interface{} {
+				columnTitles:  []any{"Name", "From", "To"},
+				fieldsExtract: func(row any) []any {
 					bi := row.(unicode.BlockInfo)
-					return []interface{}{
+					return []any{
 						bi.Name,
 						strconv.FormatUint(uint64(bi.Min), 16),
 						strconv.FormatUint(uint64(bi.Max), 16),

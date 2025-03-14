@@ -133,7 +133,7 @@ func Start() {
 
 // Errorf is a convenience for errors from other commands so that things are consistent
 // instead of importing fmt and os all over the place
-func Errorf(spec string, args ...interface{}) {
+func Errorf(spec string, args ...any) {
 	fmt.Fprintf(os.Stderr, spec, args...)
 	Errored()
 }

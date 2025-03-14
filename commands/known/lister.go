@@ -16,8 +16,8 @@ import (
 type lister struct {
 	command       string
 	nonTableLabel string
-	columnTitles  []interface{}
-	fieldsExtract func(x interface{}) []interface{}
+	columnTitles  []any
+	fieldsExtract func(x any) []any
 
 	nameOnly bool
 	verbose  bool
@@ -25,12 +25,12 @@ type lister struct {
 
 func (l *lister) fillDefaults() {
 	if l.fieldsExtract == nil {
-		l.fieldsExtract = func(x interface{}) []interface{} { return []interface{}{x.(string)} }
+		l.fieldsExtract = func(x any) []any { return []any{x.(string)} }
 	}
 }
 
 // Each iterates over a non-nil slice, showing the contents on stdout.
-func (l *lister) Each(enumerableI interface{}) {
+func (l *lister) Each(enumerableI any) {
 	l.fillDefaults()
 
 	eVal := reflect.ValueOf(enumerableI)
@@ -49,7 +49,7 @@ func (l *lister) Each(enumerableI interface{}) {
 			fmt.Println(":")
 		}
 		spec := strings.Repeat("\t%q", len(l.columnTitles)) + "\n"
-		for i := 0; i < length; i++ {
+		for i := range length {
 			item := eVal.Index(i).Interface()
 			if l.nameOnly {
 				fmt.Printf("%s\n", l.fieldsExtract(item)[0])
@@ -67,7 +67,7 @@ func (l *lister) Each(enumerableI interface{}) {
 
 	t := table.New()
 	t.AddHeaders(l.columnTitles...)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		item := eVal.Index(i).Interface()
 		t.AddRow(l.fieldsExtract(item)...)
 	}

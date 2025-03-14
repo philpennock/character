@@ -316,7 +316,7 @@ func (rs *ResultSet) LenItemCount() int {
 }
 
 // RenderCharInfoItem converts a charItem and an attribute selector into a string or Stringer
-func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) interface{} {
+func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 	// Exceptional cases first:
 	//
 	// We use 0 as a special-case for things like combinations, where there's only a name:
@@ -519,7 +519,7 @@ type JCombination struct {
 }
 
 // S converts to a string, for JSON
-func S(x interface{}) string {
+func S(x any) string {
 	switch s := x.(type) {
 	case string:
 		return s
@@ -533,7 +533,7 @@ func S(x interface{}) string {
 }
 
 // JItemWidth converts to a width, for JSON
-func JItemWidth(x interface{}) int {
+func JItemWidth(x any) int {
 	switch s := x.(type) {
 	case string:
 		width, _ := runemanip.DisplayCellWidth(s)
@@ -549,7 +549,7 @@ func JItemWidth(x interface{}) int {
 }
 
 // JSONEntry constructs a probably-JItem struct for JSON rendering of a character.
-func (rs *ResultSet) JSONEntry(ci charItem) interface{} {
+func (rs *ResultSet) JSONEntry(ci charItem) any {
 	html, _ := entities.HTMLEntitiesReverse[ci.unicode.Number]
 	xml, _ := entities.XMLEntitiesReverse[ci.unicode.Number]
 
@@ -599,11 +599,11 @@ func (rs *ResultSet) PrintJSON() {
 		Error string `json:"error"`
 	}
 	var output struct {
-		Characters []interface{} `json:"characters,omitempty"`
-		Errors     []JError      `json:"errors,omitempty"`
+		Characters []any    `json:"characters,omitempty"`
+		Errors     []JError `json:"errors,omitempty"`
 	}
 	if len(rs.items) > 0 {
-		output.Characters = make([]interface{}, 0, len(rs.items))
+		output.Characters = make([]any, 0, len(rs.items))
 		ii := 0
 		for _, s := range rs.which {
 			switch s {
@@ -672,18 +672,18 @@ func (rs *ResultSet) PrintTables() {
 	}
 }
 
-func (rs *ResultSet) detailsHeaders() []interface{} {
+func (rs *ResultSet) detailsHeaders() []any {
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
-		return []interface{}{
+		return []any{
 			"C", "Name", "Hex", "Dec", "Block", "Vim", "X11", "HTML", "XML",
 		}
 	case FIELD_SET_NET:
-		return []interface{}{
+		return []any{
 			"C", "Name", "Hex", "UTF-8", "JSON", "Punycode", "Of",
 		}
 	case FIELD_SET_DEBUG:
-		return []interface{}{
+		return []any{
 			"C", "Width", "Hex", "Name", "C-Type",
 		}
 	}
@@ -721,7 +721,7 @@ func (rs *ResultSet) detailsColumnProperties() []columnProperties {
 	return nil
 }
 
-func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
+func (rs *ResultSet) detailsFor(ci charItem) []any {
 	runeDisplay := PRINT_RUNE // should be PRINT_RUNE_ISOLATED
 	switch rs.runeBias {
 	case runeRenderUnspecified:
@@ -738,7 +738,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 	}
 	switch rs.fields {
 	case FIELD_SET_DEFAULT:
-		return []interface{}{
+		return []any{
 			rs.RenderCharInfoItem(ci, runeDisplay),
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
@@ -753,7 +753,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 			// annoys me, so I've removed it from my most-common view.
 		}
 	case FIELD_SET_NET:
-		return []interface{}{
+		return []any{
 			rs.RenderCharInfoItem(ci, runeDisplay),
 			rs.RenderCharInfoItem(ci, PRINT_NAME),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
@@ -763,7 +763,7 @@ func (rs *ResultSet) detailsFor(ci charItem) []interface{} {
 			rs.RenderCharInfoItem(ci, PRINT_PART_OF),
 		}
 	case FIELD_SET_DEBUG:
-		return []interface{}{
+		return []any{
 			rs.RenderCharInfoItem(ci, runeDisplay),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_WIDTH),
 			rs.RenderCharInfoItem(ci, PRINT_RUNE_HEX),
