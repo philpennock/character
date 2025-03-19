@@ -63,7 +63,7 @@ var characterCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if globalFlags.version {
-			cmd.SetArgs([]string{"version"})
+			cmd.SetArgs([]string{"version", "--short"})
 			return cmd.Execute()
 		}
 		return fmt.Errorf("need a sub-command")
@@ -81,7 +81,7 @@ func init() {
 	// for any init()-flag-setting there too.
 	flagSet := characterCmd.PersistentFlags()
 	flagSet.StringVar(&globalFlags.profileCPUFile, "profile-cpu-file", "", "write CPU profile to file")
-	flagSet.BoolVar(&globalFlags.version, "version", false, "alias for version sub-command")
+	flagSet.BoolVar(&globalFlags.version, "version", false, "alias for 'version --short' sub-command")
 	characterCmd.MarkFlagFilename("profile-cpu-file")
 	flagSet.StringVar(&globalFlags.shellParseArgv, "shell-parse-argv", "", "replace argv with shell-split of this string")
 }

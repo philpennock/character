@@ -48,6 +48,13 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version of character",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Current stance:
+		//  * --json takes precedence
+		//  * --short works with --json or without
+		//  * the default should be at most a few lines of text
+		//  * the huge tables of everything should be under --verbose
+		// The original logic was "one line", or "one line plus a few if verbose".
+		// The huge tables of everything we know are very useful, but let's make those the verbose approach.
 		if flags.short {
 			if flags.json {
 				json.NewEncoder(os.Stdout).Encode(JSONShortVersion{Version: VersionString})
@@ -60,12 +67,12 @@ var versionCmd = &cobra.Command{
 			emitJSONVersionData(cmd.Root().Name())
 			return
 		}
-		showGoModuleVersions(cmd.Root().Name())
-		if flags.verbose {
-			// keep this after the GoModule one, it mutates the VersionString
+		if !flags.verbose {
 			showOldStyleVersions(cmd.Root().Name())
 		}
-
+		if flags.verbose {
+			showGoModuleVersions(cmd.Root().Name())
+		}
 	},
 }
 
@@ -182,7 +189,7 @@ func showOldStyleVersions(programName string) {
 	if vs == "" {
 		vs = "<unknown>"
 	}
-	fmt.Printf("\n%s: version %s\n", programName, vs)
+	fmt.Printf("%s: version %s\n", programName, vs)
 
 	fmt.Printf("Golang: Runtime: %s\n", runtime.Version())
 
@@ -198,4 +205,5 @@ func showOldStyleVersions(programName string) {
 	}
 
 	fmt.Printf("%s: Source URL <%s>\n", programName, SourceURL)
+	fmt.Printf("%s: see 'version --help' for more options\n", programName)
 }
