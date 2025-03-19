@@ -118,8 +118,9 @@ Use "known -bv/-bn" to list known blocks for "browse -b".
 			fmt.Fprintf(os.Stderr,
 				("that would show %d characters, more than %d limit\n" +
 					"declining to proceed without -A override (gets slow)\n" +
+					"consider: %s known --blocks\n" +
 					"Range covers start-end:\n"),
-				results.LenItemCount(), flags.limitAbort)
+				results.LenItemCount(), flags.limitAbort, os.Args[0])
 			tmp.PrintTables()
 			root.Errored()
 			return

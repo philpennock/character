@@ -116,16 +116,9 @@ explore with.  Well, it was for me: "My First WASM".
 Table packages
 --------------
 
-Rendering content to tables requires a table package.  We default to my own
-package, `go.pennock.tech/tabular`.  We originally used
-`github.com/apcera/termtables` and briefly tried
-`github.com/olekukonko/tablewriter` before switching to writing my own.
-
-(Apcera's repositories have disappeared, the most widespread fork of
-`termtables` appears to be `github.com/xlab/tablewriter`).
-
-You can use Go build tags to switch the table package used.  I might remove
-support for this in the future.
+Versions prior to v0.9.0 supported multiple table packages for rendering tables
+to the terminal.  With v0.9.0, we dropped support for all table packages other
+than by own `go.pennock.tech/tabular`, support for which was added in v0.1.0.
 
 
 Alternatives

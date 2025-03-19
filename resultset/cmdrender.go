@@ -1,4 +1,4 @@
-// Copyright © 2017,2020 Phil Pennock.
+// Copyright © 2017,2020,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -23,6 +23,7 @@ var ResultCmdFlags struct {
 	Text            bool
 	Left            bool
 	Right           bool
+	OmitColumns     string
 }
 
 // RegisterCmdFlags adds the --verbose/--net-verbose/--internal-debug flags to a Cobra cmd.
@@ -38,6 +39,7 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	cmd.Flags().BoolVarP(&ResultCmdFlags.JSON, "json", "J", false, "show JSON output")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.NetVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Verbose, "verbose", "v", false, "show information about the character")
+	cmd.Flags().StringVarP(&ResultCmdFlags.OmitColumns, "omit", "", "", "skip these columns entirely when printing (comma-separated list)")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Emoji, "emoji-presentation", "E", false, "force emoji presentation")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Text, "text-presentation", "T", false, "force text presentation")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Left, "left", "L", false, "emoji facing left")

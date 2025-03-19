@@ -1,4 +1,4 @@
-// Copyright © 2015-2017,2020-2022 Phil Pennock.
+// Copyright © 2015-2017,2020-2022,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -640,6 +640,7 @@ func (rs *ResultSet) PrintTables() {
 	if len(rs.items) > 0 {
 		t := table.New()
 		t.AddHeaders(rs.detailsHeaders()...)
+		rs.SetOmitColumns(t, ResultCmdFlags.OmitColumns)
 		ii := 0
 		for _, s := range rs.which {
 			switch s {
@@ -772,4 +773,20 @@ func (rs *ResultSet) detailsFor(ci charItem) []any {
 		}
 	}
 	return nil
+}
+
+func (rs *ResultSet) SetOmitColumns(tab *table.Table, nameList string) {
+	if nameList == "" {
+		return
+	}
+	for _, field := range strings.Split(nameList, ",") {
+		field = strings.TrimSpace(field)
+		if field == "" {
+			continue
+		}
+		err := tab.SetOmitColumnName(field)
+		if err != nil {
+			rs.AddError("field "+strconv.Quote(field), err)
+		}
+	}
 }

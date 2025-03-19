@@ -1,18 +1,12 @@
-// Copyright © 2016 Phil Pennock.
+// Copyright © 2016,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
-
-//go:build tabular || (!tablewriter && !termtables)
-// +build tabular !tablewriter,!termtables
 
 // See also version command's tabular.go and replicate build tag constraints there.
 
 /*
 Package table provides table support for character.
 This implementation uses tabular for layout.
-
-With the more modern Golang features, this should probably be in /internal/
-namespace.
 */
 package table
 
@@ -94,6 +88,21 @@ func (t *Table) AlignColumn(column int, ourAlign Alignment) {
 // every entry is empty).
 func (t *Table) SetSkipableColumn(column int) {
 	t.t.Column(column).SetProperty(properties.Skipable, true)
+}
+
+// SetOmitColumn sets a column as to be entirely omitted.
+func (t *Table) SetOmitColumn(column int) {
+	t.t.Column(column).SetProperty(properties.Omit, true)
+}
+
+// SetOmitColumnName sets a column as to be entirely omitted.
+func (t *Table) SetOmitColumnName(name string) error {
+	column, err := t.t.ColumnNamed(name)
+	if err != nil {
+		return err
+	}
+	column.SetProperty(properties.Omit, true)
+	return nil
 }
 
 // We support styles.
