@@ -317,6 +317,7 @@ func (rs *ResultSet) LenItemCount() int {
 
 // RenderCharInfoItem converts a charItem and an attribute selector into a string or Stringer
 func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
+	var strForm string
 	// Exceptional cases first:
 	//
 	// We use 0 as a special-case for things like combinations, where there's only a name:
@@ -324,57 +325,88 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 		if ci.strseq != "" {
 			switch what {
 			case PRINT_RUNE, PRINT_RUNE_PRESENT_TEXT, PRINT_RUNE_PRESENT_EMOJI, PRINT_RUNE_PRESENT_LEFT, PRINT_RUNE_PRESENT_RIGHT:
-				return ci.strseq
+				// We need to fall through to put the correct wrappings around it
+				strForm = ci.strseq
 			case PRINT_NAME:
 				return "(derived sequence)"
 			default:
 				return " "
 			}
-		}
-		if what != PRINT_NAME {
+		} else if what != PRINT_NAME {
 			return " "
 		}
+	} else {
+		strForm = string(ci.unicode.Number)
+
+		// Some other substitutions:
+		if what < PRINT_RUNE__RENDERERS && !strconv.IsGraphic(ci.unicode.Number) {
+			// We need controls to not be printed, such as 0x98 "START OF STRING"
+			// The first 20 points are easy, there are replacements for them.
+			// strconv.IsGraphic is false for codepoints in newer Unicode than Go
+			// stdlib handles, so we can't just default to the replacement
+			// character.
+			// We probably need to encode "control" etc as bits in a bitfield in ci.unicode.
+			// For now, let's use a heuristic: all the "real" control characters are in
+			// "Basic Latin" or "Latin-1 Supplement" and Unicode won't be assigning new
+			// code-points there which Go won't recognise as non-graphic.
+			switch {
+			case ci.unicode.Number < 0x20:
+				return string(rune(0x2400 + ci.unicode.Number)) // 'Control Pictures' block
+			case ci.unicode.Number <= 0xFF:
+				return string(rune(0xFFFD)) // "REPLACEMENT CHARACTER"
+			}
+		}
 	}
-	// Some other substitutions:
-	if what < PRINT_RUNE__RENDERERS && !strconv.IsGraphic(ci.unicode.Number) {
-		// We need controls to not be printed, such as 0x98 "START OF STRING"
-		// The first 20 points are easy, there are replacements for them.
-		// strconv.IsGraphic is false for codepoints in newer Unicode than Go
-		// stdlib handles, so we can't just default to the replacement
-		// character.
-		// We probably need to encode "control" etc as bits in a bitfield in ci.unicode.
-		// For now, let's use a heuristic: all the "real" control characters are in
-		// "Basic Latin" or "Latin-1 Supplement" and Unicode won't be assigning new
-		// code-points there which Go won't recognise as non-graphic.
-		switch {
-		case ci.unicode.Number < 0x20:
-			return string(rune(0x2400 + ci.unicode.Number)) // 'Control Pictures' block
-		case ci.unicode.Number <= 0xFF:
-			return string(rune(0xFFFD)) // "REPLACEMENT CHARACTER"
+
+	// Deal with overrides for combining, for the various print forms
+	var (
+		width        int
+		useFixedCell bool
+	)
+	switch what {
+	case PRINT_RUNE, PRINT_RUNE_PRESENT_TEXT, PRINT_RUNE_PRESENT_EMOJI, PRINT_RUNE_PRESENT_LEFT, PRINT_RUNE_PRESENT_RIGHT:
+		var override bool
+		if width, override = runemanip.DisplayCellWidth(strForm); override {
+			if width == 0 {
+				// overrode to 0, probably is IsVariationSelector, don't fix width to that
+				strForm = " " + strForm
+				width = 1
+			}
+			useFixedCell = true
+		}
+		if ci.unicode.Number == 0 {
+			// We have a string given in, it's combined and in my experience, "probably wrong" in cell width.
+			// This is very heuristic and might create as many problems as it solves, so might be reverted.
+			if width == 1 {
+				width = 0
+			}
+		}
+		if width == 0 {
+			// Combining characters, don't combine with the table padding but with an explicit space.
+			strForm = " " + strForm
+			width = 1
 		}
 	}
 
 	// Normal handling:
 	switch what {
 	case PRINT_RUNE:
-		s := string(ci.unicode.Number)
-		if w, override := runemanip.DisplayCellWidth(s); override {
-			return fixedWidthCell{s: s, w: w}
+		if useFixedCell {
+			return fixedWidthCell{s: strForm, w: width}
 		}
-		return s
+		return strForm
 	case PRINT_RUNE_ISOLATED: // BROKEN
-		sInner := string(ci.unicode.Number)
 		// FIXME: None of these are actually working
-		sOuter := fmt.Sprintf("%c%c%c",
+		sOuter := fmt.Sprintf("%c%s%c",
 			0x202A, // LEFT-TO-RIGHT EMBEDDING
 			// 0x202D, // LEFT-TO-RIGHT OVERRIDE
 			// 0x2066, // LEFT-TO-RIGHT ISOLATE
-			ci.unicode.Number,
+			strForm,
 			// 0x2069, // POP DIRECTIONAL ISOLATE
 			0x202C, // POP DIRECTIONAL FORMATTING
 		)
-		if w, override := runemanip.DisplayCellWidth(sInner); override {
-			return fixedWidthCell{s: sOuter, w: w}
+		if useFixedCell {
+			return fixedWidthCell{s: sOuter, w: width}
 		}
 		return sOuter
 
@@ -397,33 +429,25 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 	// the bits we support here.
 
 	case PRINT_RUNE_PRESENT_TEXT: // text presentation selector, UTS#51 §1.4.3 ED-8
-		s := string(ci.unicode.Number)
-		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
-			s = s + "\uFE0E" // VARIATION SELECTOR-15
+			strForm = strForm + "\uFE0E" // VARIATION SELECTOR-15
 		}
-		return fixedWidthCell{s: s, w: w}
+		return fixedWidthCell{s: strForm, w: width}
 	case PRINT_RUNE_PRESENT_EMOJI: // emoji presentation selector, UTS#51 §1.4.3 ED-9
-		s := string(ci.unicode.Number)
-		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
-			s = s + "\uFE0F" // VARIATION SELECTOR-16
+			strForm = strForm + "\uFE0F" // VARIATION SELECTOR-16
 		}
-		return fixedWidthCell{s: s, w: w}
+		return fixedWidthCell{s: strForm, w: width}
 	case PRINT_RUNE_PRESENT_LEFT: // emoji glyph facing direction UTS#51 §2.10
-		s := string(ci.unicode.Number)
-		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
-			s = s + "\u200D\u2B05\uFE0F" // ZERO WIDTH JOINER, LEFTWARDS BLACK ARROW, VARIATION SELECTOR-16
+			strForm = strForm + "\u200D\u2B05\uFE0F" // ZERO WIDTH JOINER, LEFTWARDS BLACK ARROW, VARIATION SELECTOR-16
 		}
-		return fixedWidthCell{s: s, w: w}
+		return fixedWidthCell{s: strForm, w: width}
 	case PRINT_RUNE_PRESENT_RIGHT: // emoji glyph facing direction UTS#51 §2.10
-		s := string(ci.unicode.Number)
-		w, _ := runemanip.DisplayCellWidth(s)
 		if unicode.Emojiable(ci.unicode.Number) {
-			s = s + "\u200D\u27A1\uFE0F" // ZERO WIDTH JOINER, BLACK RIGHTWARDS ARROW, VARIATION SELECTOR-16
+			strForm = strForm + "\u200D\u27A1\uFE0F" // ZERO WIDTH JOINER, BLACK RIGHTWARDS ARROW, VARIATION SELECTOR-16
 		}
-		return fixedWidthCell{s: s, w: w}
+		return fixedWidthCell{s: strForm, w: width}
 
 	case PRINT_RUNE_HEX:
 		return strconv.FormatUint(uint64(ci.unicode.Number), 16)
