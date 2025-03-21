@@ -23,7 +23,6 @@ var flags struct {
 	blockname  string
 	limitAbort int
 	listblocks bool
-	livevim    bool
 	startrune  int
 	stoprune   int
 }
@@ -54,7 +53,7 @@ Use "known -bv/-bn" to list known blocks for "browse -b".
 		}
 
 		srcs := sources.NewFast()
-		if flags.livevim {
+		if resultset.ResultCmdFlags.LiveVim {
 			srcs.LoadLiveVim()
 		}
 
@@ -165,7 +164,6 @@ func init() {
 	browseCmd.Flags().IntVarP(&flags.limitAbort, "limit-abort", "A", 3000, "abort if would show more than this many entries")
 	browseCmd.Flags().BoolVarP(&flags.listblocks, "list-blocks", "B", false, "list all available block names")
 	browseCmd.Flags().MarkHidden("list-blocks") // moved to `known` sub-command
-	browseCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data")
 	browseCmd.Flags().IntVarP(&flags.startrune, "from", "f", 0, "show range starting at this value")
 	browseCmd.Flags().IntVarP(&flags.stoprune, "to", "t", 0, "show range ending at this value")
 	resultset.RegisterCmdFlags(browseCmd, false) // verbose v | net-verbose N | internal-debug; ; don't enable oneline

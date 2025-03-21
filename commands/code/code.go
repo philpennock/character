@@ -25,7 +25,6 @@ import (
 var flags struct {
 	base      intconvBase
 	clipboard bool
-	livevim   bool
 	utf8hex   bool
 }
 
@@ -50,7 +49,7 @@ var codeCmd = &cobra.Command{
 		}
 
 		srcs := sources.NewFast()
-		if flags.livevim {
+		if resultset.ResultCmdFlags.LiveVim {
 			srcs.LoadLiveVim()
 		}
 
@@ -157,7 +156,6 @@ var codeCmd = &cobra.Command{
 
 func init() {
 	codeCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
-	codeCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	codeCmd.Flags().BoolVarP(&flags.utf8hex, "utf8hex", "H", false, "take UTF-8 Hex-encoded codepoint")
 	codeCmd.Flags().VarP(&flags.base, "base", "b", "numeric base for code-ponts [default: usual parse rules]")
 	resultset.RegisterCmdFlags(codeCmd, true) // verbose v | net-verbose N | internal-debug; enable oneline

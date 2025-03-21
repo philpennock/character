@@ -23,6 +23,7 @@ var ResultCmdFlags struct {
 	Text            bool
 	Left            bool
 	Right           bool
+	LiveVim         bool
 	OmitColumns     string
 }
 
@@ -39,6 +40,7 @@ func RegisterCmdFlags(cmd *cobra.Command, supportOneline bool) {
 	cmd.Flags().BoolVarP(&ResultCmdFlags.JSON, "json", "J", false, "show JSON output")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.NetVerbose, "net-verbose", "N", false, "show net-biased information (punycode, etc)")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Verbose, "verbose", "v", false, "show information about the character")
+	cmd.Flags().BoolVarP(&ResultCmdFlags.LiveVim, "livevim", "l", false, "load full vim data (for verbose)")
 	cmd.Flags().StringVarP(&ResultCmdFlags.OmitColumns, "omit", "", "", "skip these columns entirely when printing (comma-separated list)")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Emoji, "emoji-presentation", "E", false, "force emoji presentation")
 	cmd.Flags().BoolVarP(&ResultCmdFlags.Text, "text-presentation", "T", false, "force text presentation")

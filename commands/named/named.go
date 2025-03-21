@@ -23,7 +23,6 @@ import (
 var flags struct {
 	clipboard  bool
 	join       bool
-	livevim    bool
 	search     bool
 	unsorted   bool
 	htmlEntity bool
@@ -62,7 +61,7 @@ var namedCmd = &cobra.Command{
 		if flags.search {
 			srcs.LoadUnicodeSearch()
 		}
-		if flags.livevim {
+		if resultset.ResultCmdFlags.LiveVim {
 			srcs.LoadLiveVim()
 		}
 		results := resultset.New(srcs, len(args))
@@ -152,7 +151,6 @@ var namedCmd = &cobra.Command{
 func init() {
 	namedCmd.Flags().BoolVarP(&flags.clipboard, "clipboard", "c", false, "copy resulting chars to clipboard too")
 	namedCmd.Flags().BoolVarP(&flags.join, "join", "j", false, "all args are for one char name")
-	namedCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
 	namedCmd.Flags().BoolVarP(&flags.search, "search", "/", false, "search for words, not full name")
 	namedCmd.Flags().BoolVarP(&flags.unsorted, "unsorted", "u", false, "do not sort search results")
 	namedCmd.Flags().BoolVarP(&flags.htmlEntity, "html-entity", "H", false, "input words are HTML entity names")

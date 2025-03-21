@@ -23,7 +23,6 @@ import (
 var flags struct {
 	encoding      string
 	listEncodings bool
-	livevim       bool
 	punyIn        bool
 	hexInput      bool
 }
@@ -53,7 +52,7 @@ var nameCmd = &cobra.Command{
 		}
 
 		srcs := sources.NewFast()
-		if flags.livevim {
+		if resultset.ResultCmdFlags.LiveVim {
 			srcs.LoadLiveVim()
 		}
 		approxCharCount := 0
@@ -105,10 +104,6 @@ func init() {
 	nameCmd.Flags().BoolVarP(&flags.listEncodings, "list-encodings", "", false, "list -e encodings & exit")
 	nameCmd.Flags().BoolVarP(&flags.punyIn, "punycode-input", "p", false, "decode punycode on cmdline")
 	resultset.RegisterCmdFlags(nameCmd, false) // verbose v | net-verbose N | internal-debug; don't enable oneline
-	if resultset.CanTable() {
-		nameCmd.Flags().BoolVarP(&flags.livevim, "livevim", "l", false, "load full vim data (for verbose)")
-	}
-	// FIXME: support verbose results without tables
 
 	root.AddCommand(nameCmd)
 }
