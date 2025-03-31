@@ -39,14 +39,15 @@ var warningCount int
 
 const (
 	stableUnicodeBaseURL   = "https://www.unicode.org/Public/UCD/latest/ucd/"
-	unstableUnicodeBaseURL = "https://www.unicode.org/Public/15.0.0/ucd/"
-	// FIXME: from Unicode 13.0 onwards, we have "emoji-sequences.txt" instead, in a different format.
-	emojiVariationsURL      = "https://unicode.org/Public/emoji/12.1/emoji-variation-sequences.txt"
+	unstableUnicodeBaseURL = "https://www.unicode.org/Public/16.0.0/ucd/"
+	// from Unicode 13.0 onwards, we have "emoji-sequences.txt" instead, in a different format, in the Public/emoji/ dir ...
+	// but emoji-variation-sequences.txt moved into the UCD release
+	emojiVariationsURL      = stableUnicodeBaseURL + "emoji/emoji-variation-sequences.txt"
 	blocksFilename          = "Blocks.txt"
-	unstableBlocksFilename  = "Blocks-15.0.0.txt"
+	unstableBlocksFilename  = "Blocks-16.0.0.txt"
 	blocksOutFilename       = "generated_blocks.go"
 	unidataFilename         = "UnicodeData.txt"
-	unstableUnidataFilename = "UnicodeData-15.0.0.txt"
+	unstableUnidataFilename = "UnicodeData-16.0.0.txt"
 	unidataOutFilename      = "generated_data.go"
 	emojiVariationsFilename = "emoji-variation-sequences.txt"
 	emojiOutFilename        = "generated_emoji.go"
