@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Phil Pennock.
+// Copyright © 2015-2017,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -64,6 +64,10 @@ var characterCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if globalFlags.version {
 			cmd.SetArgs([]string{"version", "--short"})
+			return cmd.Execute()
+		}
+		if tableRequestedList() {
+			cmd.SetArgs([]string{"known", "--table-styles"})
 			return cmd.Execute()
 		}
 		return fmt.Errorf("need a sub-command")
