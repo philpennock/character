@@ -14,10 +14,17 @@ echo
 echo "var staticVimData = []byte(\`"
 
 # capture built-in digraphs, so skip any .vimrc additions
+# The `--clean` flag was added in vim patch: 8.0.1554
+#
 # We need to redir from the tty for vim to be happy and emit content;
 # `go generate` does not plumb through stdin.
-vim -u /dev/null -e +digraphs +quit </dev/tty | \
+#
+# We normalize to one digraph per line with the second perl expression;
+# this is a little sensitive to get right, but basically if we special-case
+# 0x20 "SP" then we can rely upon \S+ in the middle for everything else.
+vim --clean -e +digraphs +quit </dev/tty | \
 	perl -pe 's/\e\[[!#>]?[?0-9;]*['"'"'#"*$]?[a-zA-Z^`{|}~]//g;  s/\e=//g; s/\e>//g' | \
+	perl -pe 's/\s+ ( (?:(?:(?:\S+) \s+ (?:\S+))|SP) \s+ (?:\d+)) /\n\1/xg' | \
 	sed 's/`/`+"`"+`/g'
 
 echo '`)'
