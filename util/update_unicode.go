@@ -39,22 +39,22 @@ var warningCount int
 
 const (
 	stableUnicodeBaseURL   = "https://www.unicode.org/Public/UCD/latest/ucd/"
-	unstableUnicodeBaseURL = "https://www.unicode.org/Public/16.0.0/ucd/"
+	unstableUnicodeBaseURL = "https://www.unicode.org/Public/17.0.0/ucd/"
 	// from Unicode 13.0 onwards, we have "emoji-sequences.txt" instead, in a different format, in the Public/emoji/ dir ...
 	// but emoji-variation-sequences.txt moved into the UCD release
 	emojiVariationsURL      = stableUnicodeBaseURL + "emoji/emoji-variation-sequences.txt"
 	blocksFilename          = "Blocks.txt"
-	unstableBlocksFilename  = "Blocks-16.0.0.txt"
+	unstableBlocksFilename  = "Blocks-17.0.0.txt"
 	blocksOutFilename       = "generated_blocks.go"
 	unidataFilename         = "UnicodeData.txt"
-	unstableUnidataFilename = "UnicodeData-16.0.0.txt"
+	unstableUnidataFilename = "UnicodeData-17.0.0.txt"
 	unidataOutFilename      = "generated_data.go"
 	emojiVariationsFilename = "emoji-variation-sequences.txt"
 	emojiOutFilename        = "generated_emoji.go"
 
 	approxBlockUpperBound      = 500
-	approxUnidataUpperBound    = 35000
-	approxVariationsUpperBound = 500 // 351 as of emoji 5.0
+	approxUnidataUpperBound    = 41000 // Unicode 17: 40575
+	approxVariationsUpperBound = 500   // 351 as of emoji 5.0
 )
 
 func init() {
@@ -335,6 +335,8 @@ ReadLoop:
 		ordered = append(ordered, bi)
 	}
 
+	fmt.Fprintf(os.Stderr, "size checks FYI: blocks: %d/%d\n",
+		len(ordered), approxBlockUpperBound)
 	return ordered, maxKnownBlockRune, nil
 }
 
@@ -401,6 +403,11 @@ ReadLoop:
 			max = r
 		}
 	}
+
+	fmt.Fprintf(os.Stderr, "size checks FYI: linearNames: %d/%d\tlinearCI %d/%d\tRunes %d/%d\n",
+		len(linearNames), approxUnidataUpperBound,
+		len(linearCI), approxUnidataUpperBound,
+		len(Runes), approxUnidataUpperBound)
 
 	return unicode.Unicode{
 			MaxRune: max,
@@ -478,6 +485,7 @@ ReadLoop:
 		return nil, fmt.Errorf("file finished without pairing final rune %04X/text with matching /emoji", textSeen)
 	}
 
+	fmt.Fprintf(os.Stderr, "size checks FYI: emoji 5.0: %d/%d\n", len(emoji), approxVariationsUpperBound)
 	return emoji, nil
 }
 

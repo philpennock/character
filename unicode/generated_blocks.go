@@ -198,6 +198,7 @@ const (
 	BlockHatran
 	BlockPhoenician
 	BlockLydian
+	BlockSidetic
 	BlockMeroiticHieroglyphs
 	BlockMeroiticCursive
 	BlockKharoshthi
@@ -249,11 +250,13 @@ const (
 	BlockUnifiedCanadianAboriginalSyllabicsExtendedA
 	BlockPauCinHau
 	BlockDevanagariExtendedA
+	BlockSharadaSupplement
 	BlockSunuwar
 	BlockBhaiksuki
 	BlockMarchen
 	BlockMasaramGondi
 	BlockGunjalaGondi
+	BlockTolongSiki
 	BlockMakasar
 	BlockKawi
 	BlockLisuSupplement
@@ -274,12 +277,14 @@ const (
 	BlockPahawhHmong
 	BlockKiratRai
 	BlockMedefaidrin
+	BlockBeriaErfe
 	BlockMiao
 	BlockIdeographicSymbolsandPunctuation
 	BlockTangut
 	BlockTangutComponents
 	BlockKhitanSmallScript
 	BlockTangutSupplement
+	BlockTangutComponentsSupplement
 	BlockKanaExtendedB
 	BlockKanaSupplement
 	BlockKanaExtendedA
@@ -288,6 +293,7 @@ const (
 	BlockDuployan
 	BlockShorthandFormatControls
 	BlockSymbolsforLegacyComputingSupplement
+	BlockMiscellaneousSymbolsSupplement
 	BlockZnamennyMusicalNotation
 	BlockByzantineMusicalSymbols
 	BlockMusicalSymbols
@@ -306,6 +312,7 @@ const (
 	BlockWancho
 	BlockNagMundari
 	BlockOlOnal
+	BlockTaiYo
 	BlockEthiopicExtendedB
 	BlockMendeKikakui
 	BlockAdlam
@@ -337,6 +344,7 @@ const (
 	BlockCJKCompatibilityIdeographsSupplement
 	BlockCJKUnifiedIdeographsExtensionG
 	BlockCJKUnifiedIdeographsExtensionH
+	BlockCJKUnifiedIdeographsExtensionJ
 	BlockTags
 	BlockVariationSelectorsSupplement
 	BlockSupplementaryPrivateUseAreaA
@@ -539,6 +547,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 67808, Max: 67839, ID: BlockHatran, Name: "Hatran"},
 	BlockInfo{Min: 67840, Max: 67871, ID: BlockPhoenician, Name: "Phoenician"},
 	BlockInfo{Min: 67872, Max: 67903, ID: BlockLydian, Name: "Lydian"},
+	BlockInfo{Min: 67904, Max: 67935, ID: BlockSidetic, Name: "Sidetic"},
 	BlockInfo{Min: 67968, Max: 67999, ID: BlockMeroiticHieroglyphs, Name: "Meroitic Hieroglyphs"},
 	BlockInfo{Min: 68000, Max: 68095, ID: BlockMeroiticCursive, Name: "Meroitic Cursive"},
 	BlockInfo{Min: 68096, Max: 68191, ID: BlockKharoshthi, Name: "Kharoshthi"},
@@ -590,11 +599,13 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 72368, Max: 72383, ID: BlockUnifiedCanadianAboriginalSyllabicsExtendedA, Name: "Unified Canadian Aboriginal Syllabics Extended-A"},
 	BlockInfo{Min: 72384, Max: 72447, ID: BlockPauCinHau, Name: "Pau Cin Hau"},
 	BlockInfo{Min: 72448, Max: 72543, ID: BlockDevanagariExtendedA, Name: "Devanagari Extended-A"},
+	BlockInfo{Min: 72544, Max: 72575, ID: BlockSharadaSupplement, Name: "Sharada Supplement"},
 	BlockInfo{Min: 72640, Max: 72703, ID: BlockSunuwar, Name: "Sunuwar"},
 	BlockInfo{Min: 72704, Max: 72815, ID: BlockBhaiksuki, Name: "Bhaiksuki"},
 	BlockInfo{Min: 72816, Max: 72895, ID: BlockMarchen, Name: "Marchen"},
 	BlockInfo{Min: 72960, Max: 73055, ID: BlockMasaramGondi, Name: "Masaram Gondi"},
 	BlockInfo{Min: 73056, Max: 73135, ID: BlockGunjalaGondi, Name: "Gunjala Gondi"},
+	BlockInfo{Min: 73136, Max: 73199, ID: BlockTolongSiki, Name: "Tolong Siki"},
 	BlockInfo{Min: 73440, Max: 73471, ID: BlockMakasar, Name: "Makasar"},
 	BlockInfo{Min: 73472, Max: 73567, ID: BlockKawi, Name: "Kawi"},
 	BlockInfo{Min: 73648, Max: 73663, ID: BlockLisuSupplement, Name: "Lisu Supplement"},
@@ -615,12 +626,14 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 92928, Max: 93071, ID: BlockPahawhHmong, Name: "Pahawh Hmong"},
 	BlockInfo{Min: 93504, Max: 93567, ID: BlockKiratRai, Name: "Kirat Rai"},
 	BlockInfo{Min: 93760, Max: 93855, ID: BlockMedefaidrin, Name: "Medefaidrin"},
+	BlockInfo{Min: 93856, Max: 93919, ID: BlockBeriaErfe, Name: "Beria Erfe"},
 	BlockInfo{Min: 93952, Max: 94111, ID: BlockMiao, Name: "Miao"},
 	BlockInfo{Min: 94176, Max: 94207, ID: BlockIdeographicSymbolsandPunctuation, Name: "Ideographic Symbols and Punctuation"},
 	BlockInfo{Min: 94208, Max: 100351, ID: BlockTangut, Name: "Tangut"},
 	BlockInfo{Min: 100352, Max: 101119, ID: BlockTangutComponents, Name: "Tangut Components"},
 	BlockInfo{Min: 101120, Max: 101631, ID: BlockKhitanSmallScript, Name: "Khitan Small Script"},
 	BlockInfo{Min: 101632, Max: 101759, ID: BlockTangutSupplement, Name: "Tangut Supplement"},
+	BlockInfo{Min: 101760, Max: 101887, ID: BlockTangutComponentsSupplement, Name: "Tangut Components Supplement"},
 	BlockInfo{Min: 110576, Max: 110591, ID: BlockKanaExtendedB, Name: "Kana Extended-B"},
 	BlockInfo{Min: 110592, Max: 110847, ID: BlockKanaSupplement, Name: "Kana Supplement"},
 	BlockInfo{Min: 110848, Max: 110895, ID: BlockKanaExtendedA, Name: "Kana Extended-A"},
@@ -629,6 +642,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 113664, Max: 113823, ID: BlockDuployan, Name: "Duployan"},
 	BlockInfo{Min: 113824, Max: 113839, ID: BlockShorthandFormatControls, Name: "Shorthand Format Controls"},
 	BlockInfo{Min: 117760, Max: 118463, ID: BlockSymbolsforLegacyComputingSupplement, Name: "Symbols for Legacy Computing Supplement"},
+	BlockInfo{Min: 118464, Max: 118527, ID: BlockMiscellaneousSymbolsSupplement, Name: "Miscellaneous Symbols Supplement"},
 	BlockInfo{Min: 118528, Max: 118735, ID: BlockZnamennyMusicalNotation, Name: "Znamenny Musical Notation"},
 	BlockInfo{Min: 118784, Max: 119039, ID: BlockByzantineMusicalSymbols, Name: "Byzantine Musical Symbols"},
 	BlockInfo{Min: 119040, Max: 119295, ID: BlockMusicalSymbols, Name: "Musical Symbols"},
@@ -647,6 +661,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 123584, Max: 123647, ID: BlockWancho, Name: "Wancho"},
 	BlockInfo{Min: 124112, Max: 124159, ID: BlockNagMundari, Name: "Nag Mundari"},
 	BlockInfo{Min: 124368, Max: 124415, ID: BlockOlOnal, Name: "Ol Onal"},
+	BlockInfo{Min: 124608, Max: 124671, ID: BlockTaiYo, Name: "Tai Yo"},
 	BlockInfo{Min: 124896, Max: 124927, ID: BlockEthiopicExtendedB, Name: "Ethiopic Extended-B"},
 	BlockInfo{Min: 124928, Max: 125151, ID: BlockMendeKikakui, Name: "Mende Kikakui"},
 	BlockInfo{Min: 125184, Max: 125279, ID: BlockAdlam, Name: "Adlam"},
@@ -678,6 +693,7 @@ var allKnownBlocks = []BlockInfo{
 	BlockInfo{Min: 194560, Max: 195103, ID: BlockCJKCompatibilityIdeographsSupplement, Name: "CJK Compatibility Ideographs Supplement"},
 	BlockInfo{Min: 196608, Max: 201551, ID: BlockCJKUnifiedIdeographsExtensionG, Name: "CJK Unified Ideographs Extension G"},
 	BlockInfo{Min: 201552, Max: 205743, ID: BlockCJKUnifiedIdeographsExtensionH, Name: "CJK Unified Ideographs Extension H"},
+	BlockInfo{Min: 205744, Max: 210047, ID: BlockCJKUnifiedIdeographsExtensionJ, Name: "CJK Unified Ideographs Extension J"},
 	BlockInfo{Min: 917504, Max: 917631, ID: BlockTags, Name: "Tags"},
 	BlockInfo{Min: 917760, Max: 917999, ID: BlockVariationSelectorsSupplement, Name: "Variation Selectors Supplement"},
 	BlockInfo{Min: 983040, Max: 1048575, ID: BlockSupplementaryPrivateUseAreaA, Name: "Supplementary Private Use Area-A"},
