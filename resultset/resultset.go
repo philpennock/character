@@ -803,7 +803,7 @@ func (rs *ResultSet) SetOmitColumns(tab *table.Table, nameList string) {
 	if nameList == "" {
 		return
 	}
-	for _, field := range strings.Split(nameList, ",") {
+	for field := range strings.SplitSeq(nameList, ",") {
 		field = strings.TrimSpace(field)
 		if field == "" {
 			continue

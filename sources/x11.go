@@ -41,7 +41,7 @@ func loadStaticX11Digraphs() X11Data {
 	x := X11Data{
 		DigraphsByRune: make(map[rune]string, staticX11RuneCount),
 	}
-	for _, l := range strings.Split(staticX11ComposeSeqs, "\n") {
+	for l := range strings.SplitSeq(staticX11ComposeSeqs, "\n") {
 		if len(l) == 0 {
 			continue
 		}
