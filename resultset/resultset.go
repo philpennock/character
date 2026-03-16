@@ -11,13 +11,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"unicode/utf16"
 
 	"golang.org/x/net/idna"
 
 	"github.com/philpennock/character/entities"
 	"github.com/philpennock/character/internal/runemanip"
 	"github.com/philpennock/character/internal/table"
+	"github.com/philpennock/character/internal/uformat"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"
 )
@@ -461,14 +461,7 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 		}
 		return s
 	case PRINT_RUNE_JSON:
-		r1, r2 := utf16.EncodeRune(ci.unicode.Number)
-		if r1 == 0xFFFD && r2 == 0xFFFD {
-			if ci.unicode.Number <= 0xFFFF {
-				return fmt.Sprintf("\\u%04X", ci.unicode.Number)
-			}
-			return "?"
-		}
-		return fmt.Sprintf("\\u%04X\\u%04X", r1, r2)
+		return uformat.JSONEscaped(ci.unicode.Number)
 	case PRINT_RUNE_PUNY:
 		p, err := idna.ToASCII(string(ci.unicode.Number))
 		if err != nil {
@@ -509,6 +502,19 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 	}
 }
 
+// JBlock holds structured Unicode block information in JSON output.
+type JBlock struct {
+	Name  string `json:"name"`
+	Start string `json:"start"` // e.g. "U+2700"
+	End   string `json:"end"`   // e.g. "U+27BF"
+}
+
+// JPresentVariant describes one presentation-selector variant in JSON output.
+type JPresentVariant struct {
+	Selector string `json:"selector"` // e.g. "U+FE0F"
+	Type     string `json:"type"`     // "text" or "emoji"
+}
+
 // JItem is how a character is represented in JSON output.
 type JItem struct {
 	Display      string   `json:"display"`
@@ -529,6 +535,15 @@ type JItem struct {
 	RenderWidth  int      `json:"renderWidth"`
 	Puny         string   `json:"puny"`
 	PartOf       string   `json:"part-of,omitempty"`
+
+	// New fields (omitempty — absent for synthetic entries where Number==0).
+	UTF8Bytes      string            `json:"utf8_bytes,omitempty"`
+	UTF8Escaped    string            `json:"utf8_escaped,omitempty"`
+	UnicodeEscaped string            `json:"unicode_escaped,omitempty"`
+	RustEscaped    string            `json:"rust_escaped,omitempty"`
+	Category       string            `json:"category,omitempty"`
+	BlockInfo      *JBlock           `json:"block_info,omitempty"`
+	PresentVariants []JPresentVariant `json:"presentation_variants,omitempty"`
 }
 
 // JInfo is something which might be shown instead of JItem.
@@ -586,7 +601,7 @@ func (rs *ResultSet) JSONEntry(ci charItem) any {
 		}
 	}
 
-	return &JItem{
+	item := &JItem{
 		Display:      S(rs.RenderCharInfoItem(ci, PRINT_RUNE)),
 		DisplayText:  S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_TEXT)),
 		DisplayEmoji: S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PRESENT_EMOJI)),
@@ -606,6 +621,35 @@ func (rs *ResultSet) JSONEntry(ci charItem) any {
 		Puny:         S(rs.RenderCharInfoItem(ci, PRINT_RUNE_PUNY)),
 		PartOf:       S(rs.RenderCharInfoItem(ci, PRINT_PART_OF)),
 	}
+
+	// Populate new fields only for real codepoints (Number==0 is synthetic).
+	if ci.unicode.Number != 0 {
+		r := ci.unicode.Number
+		item.UTF8Bytes = uformat.UTF8Bytes(r)
+		item.UTF8Escaped = uformat.UTF8Escaped(r)
+		item.UnicodeEscaped = uformat.UnicodeEscaped(r)
+		item.RustEscaped = uformat.RustEscaped(r)
+		item.Category = unicode.GeneralCategory(r)
+		if bi := rs.sources.UBlocks.LookupInfo(r); bi != nil {
+			item.BlockInfo = &JBlock{
+				Name:  bi.Name,
+				Start: fmt.Sprintf("U+%04X", bi.Min),
+				End:   fmt.Sprintf("U+%04X", bi.Max),
+			}
+		}
+		pvs := unicode.PresentationVariants(r)
+		if len(pvs) > 0 {
+			item.PresentVariants = make([]JPresentVariant, len(pvs))
+			for i, pv := range pvs {
+				item.PresentVariants[i] = JPresentVariant{
+					Selector: fmt.Sprintf("U+%04X", pv.Selector),
+					Type:     pv.Type,
+				}
+			}
+		}
+	}
+
+	return item
 }
 
 // PrintJSON shows everything we know about each result, in JSON.
