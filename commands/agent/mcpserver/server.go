@@ -18,9 +18,15 @@ type Server struct {
 }
 
 // NewServer creates a Server, registers all tools, and returns it.
-func NewServer(srcs *sources.Sources) *Server {
+//
+// searchReady, if non-nil, is a channel that is closed once
+// srcs.Unicode.Search has been populated.  Tools that require the search
+// index will block on it so that initialize / tools/list respond immediately
+// while the index loads in the background.  Pass nil to skip the async path
+// (e.g. in tests that pre-load everything synchronously).
+func NewServer(srcs *sources.Sources, searchReady <-chan struct{}) *Server {
 	inner := mcpstdio.NewServer("character", version.VersionString)
-	registerTools(inner, srcs)
+	registerTools(inner, srcs, searchReady)
 	return &Server{inner: inner}
 }
 

@@ -28,7 +28,7 @@ func jsonResult(v any) (string, error) {
 }
 
 // registerTools registers all eight MCP tools on srv.
-func registerTools(srv *mcpstdio.Server, srcs *sources.Sources) {
+func registerTools(srv *mcpstdio.Server, srcs *sources.Sources, searchReady <-chan struct{}) {
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_lookup_char",
 		Description: "Look up a single Unicode character and return its full property object",
@@ -39,13 +39,13 @@ func registerTools(srv *mcpstdio.Server, srcs *sources.Sources) {
 		Name:        "unicode_lookup_name",
 		Description: "Look up a Unicode character by name (exact or substring search)",
 		InputSchema: schemaLookupName,
-	}, handleLookupName(srcs))
+	}, handleLookupName(srcs, searchReady))
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_search",
 		Description: "Search for Unicode characters whose names contain the query string",
 		InputSchema: schemaSearch,
-	}, handleSearch(srcs))
+	}, handleSearch(srcs, searchReady))
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_lookup_codepoint",
@@ -97,7 +97,7 @@ func handleLookupChar(srcs *sources.Sources) mcpstdio.Handler {
 	}
 }
 
-func handleLookupName(srcs *sources.Sources) mcpstdio.Handler {
+func handleLookupName(srcs *sources.Sources, searchReady <-chan struct{}) mcpstdio.Handler {
 	return func(ctx context.Context, args json.RawMessage) (string, error) {
 		var p struct {
 			Name  string `json:"name"`
@@ -116,7 +116,14 @@ func handleLookupName(srcs *sources.Sources) mcpstdio.Handler {
 			return jsonResult([]CharProps{CharPropsFromRune(ci.Number, srcs)})
 		}
 
-		// Substring search.
+		// Substring search: wait for the search index to be ready.
+		if searchReady != nil {
+			select {
+			case <-searchReady:
+			case <-ctx.Done():
+				return "", ctx.Err()
+			}
+		}
 		_, found := srcs.Unicode.Search.Query(p.Name, -1)
 		if len(found) == 0 {
 			return jsonResult([]CharProps{})
@@ -126,13 +133,20 @@ func handleLookupName(srcs *sources.Sources) mcpstdio.Handler {
 	}
 }
 
-func handleSearch(srcs *sources.Sources) mcpstdio.Handler {
+func handleSearch(srcs *sources.Sources, searchReady <-chan struct{}) mcpstdio.Handler {
 	return func(ctx context.Context, args json.RawMessage) (string, error) {
 		var p struct {
 			Query string `json:"query"`
 		}
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		if searchReady != nil {
+			select {
+			case <-searchReady:
+			case <-ctx.Done():
+				return "", ctx.Err()
+			}
 		}
 		_, found := srcs.Unicode.Search.Query(p.Query, -1)
 		if len(found) == 0 {

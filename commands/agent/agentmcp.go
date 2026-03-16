@@ -33,9 +33,17 @@ func init() {
 
 func runAgentMCP(cmd *cobra.Command, args []string) {
 	srcs := sources.NewFast()
-	srcs.LoadUnicodeSearch()
 
-	srv := mcpserver.NewServer(srcs)
+	// Load the search index in the background so that initialize and
+	// tools/list respond immediately.  The search handlers block on
+	// searchReady before touching srcs.Unicode.Search.
+	searchReady := make(chan struct{})
+	go func() {
+		srcs.LoadUnicodeSearch()
+		close(searchReady)
+	}()
+
+	srv := mcpserver.NewServer(srcs, searchReady)
 	if err := srv.ServeStdio(context.Background()); err != nil {
 		fmt.Fprintf(os.Stderr, "agent mcp: %v\n", err)
 		root.Errored()

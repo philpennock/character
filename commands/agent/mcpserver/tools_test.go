@@ -272,7 +272,7 @@ func extractTransformResult(t *testing.T, result json.RawMessage) mcpserver.Tran
 
 func TestToolLookupChar(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_char", map[string]any{"char": "✓"})
 	cp := extractCharProps(t, result)
 	if cp.Name != "CHECK MARK" {
@@ -282,21 +282,21 @@ func TestToolLookupChar(t *testing.T) {
 
 func TestToolLookupCharEmpty(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_char", map[string]any{"char": ""})
 	assertIsError(t, result, "exactly one")
 }
 
 func TestToolLookupCharTwoRunes(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_char", map[string]any{"char": "ab"})
 	assertIsError(t, result, "")
 }
 
 func TestToolLookupCodepointUPlus(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_codepoint", map[string]any{"codepoint": "U+2713"})
 	cp := extractCharProps(t, result)
 	if cp.Name != "CHECK MARK" {
@@ -306,7 +306,7 @@ func TestToolLookupCodepointUPlus(t *testing.T) {
 
 func TestToolLookupCodepointDecimal(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_codepoint", map[string]any{"codepoint": "10003"})
 	cp := extractCharProps(t, result)
 	if cp.Name != "CHECK MARK" {
@@ -316,7 +316,7 @@ func TestToolLookupCodepointDecimal(t *testing.T) {
 
 func TestToolLookupCodepointHex(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_codepoint", map[string]any{"codepoint": "0x2713"})
 	cp := extractCharProps(t, result)
 	if cp.Name != "CHECK MARK" {
@@ -326,7 +326,7 @@ func TestToolLookupCodepointHex(t *testing.T) {
 
 func TestToolLookupNameExact(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_name",
 		map[string]any{"name": "CHECK MARK", "exact": true})
 	cps := extractCharPropsSlice(t, result)
@@ -337,7 +337,7 @@ func TestToolLookupNameExact(t *testing.T) {
 
 func TestToolLookupNameExactNotFound(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_name",
 		map[string]any{"name": "NONEXISTENT XYZ CHARACTER", "exact": true})
 	assertIsError(t, result, "")
@@ -345,7 +345,7 @@ func TestToolLookupNameExactNotFound(t *testing.T) {
 
 func TestToolSearch(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_search", map[string]any{"query": "snowman"})
 	cps := extractCharPropsSlice(t, result)
 	if len(cps) == 0 {
@@ -364,7 +364,7 @@ func TestToolSearch(t *testing.T) {
 
 func TestToolListBlocks(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_list_blocks", map[string]any{})
 	blocks := extractBlockSlice(t, result)
 	if len(blocks) == 0 {
@@ -382,7 +382,7 @@ func TestToolListBlocks(t *testing.T) {
 
 func TestToolBrowseBlock(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_browse_block", map[string]any{"block": "Dingbats"})
 	cps := extractCharPropsSlice(t, result)
 	if len(cps) == 0 {
@@ -392,7 +392,7 @@ func TestToolBrowseBlock(t *testing.T) {
 
 func TestToolBrowseBlockNotFound(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_browse_block",
 		map[string]any{"block": "Nonexistent Block XYZ"})
 	assertIsError(t, result, "unknown block")
@@ -400,7 +400,7 @@ func TestToolBrowseBlockNotFound(t *testing.T) {
 
 func TestToolEmojiFlagFR(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_emoji_flag", map[string]any{"country_code": "FR"})
 	fr := extractFlagResult(t, result)
 	if fr.Combined == "" {
@@ -410,7 +410,7 @@ func TestToolEmojiFlagFR(t *testing.T) {
 
 func TestToolEmojiFlagLowercase(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 
 	upperResult, _ := callViaServeConn(t, inner, "unicode_emoji_flag", map[string]any{"country_code": "FR"})
 	lowerResult, _ := callViaServeConn(t, inner, "unicode_emoji_flag", map[string]any{"country_code": "fr"})
@@ -424,14 +424,14 @@ func TestToolEmojiFlagLowercase(t *testing.T) {
 
 func TestToolEmojiFlagThreeLetters(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_emoji_flag", map[string]any{"country_code": "ZZZ"})
 	assertIsError(t, result, "exactly two letters")
 }
 
 func TestToolTransformFraktur(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_transform",
 		map[string]any{"type": "fraktur", "text": "Hello"})
 	tr := extractTransformResult(t, result)
@@ -442,7 +442,7 @@ func TestToolTransformFraktur(t *testing.T) {
 
 func TestToolTransformScreamRoundtrip(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	orig := "hello world"
 
 	encResult, _ := callViaServeConn(t, inner, "unicode_transform",
@@ -460,7 +460,7 @@ func TestToolTransformScreamRoundtrip(t *testing.T) {
 
 func TestToolTransformInvalidType(t *testing.T) {
 	srcs := newTestSrcs(t)
-	inner := mcpserver.NewServer(srcs).Inner()
+	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_transform",
 		map[string]any{"type": "invalid", "text": "hello"})
 	assertIsError(t, result, "unknown transform type")
