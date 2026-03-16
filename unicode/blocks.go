@@ -35,6 +35,25 @@ type Blocks struct {
 	maxKnownBlockRune rune
 }
 
+// LookupInfo returns a pointer to a copy of the BlockInfo for the block
+// containing r, or nil if no block contains r.
+func (b Blocks) LookupInfo(r rune) *BlockInfo {
+	if r > b.maxKnownBlockRune {
+		return nil
+	}
+	for i := range b.ordered {
+		if b.ordered[i].Max < r {
+			continue
+		}
+		if b.ordered[i].Min <= r {
+			info := b.ordered[i] // copy
+			return &info
+		}
+		return nil // gap between blocks
+	}
+	return nil
+}
+
 // Lookup returns the name of the one block which contains a given rune, or
 // the empty string if no such block is found.
 func (b Blocks) Lookup(r rune) (blockname string) {

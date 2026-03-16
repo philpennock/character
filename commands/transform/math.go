@@ -216,8 +216,36 @@ func mathListCommands(w io.Writer, verbose bool, args []string) error {
 		}
 		t.AddRow(row...)
 	}
-	_, err := fmt.Fprintf(w, t.Render())
+	_, err := fmt.Fprint(w, t.Render())
 	return err
+}
+
+// TransformMath converts each argument to a mathematical letter variant and
+// returns the results joined by spaces.  target names a conversion type (e.g.
+// "bold", "italic", "frakturnormal"); an empty string is treated as "normal".
+// It is the exported API for non-Cobra callers (e.g. the MCP server).
+func TransformMath(args []string, target string) (string, error) {
+	if len(args) == 0 {
+		return "", nil
+	}
+	want := strings.Map(func(r rune) rune {
+		if unicode.IsLower(r) {
+			return r
+		}
+		return -1
+	}, strings.ToLower(target))
+	if len(want) == 0 {
+		want = "normal"
+	}
+	convert, ok := conversions[want]
+	if !ok {
+		return "", fmt.Errorf("math: unknown conversion %q", target)
+	}
+	output := make([]string, len(args))
+	for argI := range args {
+		output[argI] = strings.Map(convert, args[argI])
+	}
+	return strings.Join(output, " "), nil
 }
 
 var mathSubcommand = transformCobraCommand{

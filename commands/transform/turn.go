@@ -16,7 +16,11 @@ const turnReplacementsB string = "ɐqɔpəɟᵷɥᴉɾʞꞁɯuodbɹsʇnʌʍxʎz�
 
 var turnTable map[rune]rune
 
-func transformTurn(args []string) (string, error) {
+// TransformTurn converts each argument to upside-down characters and returns
+// the results joined by spaces (text is reversed by default, matching the CLI
+// default of preserveOrder=false).  It is the exported API for non-Cobra
+// callers (e.g. the MCP server).
+func TransformTurn(args []string) (string, error) {
 	ensureBidirectionalRuneTable(&turnTable, turnReplacementsA, turnReplacementsB)
 	var transFlags transformFlags
 	if !flags.preserveOrder {
@@ -28,5 +32,5 @@ func transformTurn(args []string) (string, error) {
 var turnSubcommand = transformCobraCommand{
 	Use:         "turn [text ...]",
 	Short:       "turn characters upside down",
-	Transformer: transformTurn,
+	Transformer: TransformTurn,
 }
