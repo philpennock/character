@@ -25,6 +25,8 @@ import (
 	_ "github.com/philpennock/character/commands/transform"
 	_ "github.com/philpennock/character/commands/version"
 
+	_ "github.com/philpennock/character/commands/agent"
+
 	_ "github.com/philpennock/character/commands/deprecated"
 )
 
