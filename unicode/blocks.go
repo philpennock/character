@@ -1,4 +1,4 @@
-// Copyright © 2015,2016,2021 Phil Pennock.
+// Copyright © 2015,2016,2021,2026 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
