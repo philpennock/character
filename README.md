@@ -36,6 +36,8 @@ A̰áăăå ȁåȃăa̱
 $ character transform scream --decode \
     $(character transform scream Hello world)
 Hello world
+$ character named -Jj CHECK MARK
+{"characters":[{"display":"✓","name":"CHECK MARK","hex":"2713",...}]}
 $ character named -1c 'INFORMATION DESK PERSON' \
     'EMOJI MODIFIER FITZPATRICK TYPE-5'
 💁🏾
@@ -49,6 +51,9 @@ the modified character, so `-1c` _should_ show you the same thing that is
 copied to the clipboard where `-c` on its own would show you the individual
 parts while copying the modified/combined whole to the clipboard.
 
+Use `-J` / `--json` for machine-readable output — this is the most reliable
+format for scripting and agent consumption (but consider MCP invocation).
+
 <img src=".web-assets/images/character-smiling_4bfca881.png"
      alt="character named -v/ smiling"
      title="character named -v/ smiling"
@@ -61,31 +66,76 @@ parts while copying the modified/combined whole to the clipboard.
 
 
 [Licensed](./LICENSE.txt) under a MIT-style license.  
-[Accumulated licenses of all dependencies](./LICENSES_all.txt) are available
-too.  
+[Accumulated licenses of all dependencies](./LICENSES_all.txt) are available too.  
 Patches welcome.
 
 
-Building
---------
+## Agent and MCP support
 
-Install without downloading manually with `go install`:
+The `agent` sub-command tree has commands designed for AI coding agents and
+other automated tooling.  All agent output is stable, machine-readable JSON.
+AIs should see [`AGENTS.md`](AGENTS.md) for full tool schemas and usage patterns.
+
+`character agent mcp` starts a [Model Context Protocol][mcp] stdio server.
+This allows `character` to act as a co-process providing Unicode domain
+knowledge.
+
+[mcp]: https://modelcontextprotocol.io/
+
+(Disclosure: Claude was used to implement the MCP support.)
+
+### Registering as an MCP server
+
+#### Claude Code
+
+Via the CLI:
 
 ```sh
-go install -v github.com/philpennock/character@latest
+claude mcp add --scope user --transport stdio character -- character agent mcp
 ```
 
---------------------------------------------------
+This registers the agent as available for all Projects;
+drop the `--scope user` to only make available to this specific project.
 
-Run: `go build`
+#### Other MCP clients
 
-Assuming defaults, install into `~/go/bin/` with: `go build`
+Any client that supports the MCP stdio transport can launch `character agent
+mcp` as a subprocess.  The server speaks JSON-RPC 2.0 with newline-delimited
+framing (one JSON object per `\n`-terminated line).
 
-This software uses Go Modules and requires a sufficiently recent version of
-Go.  Clone this repo anywhere, don't worry about `$GOPATH` or such things
-(assuming Go 1.12 or newer).
 
-If you are on an older Go, look for the last release in the `v0.3.x` series.
+## Documentation
+
+| File                             | Audience                                                      |
+| -------------------------------- | ------------------------------------------------------------- |
+| [`AGENTS.md`](AGENTS.md)         | AI agents — tool schemas, example invocations, output formats |
+| [`CODE_GUIDE.md`](CODE_GUIDE.md) | Developers — package map, reading order, data flow, protocols |
+
+
+## Building
+
+Requires Go 1.24 or newer.
+
+Install without cloning:
+
+```sh
+go install github.com/philpennock/character@latest
+```
+
+Or clone and build locally:
+
+```sh
+git clone https://github.com/philpennock/character.git
+cd character
+go build
+```
+
+Unicode data and entity tables are compiled in.  To regenerate them after
+updating source data files (e.g. for a new Unicode version):
+
+```sh
+go generate ./...
+```
 
 ### WASM
 
@@ -112,17 +162,18 @@ any cookies or other credentials worth stealing.  But it's a useful toy to
 explore with.  Well, it was for me: "My First WASM".
 
 
-
-Table packages
---------------
+## Table packages
 
 Versions prior to v0.9.0 supported multiple table packages for rendering tables
 to the terminal.  With v0.9.0, we dropped support for all table packages other
 than by own `go.pennock.tech/tabular`, support for which was added in v0.1.0.
 
 
-Alternatives
-------------
+## Alternatives
 
-* `uni` by Martin Tournoij: <https://github.com/arp242/uni>,
-  `go get arp242.net/uni`
+* `uni` by Martin Tournoij: <https://github.com/arp242/uni>
+  — `go install arp242.net/uni/v2@latest`
+* `unicode` (Debian/Ubuntu): `apt install unicode`
+  — command-line Unicode database query tool
+* `unipicker` by Jeremy Janzen: <https://github.com/jeremija/unipicker>
+  — interactive console Unicode character picker with clipboard support
