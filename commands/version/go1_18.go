@@ -3,7 +3,6 @@
 // Licensed per file LICENSE.txt
 
 //go:build go1.18
-// +build go1.18
 
 package version
 

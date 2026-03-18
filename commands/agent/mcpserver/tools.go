@@ -315,7 +315,7 @@ func handleTransform() mcpstdio.Handler {
 }
 
 // charInfoSlice converts the []interface{} from Search.Query into []unicode.CharInfo.
-func charInfoSlice(found []interface{}) unicode.CharInfoList {
+func charInfoSlice(found []any) unicode.CharInfoList {
 	cis := make(unicode.CharInfoList, len(found))
 	for i, item := range found {
 		cis[i] = item.(unicode.CharInfo)

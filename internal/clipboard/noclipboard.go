@@ -3,7 +3,6 @@
 // Licensed per file LICENSE.txt
 
 //go:build noclipboard
-// +build noclipboard
 
 package clipboard
 

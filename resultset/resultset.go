@@ -455,11 +455,11 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 		return strconv.FormatUint(uint64(ci.unicode.Number), 10)
 	case PRINT_RUNE_UTF8ENC:
 		bb := []byte(string(ci.unicode.Number))
-		var s string
+		var s strings.Builder
 		for i := range bb {
-			s += fmt.Sprintf("%%%X", bb[i])
+			s.WriteString(fmt.Sprintf("%%%X", bb[i]))
 		}
-		return s
+		return s.String()
 	case PRINT_RUNE_JSON:
 		return uformat.JSONEscaped(ci.unicode.Number)
 	case PRINT_RUNE_PUNY:

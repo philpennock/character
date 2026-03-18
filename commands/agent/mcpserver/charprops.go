@@ -9,6 +9,7 @@ package mcpserver
 
 import (
 	"fmt"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/philpennock/character/entities"
@@ -57,11 +58,11 @@ type CharProps struct {
 func utf8Percent(r rune) string {
 	var buf [utf8.UTFMax]byte
 	n := utf8.EncodeRune(buf[:], r)
-	s := ""
+	var s strings.Builder
 	for i := range n {
-		s += fmt.Sprintf("%%%X", buf[i])
+		s.WriteString(fmt.Sprintf("%%%X", buf[i]))
 	}
-	return s
+	return s.String()
 }
 
 // CharPropsFromRune computes all character properties for r from the given
