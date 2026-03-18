@@ -219,18 +219,89 @@ def _print_result(resp: dict):
                 print(text)
 
 
+def _build_completions(tools: list[dict]) -> tuple[set[str], dict[str, list[str]], dict[str, list[str]]]:
+    """Extract tool names, per-tool argument keys, and per-key enum values
+    from the tools/list response for tab-completion."""
+    commands = {"list", "help", "quit", "exit"}
+    tool_names: set[str] = set()
+    tool_args: dict[str, list[str]] = {}    # tool → ["key=", ...]
+    arg_enums: dict[str, list[str]] = {}    # "tool:key" → ["val1", ...]
+    for t in tools:
+        name = t["name"]
+        tool_names.add(name)
+        schema = t.get("inputSchema", {})
+        props = schema.get("properties", {})
+        keys = sorted(props.keys())
+        tool_args[name] = [k + "=" for k in keys]
+        for k, v in props.items():
+            if "enum" in v:
+                arg_enums[f"{name}:{k}"] = v["enum"]
+    return commands | tool_names, tool_args, arg_enums
+
+
+def _make_completer(commands: set[str], tool_names: set[str],
+                    tool_args: dict[str, list[str]],
+                    arg_enums: dict[str, list[str]]):
+    """Return a readline completer function with closure over tool metadata."""
+
+    def completer(text: str, state: int) -> str | None:
+        import readline
+        buf = readline.get_line_buffer()
+        begin = readline.get_begidx()
+
+        if begin == 0:
+            # First word — complete command / tool names.
+            matches = sorted(c for c in commands if c.startswith(text))
+        else:
+            # After the first word — figure out which tool is being invoked.
+            first_word = buf[:begin].split()[0] if buf[:begin].strip() else ""
+            if first_word in tool_names:
+                # If text contains '=' we're completing a value.
+                if "=" in text:
+                    key, _, partial = text.partition("=")
+                    enum_key = f"{first_word}:{key}"
+                    if enum_key in arg_enums:
+                        prefix = key + "="
+                        matches = sorted(
+                            prefix + v
+                            for v in arg_enums[enum_key]
+                            if v.startswith(partial)
+                        )
+                    else:
+                        matches = []
+                else:
+                    # Complete argument keys (as "key=").
+                    matches = sorted(
+                        k for k in tool_args.get(first_word, [])
+                        if k.startswith(text)
+                    )
+            else:
+                matches = []
+
+        return matches[state] if state < len(matches) else None
+
+    return completer
+
+
 def repl(proc, tools: list[dict]):
     tool_names = {t["name"] for t in tools}
 
     print()
     print(bold("character MCP test driver"))
     print(dim('Type "list" to see tools, "help" for usage, Ctrl-D to exit.'))
+    print(dim("Tab-completion is available for commands, tools, and arguments."))
     print()
 
     try:
-        import readline  # noqa: F401  (enables arrow-key history)
+        import readline
     except ImportError:
         pass
+    else:
+        all_words, tool_args, arg_enums = _build_completions(tools)
+        readline.set_completer(_make_completer(all_words, tool_names,
+                                               tool_args, arg_enums))
+        readline.set_completer_delims(" ")
+        readline.parse_and_bind("tab: complete")
 
     while True:
         try:
