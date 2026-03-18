@@ -89,8 +89,7 @@ knowledge.
 **Schema stability:** The MCP tool schemas (parameter names, types, and
 response shapes) may change incompatibly across any release, including patch
 versions.  Clients must discover schemas at runtime via the MCP `tools/list`
-method rather than hard-coding parameter knowledge.  The skill file
-(`extra/SKILL.md`) is updated alongside schema changes.
+method rather than hard-coding parameter knowledge.
 
 ### Registering as an MCP server
 
@@ -105,10 +104,14 @@ claude mcp add --scope user --transport stdio character -- character agent mcp
 This registers the agent as available for all Projects;
 drop the `--scope user` to only make available to this specific project.
 
-**Installing the skill file** (recommended): the file
-[`extra/SKILL.md`](extra/SKILL.md) teaches Claude the exact parameter names,
-types, and usage patterns for every tool.  Install it as a custom slash
-command so Claude can reference it when using the MCP tools:
+The server returns an `instructions` field in its MCP initialize response,
+which Claude Code uses to discover the Unicode tools automatically via Tool
+Search — no additional configuration is needed for basic usage.
+
+**Installing the skill file** (optional): the file
+[`extra/SKILL.md`](extra/SKILL.md) provides a deeper reference — a
+tool-routing decision table, the full property field reference, and advanced
+tips.  Install it as a custom slash command for on-demand access:
 
 ```sh
 # from the character source tree
@@ -117,14 +120,16 @@ cp extra/SKILL.md ~/.claude/commands/character-unicode.md
 ```
 
 Once installed, type `/character-unicode` in a Claude Code session to load the
-skill into context.  This is optional but significantly reduces parameter
-errors.
+skill into context.  The server's `instructions` text references the skill, so
+Claude can load it when detailed guidance is needed.
 
 #### Other MCP clients
 
 Any client that supports the MCP stdio transport can launch `character agent
 mcp` as a subprocess.  The server speaks JSON-RPC 2.0 with newline-delimited
-framing (one JSON object per `\n`-terminated line).
+framing (one JSON object per `\n`-terminated line).  Clients that support the
+MCP `instructions` field will receive discovery guidance and key usage patterns
+automatically.
 
 
 ## Documentation
@@ -133,7 +138,7 @@ framing (one JSON object per `\n`-terminated line).
 | ---------------------------------- | ---------------------------------------------------------------------------- |
 | [`AGENTS.md`](AGENTS.md)           | AI agents — tool schemas, example invocations, output formats                |
 | [`CODE_GUIDE.md`](CODE_GUIDE.md)   | Developers — package map, reading order, data flow, protocols                |
-| [`extra/SKILL.md`](extra/SKILL.md) | AI agents — MCP tool parameter reference, installable as a Claude Code skill |
+| [`extra/SKILL.md`](extra/SKILL.md) | AI agents — tool-routing table, property field reference, Claude Code skill  |
 
 
 ## Building

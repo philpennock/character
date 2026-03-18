@@ -228,6 +228,30 @@ response shapes) may change incompatibly across any release, including patch
 versions.  Clients must discover schemas at runtime via the MCP `tools/list`
 method rather than hard-coding parameter knowledge.
 
+#### Server instructions and the companion skill
+
+The MCP server returns an `instructions` field in its `InitializeResult`,
+providing discovery guidance and key usage patterns (when to reach for these
+tools, summary-mode and pagination hints).  Clients that support the MCP
+`instructions` field (e.g. Claude Code's Tool Search) use this to decide when
+to search for the Unicode tools without needing any extra configuration.
+
+For Claude Code specifically, a companion **skill** file
+[`extra/SKILL.md`](extra/SKILL.md) can be installed as
+`~/.claude/commands/character-unicode.md`.  The skill provides a deeper
+reference — the tool-routing decision table, the full property field table, and
+advanced tips — and is loaded on demand (via `/character-unicode`) rather than
+occupying context in every conversation.  The server's `instructions` text
+references the skill so that clients aware of it can load the detailed guide
+when needed.
+
+The two layers are designed to be complementary:
+
+| Layer | Always loaded? | Content |
+|---|---|---|
+| `instructions` (in server) | Yes (via MCP init) | Discovery triggers, brief usage patterns |
+| Skill (`extra/SKILL.md`) | No (on demand) | Decision table, property field reference, tips |
+
 #### Exposed MCP tools
 
 | Tool | Parameters | Returns |
