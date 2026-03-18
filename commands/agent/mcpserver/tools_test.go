@@ -160,7 +160,9 @@ func assertIsError(t *testing.T, result json.RawMessage, wantSubstr string) {
 func extractCharProps(t *testing.T, result json.RawMessage) mcpserver.CharProps {
 	t.Helper()
 	var r struct {
-		Content []struct{ Text string `json:"text"` } `json:"content"`
+		Content []struct {
+			Text string `json:"text"`
+		} `json:"content"`
 	}
 	if err := json.Unmarshal(result, &r); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
@@ -178,7 +180,9 @@ func extractCharProps(t *testing.T, result json.RawMessage) mcpserver.CharProps 
 func extractCharPropsSlice(t *testing.T, result json.RawMessage) []mcpserver.CharProps {
 	t.Helper()
 	var r struct {
-		Content []struct{ Text string `json:"text"` } `json:"content"`
+		Content []struct {
+			Text string `json:"text"`
+		} `json:"content"`
 	}
 	if err := json.Unmarshal(result, &r); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
@@ -196,7 +200,9 @@ func extractCharPropsSlice(t *testing.T, result json.RawMessage) []mcpserver.Cha
 func extractBlockSlice(t *testing.T, result json.RawMessage) []mcpserver.BlockObj {
 	t.Helper()
 	var r struct {
-		Content []struct{ Text string `json:"text"` } `json:"content"`
+		Content []struct {
+			Text string `json:"text"`
+		} `json:"content"`
 	}
 	if err := json.Unmarshal(result, &r); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
@@ -214,7 +220,9 @@ func extractBlockSlice(t *testing.T, result json.RawMessage) []mcpserver.BlockOb
 func extractFlagResult(t *testing.T, result json.RawMessage) mcpserver.FlagResult {
 	t.Helper()
 	var r struct {
-		Content []struct{ Text string `json:"text"` } `json:"content"`
+		Content []struct {
+			Text string `json:"text"`
+		} `json:"content"`
 	}
 	if err := json.Unmarshal(result, &r); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
@@ -232,7 +240,9 @@ func extractFlagResult(t *testing.T, result json.RawMessage) mcpserver.FlagResul
 func extractTransformResult(t *testing.T, result json.RawMessage) mcpserver.TransformResult {
 	t.Helper()
 	var r struct {
-		Content []struct{ Text string `json:"text"` } `json:"content"`
+		Content []struct {
+			Text string `json:"text"`
+		} `json:"content"`
 	}
 	if err := json.Unmarshal(result, &r); err != nil {
 		t.Fatalf("unmarshal result: %v", err)

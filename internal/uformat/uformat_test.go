@@ -15,11 +15,11 @@ func TestUTF8Bytes(t *testing.T) {
 		r    rune
 		want string
 	}{
-		{0x2713, "e2 9c 93"},   // CHECK MARK
+		{0x2713, "e2 9c 93"},     // CHECK MARK
 		{0x1F600, "f0 9f 98 80"}, // GRINNING FACE
-		{0x0041, "41"},          // LATIN CAPITAL A
-		{0x007F, "7f"},          // DEL
-		{0x0080, "c2 80"},       // first two-byte
+		{0x0041, "41"},           // LATIN CAPITAL A
+		{0x007F, "7f"},           // DEL
+		{0x0080, "c2 80"},        // first two-byte
 	}
 	for _, tt := range tests {
 		got := uformat.UTF8Bytes(tt.r)
@@ -87,8 +87,8 @@ func TestJSONEscaped(t *testing.T) {
 		r    rune
 		want string
 	}{
-		{0x2713, `\u2713`},     // CHECK MARK — BMP
-		{0x0041, `\u0041`},     // LATIN CAPITAL A
+		{0x2713, `\u2713`},        // CHECK MARK — BMP
+		{0x0041, `\u0041`},        // LATIN CAPITAL A
 		{0x1F1FA, `\uD83C\uDDFA`}, // REGIONAL INDICATOR U — surrogate pair
 		{0x1F600, `\uD83D\uDE00`}, // GRINNING FACE
 	}

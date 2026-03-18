@@ -52,9 +52,9 @@ type Server struct {
 // the InitializeResult serverInfo).
 func NewServer(name, version string) *Server {
 	return &Server{
-		name:   name,
+		name:    name,
 		version: version,
-		byName: make(map[string]int),
+		byName:  make(map[string]int),
 	}
 }
 
@@ -132,8 +132,8 @@ func readFrame(r *bufio.Reader) ([]byte, error) {
 
 // writeFrame writes one newline-terminated JSON message to w.
 func writeFrame(w io.Writer, body []byte) {
-	w.Write(body)          //nolint:errcheck
-	fmt.Fprintln(w)        //nolint:errcheck
+	w.Write(body)   //nolint:errcheck
+	fmt.Fprintln(w) //nolint:errcheck
 }
 
 func writeResponse(w io.Writer, id json.RawMessage, result any) {

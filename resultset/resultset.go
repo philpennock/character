@@ -537,12 +537,12 @@ type JItem struct {
 	PartOf       string   `json:"part-of,omitempty"`
 
 	// New fields (omitempty — absent for synthetic entries where Number==0).
-	UTF8Bytes      string            `json:"utf8_bytes,omitempty"`
-	UTF8Escaped    string            `json:"utf8_escaped,omitempty"`
-	UnicodeEscaped string            `json:"unicode_escaped,omitempty"`
-	RustEscaped    string            `json:"rust_escaped,omitempty"`
-	Category       string            `json:"category,omitempty"`
-	BlockInfo      *JBlock           `json:"block_info,omitempty"`
+	UTF8Bytes       string            `json:"utf8_bytes,omitempty"`
+	UTF8Escaped     string            `json:"utf8_escaped,omitempty"`
+	UnicodeEscaped  string            `json:"unicode_escaped,omitempty"`
+	RustEscaped     string            `json:"rust_escaped,omitempty"`
+	Category        string            `json:"category,omitempty"`
+	BlockInfo       *JBlock           `json:"block_info,omitempty"`
 	PresentVariants []JPresentVariant `json:"presentation_variants,omitempty"`
 }
 

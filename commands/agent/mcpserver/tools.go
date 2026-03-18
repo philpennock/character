@@ -332,4 +332,3 @@ func charPropsSlice(cis unicode.CharInfoList, srcs *sources.Sources) []CharProps
 	}
 	return result
 }
-

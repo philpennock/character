@@ -86,7 +86,7 @@ func TransformFraktur(args []string) (string, error) {
 }
 
 var frakturSubcommand = transformCobraCommand{
-	Use:   "fraktur",
-	Short: "toggle characters between plain & Fraktur",
+	Use:         "fraktur",
+	Short:       "toggle characters between plain & Fraktur",
 	Transformer: TransformFraktur,
 }

@@ -33,23 +33,23 @@ type PresentVar struct {
 
 // CharProps is the full character property object returned by MCP lookup tools.
 type CharProps struct {
-	Character      string       `json:"character"`
-	Name           string       `json:"name"`
-	Hex            string       `json:"hex"`
-	Decimal        int          `json:"decimal"`
-	UTF8Percent    string       `json:"utf8_percent"`
-	UTF8Bytes      string       `json:"utf8_bytes"`
-	UTF8Escaped    string       `json:"utf8_escaped"`
-	UnicodeEscaped string       `json:"unicode_escaped"`
-	RustEscaped    string       `json:"rust_escaped"`
-	JSONEscaped    string       `json:"json_escaped"`
-	Block          BlockObj     `json:"block"`
-	Category       string       `json:"category"`
-	RenderWidth    int          `json:"render_width"`
-	HTMLEntities   []string     `json:"html_entities,omitempty"`
-	XMLEntities    []string     `json:"xml_entities,omitempty"`
-	VimDigraphs    []string     `json:"vim_digraphs,omitempty"`
-	X11Digraphs    []string     `json:"x11_digraphs,omitempty"`
+	Character       string       `json:"character"`
+	Name            string       `json:"name"`
+	Hex             string       `json:"hex"`
+	Decimal         int          `json:"decimal"`
+	UTF8Percent     string       `json:"utf8_percent"`
+	UTF8Bytes       string       `json:"utf8_bytes"`
+	UTF8Escaped     string       `json:"utf8_escaped"`
+	UnicodeEscaped  string       `json:"unicode_escaped"`
+	RustEscaped     string       `json:"rust_escaped"`
+	JSONEscaped     string       `json:"json_escaped"`
+	Block           BlockObj     `json:"block"`
+	Category        string       `json:"category"`
+	RenderWidth     int          `json:"render_width"`
+	HTMLEntities    []string     `json:"html_entities,omitempty"`
+	XMLEntities     []string     `json:"xml_entities,omitempty"`
+	VimDigraphs     []string     `json:"vim_digraphs,omitempty"`
+	X11Digraphs     []string     `json:"x11_digraphs,omitempty"`
 	PresentVariants []PresentVar `json:"presentation_variants,omitempty"`
 }
 
@@ -95,23 +95,23 @@ func CharPropsFromRune(r rune, srcs *sources.Sources) CharProps {
 	}
 
 	return CharProps{
-		Character:      string(r),
-		Name:           name,
-		Hex:            fmt.Sprintf("%X", r),
-		Decimal:        int(r),
-		UTF8Percent:    utf8Percent(r),
-		UTF8Bytes:      uformat.UTF8Bytes(r),
-		UTF8Escaped:    uformat.UTF8Escaped(r),
-		UnicodeEscaped: uformat.UnicodeEscaped(r),
-		RustEscaped:    uformat.RustEscaped(r),
-		JSONEscaped:    uformat.JSONEscaped(r),
-		Block:          block,
-		Category:       unicode.GeneralCategory(r),
-		RenderWidth:    width,
-		HTMLEntities:   html,
-		XMLEntities:    xml,
-		VimDigraphs:    srcs.Vim.DigraphsSliceFor(r),
-		X11Digraphs:    srcs.X11.DigraphsSliceFor(r),
+		Character:       string(r),
+		Name:            name,
+		Hex:             fmt.Sprintf("%X", r),
+		Decimal:         int(r),
+		UTF8Percent:     utf8Percent(r),
+		UTF8Bytes:       uformat.UTF8Bytes(r),
+		UTF8Escaped:     uformat.UTF8Escaped(r),
+		UnicodeEscaped:  uformat.UnicodeEscaped(r),
+		RustEscaped:     uformat.RustEscaped(r),
+		JSONEscaped:     uformat.JSONEscaped(r),
+		Block:           block,
+		Category:        unicode.GeneralCategory(r),
+		RenderWidth:     width,
+		HTMLEntities:    html,
+		XMLEntities:     xml,
+		VimDigraphs:     srcs.Vim.DigraphsSliceFor(r),
+		X11Digraphs:     srcs.X11.DigraphsSliceFor(r),
 		PresentVariants: presentVars,
 	}
 }
