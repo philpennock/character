@@ -84,6 +84,8 @@ knowledge.
 
 (Disclosure: Claude was used to implement the MCP support.)
 
+(Added in v0.10.0)
+
 ### Registering as an MCP server
 
 #### Claude Code
