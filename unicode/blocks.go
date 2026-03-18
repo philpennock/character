@@ -1,4 +1,4 @@
-// Copyright © 2015,2016,2021 Phil Pennock.
+// Copyright © 2015,2016,2021,2026 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -33,6 +33,25 @@ type BlockInfo struct {
 type Blocks struct {
 	ordered           []BlockInfo
 	maxKnownBlockRune rune
+}
+
+// LookupInfo returns a pointer to a copy of the BlockInfo for the block
+// containing r, or nil if no block contains r.
+func (b Blocks) LookupInfo(r rune) *BlockInfo {
+	if r > b.maxKnownBlockRune {
+		return nil
+	}
+	for i := range b.ordered {
+		if b.ordered[i].Max < r {
+			continue
+		}
+		if b.ordered[i].Min <= r {
+			info := b.ordered[i] // copy
+			return &info
+		}
+		return nil // gap between blocks
+	}
+	return nil
 }
 
 // Lookup returns the name of the one block which contains a given rune, or

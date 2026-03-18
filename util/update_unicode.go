@@ -1,4 +1,4 @@
-// Copyright © 2017,2018 Phil Pennock.
+// Copyright © 2017,2018,2026 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -264,7 +264,7 @@ func generateEmojiVariationsFromTo(inFn, outFn string) error {
 	}
 	defer in.Close()
 
-	emoji, err := parseEmojiData(in)
+	text, emoji, err := parseEmojiData(in)
 	if err != nil {
 		return err
 	}
@@ -287,7 +287,13 @@ func generateEmojiVariationsFromTo(inFn, outFn string) error {
 		fmt.Fprintf(out, "\t%d: struct{}{},\n", e)
 	}
 	fmt.Fprintf(out, "}\n\n")
-	fmt.Fprintf(out, "const emojiableTotalCount = %d\n", len(emoji))
+	fmt.Fprintf(out, "const emojiableTotalCount = %d\n\n", len(emoji))
+	fmt.Fprintf(out, "var textable = map[rune]struct{} {\n")
+	for _, e := range text {
+		fmt.Fprintf(out, "\t%d: struct{}{},\n", e)
+	}
+	fmt.Fprintf(out, "}\n\n")
+	fmt.Fprintf(out, "const textableTotalCount = %d\n", len(text))
 	return nil
 }
 
@@ -418,15 +424,17 @@ ReadLoop:
 		}, nil
 }
 
-// We return just a list of runes, because as of definition 5.0, the
-// definitions consist of two lines per base rune, the first followed by FE0E
-// and the second line with the same rune followed by FE0F.  So we will
-// complain bitterly if that's not true, because we'll need to update the
-// logic, but while that assumption continues to hold true, we just want a
-// list.
-func parseEmojiData(in io.Reader) ([]rune, error) {
+// parseEmojiData parses emoji-variation-sequences.txt and returns two ordered
+// slices: text (runes with U+FE0E text-presentation variant) and emoji (runes
+// with U+FE0F emoji-presentation variant).
+//
+// As of Unicode 5.0+ the file contains two lines per base rune: one followed
+// by FE0E and one followed by FE0F.  The parser tracks each set independently
+// so future divergences are handled gracefully.
+func parseEmojiData(in io.Reader) (text []rune, emoji []rune, err error) {
 	rdr := bufio.NewReader(in)
-	emoji := make([]rune, 0, approxVariationsUpperBound)
+	text = make([]rune, 0, approxVariationsUpperBound)
+	emoji = make([]rune, 0, approxVariationsUpperBound)
 	matcher := regexp.MustCompile(`^([0-9A-Fa-f]+)\s+([0-9A-Fa-f]+)\s+;`)
 
 	const (
@@ -434,18 +442,17 @@ func parseEmojiData(in io.Reader) ([]rune, error) {
 		emojiSelect rune = 0xFE0F
 	)
 
-	var textSeen rune
 	lineNum := 0
 ReadLoop:
 	for {
-		line, err := rdr.ReadBytes('\n')
+		line, readErr := rdr.ReadBytes('\n')
 		lineNum++
-		if err != nil {
-			switch err {
+		if readErr != nil {
+			switch readErr {
 			case io.EOF:
 				break ReadLoop
 			default:
-				return nil, err
+				return nil, nil, readErr
 			}
 		}
 		line = line[:len(line)-1]
@@ -463,30 +470,17 @@ ReadLoop:
 		variationSelector := runemanip.RuneFromHexField(got[2])
 		switch variationSelector {
 		case textSelect:
-			if textSeen != 0 {
-				return nil, fmt.Errorf("saw two sequential distinct text selectors, %04X then %04X on line %d", textSeen, baseRune, lineNum)
-			}
-			textSeen = baseRune
+			text = append(text, baseRune)
 		case emojiSelect:
-			if textSeen == 0 {
-				return nil, fmt.Errorf("saw emoji selector not following a text selector, %04X on line %d", baseRune, lineNum)
-			}
-			if baseRune != textSeen {
-				return nil, fmt.Errorf("saw emoji selector for %04X after non-matching text selector %04X, on line %d", baseRune, textSeen, lineNum)
-			}
 			emoji = append(emoji, baseRune)
-			textSeen = 0
 		default:
-			return nil, fmt.Errorf("saw unrecognized variation selector %04X on line %d", variationSelector, lineNum)
+			return nil, nil, fmt.Errorf("saw unrecognized variation selector %04X on line %d", variationSelector, lineNum)
 		}
 	}
 
-	if textSeen != 0 {
-		return nil, fmt.Errorf("file finished without pairing final rune %04X/text with matching /emoji", textSeen)
-	}
-
-	fmt.Fprintf(os.Stderr, "size checks FYI: emoji 5.0: %d/%d\n", len(emoji), approxVariationsUpperBound)
-	return emoji, nil
+	fmt.Fprintf(os.Stderr, "size checks FYI: emoji 5.0: text=%d emoji=%d (limit %d)\n",
+		len(text), len(emoji), approxVariationsUpperBound)
+	return text, emoji, nil
 }
 
 func reformatFile(fn string) error {

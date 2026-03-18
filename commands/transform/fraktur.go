@@ -1,4 +1,4 @@
-// Copyright © 2016 Phil Pennock.
+// Copyright © 2016,2026 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -71,17 +71,22 @@ func toggleFrakturRune(r rune) rune {
 	return r
 }
 
+// TransformFraktur converts each argument to/from Fraktur mathematical
+// letters and returns the results joined by spaces.  It is the exported API
+// for non-Cobra callers (e.g. the MCP server).
+func TransformFraktur(args []string) (string, error) {
+	if len(args) == 0 {
+		return "", nil
+	}
+	output := make([]string, len(args))
+	for argI := range args {
+		output[argI] = strings.Map(toggleFrakturRune, args[argI])
+	}
+	return strings.Join(output, " "), nil
+}
+
 var frakturSubcommand = transformCobraCommand{
 	Use:   "fraktur",
 	Short: "toggle characters between plain & Fraktur",
-	Transformer: func(args []string) (string, error) {
-		if len(args) == 0 {
-			return "", nil
-		}
-		output := make([]string, len(args))
-		for argI := range args {
-			output[argI] = strings.Map(toggleFrakturRune, args[argI])
-		}
-		return strings.Join(output, " "), nil
-	},
+	Transformer: TransformFraktur,
 }

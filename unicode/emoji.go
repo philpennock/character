@@ -1,4 +1,4 @@
-// Copyright © 2017,2021 Phil Pennock.
+// Copyright © 2017,2021,2026 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -7,6 +7,32 @@ package unicode
 import (
 	"github.com/philpennock/character/internal/runemanip"
 )
+
+// PresentVariant describes one presentation variant selector for a rune.
+type PresentVariant struct {
+	// Selector is the variation selector rune (e.g. U+FE0E or U+FE0F).
+	Selector rune
+	// Type is "text" for U+FE0E or "emoji" for U+FE0F.
+	Type string
+}
+
+// PresentationVariants returns the variation-selector entries for r, or nil
+// if r has no registered presentation variants.
+func PresentationVariants(r rune) []PresentVariant {
+	_, hasText := textable[r]
+	_, hasEmoji := emojiable[r]
+	if !hasText && !hasEmoji {
+		return nil
+	}
+	var variants []PresentVariant
+	if hasText {
+		variants = append(variants, PresentVariant{Selector: 0xFE0E, Type: "text"})
+	}
+	if hasEmoji {
+		variants = append(variants, PresentVariant{Selector: 0xFE0F, Type: "emoji"})
+	}
+	return variants
+}
 
 // Emojiable indicates whether or not a given rune might be an emoji and so can
 // be followed by a presentation selector, per UTS#51 on Unicode Emoji.

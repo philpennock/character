@@ -1,4 +1,4 @@
-// Copyright © 2015,2016,2020 Phil Pennock.
+// Copyright © 2015,2016,2020,2026 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -24,6 +24,8 @@ import (
 	_ "github.com/philpennock/character/commands/region"
 	_ "github.com/philpennock/character/commands/transform"
 	_ "github.com/philpennock/character/commands/version"
+
+	_ "github.com/philpennock/character/commands/agent"
 
 	_ "github.com/philpennock/character/commands/deprecated"
 )
