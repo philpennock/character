@@ -10,6 +10,45 @@ import (
 	"github.com/philpennock/character/internal/uformat"
 )
 
+func TestCodepoint(t *testing.T) {
+	tests := []struct {
+		r    rune
+		want string
+	}{
+		{0x0041, "U+0041"},     // LATIN CAPITAL A — 4 digits
+		{0x0000, "U+0000"},     // NULL — zero value, 4-digit minimum
+		{0x2713, "U+2713"},     // CHECK MARK — 4 digits
+		{0xFFFF, "U+FFFF"},     // last BMP
+		{0x10000, "U+10000"},   // first supplementary — 5 digits
+		{0x1F600, "U+1F600"},   // GRINNING FACE — 5 digits
+		{0x10FFFF, "U+10FFFF"}, // max Unicode — 6 digits
+	}
+	for _, tt := range tests {
+		got := uformat.Codepoint(tt.r)
+		if got != tt.want {
+			t.Errorf("Codepoint(0x%X) = %q; want %q", tt.r, got, tt.want)
+		}
+	}
+}
+
+func TestHexUpper(t *testing.T) {
+	tests := []struct {
+		r    rune
+		want string
+	}{
+		{0x0041, "41"},
+		{0x2713, "2713"},
+		{0x1F600, "1F600"},
+		{0x10FFFF, "10FFFF"},
+	}
+	for _, tt := range tests {
+		got := uformat.HexUpper(tt.r)
+		if got != tt.want {
+			t.Errorf("HexUpper(0x%X) = %q; want %q", tt.r, got, tt.want)
+		}
+	}
+}
+
 func TestUTF8Bytes(t *testing.T) {
 	tests := []struct {
 		r    rune

@@ -6,7 +6,6 @@ package code
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/spf13/pflag"
@@ -22,7 +21,7 @@ var ErrNotValidBaseInt = errors.New("not a valid numeric base (0 or 2..32)")
 type intconvBase int
 
 func (i *intconvBase) String() string {
-	return fmt.Sprintf("%d", *i)
+	return strconv.Itoa(int(*i))
 }
 
 func (i *intconvBase) Set(nv string) error {

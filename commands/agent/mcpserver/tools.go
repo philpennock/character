@@ -14,6 +14,7 @@ import (
 
 	"github.com/philpennock/character/commands/transform"
 	"github.com/philpennock/character/internal/mcpstdio"
+	"github.com/philpennock/character/internal/uformat"
 	"github.com/philpennock/character/sources"
 	"github.com/philpennock/character/unicode"
 )
@@ -231,8 +232,8 @@ func handleListBlocks(srcs *sources.Sources) mcpstdio.Handler {
 		for i, bi := range blocks {
 			result[i] = BlockObj{
 				Name:  bi.Name,
-				Start: fmt.Sprintf("U+%04X", bi.Min),
-				End:   fmt.Sprintf("U+%04X", bi.Max),
+				Start: uformat.Codepoint(bi.Min),
+				End:   uformat.Codepoint(bi.Max),
 			}
 		}
 		return jsonResult(result)

@@ -8,10 +8,6 @@
 package mcpserver
 
 import (
-	"fmt"
-	"strings"
-	"unicode/utf8"
-
 	"github.com/philpennock/character/entities"
 	"github.com/philpennock/character/internal/runemanip"
 	"github.com/philpennock/character/internal/uformat"
@@ -56,13 +52,7 @@ type CharProps struct {
 
 // utf8Percent returns URL-percent encoding for r (e.g. "%E2%9C%93").
 func utf8Percent(r rune) string {
-	var buf [utf8.UTFMax]byte
-	n := utf8.EncodeRune(buf[:], r)
-	var s strings.Builder
-	for i := range n {
-		s.WriteString(fmt.Sprintf("%%%X", buf[i]))
-	}
-	return s.String()
+	return uformat.UTF8PercentEncoded(r)
 }
 
 // CharPropsFromRune computes all character properties for r from the given
@@ -77,8 +67,8 @@ func CharPropsFromRune(r rune, srcs *sources.Sources) CharProps {
 	if bi := srcs.UBlocks.LookupInfo(r); bi != nil {
 		block = BlockObj{
 			Name:  bi.Name,
-			Start: fmt.Sprintf("U+%04X", bi.Min),
-			End:   fmt.Sprintf("U+%04X", bi.Max),
+			Start: uformat.Codepoint(bi.Min),
+			End:   uformat.Codepoint(bi.Max),
 		}
 	}
 
@@ -90,7 +80,7 @@ func CharPropsFromRune(r rune, srcs *sources.Sources) CharProps {
 	var presentVars []PresentVar
 	for _, pv := range unicode.PresentationVariants(r) {
 		presentVars = append(presentVars, PresentVar{
-			Selector: fmt.Sprintf("U+%04X", pv.Selector),
+			Selector: uformat.Codepoint(pv.Selector),
 			Type:     pv.Type,
 		})
 	}
@@ -98,7 +88,7 @@ func CharPropsFromRune(r rune, srcs *sources.Sources) CharProps {
 	return CharProps{
 		Character:       string(r),
 		Name:            name,
-		Hex:             fmt.Sprintf("%X", r),
+		Hex:             uformat.HexUpper(r),
 		Decimal:         int(r),
 		UTF8Percent:     utf8Percent(r),
 		UTF8Bytes:       uformat.UTF8Bytes(r),

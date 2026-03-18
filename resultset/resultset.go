@@ -454,12 +454,7 @@ func (rs *ResultSet) RenderCharInfoItem(ci charItem, what printItem) any {
 	case PRINT_RUNE_DEC:
 		return strconv.FormatUint(uint64(ci.unicode.Number), 10)
 	case PRINT_RUNE_UTF8ENC:
-		bb := []byte(string(ci.unicode.Number))
-		var s strings.Builder
-		for i := range bb {
-			s.WriteString(fmt.Sprintf("%%%X", bb[i]))
-		}
-		return s.String()
+		return uformat.UTF8PercentEncoded(ci.unicode.Number)
 	case PRINT_RUNE_JSON:
 		return uformat.JSONEscaped(ci.unicode.Number)
 	case PRINT_RUNE_PUNY:
@@ -633,8 +628,8 @@ func (rs *ResultSet) JSONEntry(ci charItem) any {
 		if bi := rs.sources.UBlocks.LookupInfo(r); bi != nil {
 			item.BlockInfo = &JBlock{
 				Name:  bi.Name,
-				Start: fmt.Sprintf("U+%04X", bi.Min),
-				End:   fmt.Sprintf("U+%04X", bi.Max),
+				Start: uformat.Codepoint(bi.Min),
+				End:   uformat.Codepoint(bi.Max),
 			}
 		}
 		pvs := unicode.PresentationVariants(r)
@@ -642,7 +637,7 @@ func (rs *ResultSet) JSONEntry(ci charItem) any {
 			item.PresentVariants = make([]JPresentVariant, len(pvs))
 			for i, pv := range pvs {
 				item.PresentVariants[i] = JPresentVariant{
-					Selector: fmt.Sprintf("U+%04X", pv.Selector),
+					Selector: uformat.Codepoint(pv.Selector),
 					Type:     pv.Type,
 				}
 			}
