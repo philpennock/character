@@ -7,6 +7,8 @@ is intended for both human contributors and AI coding agents.
 For **using** the tool as an AI agent (tool descriptions, example invocations,
 MCP tool schemas), see [`AGENTS.md`](AGENTS.md).
 
+(Side-note: I intend to maintain this file via AI, and an AI wrote it.)
+
 ---
 
 ## Table of Contents
@@ -44,24 +46,24 @@ License: MIT.  Copyright Phil Pennock.
 
 For understanding the codebase end-to-end, read in this order:
 
-| # | File(s) | Why |
-|---|---------|-----|
-| 1 | `main.go` | Entry point; shows all command imports and `go:generate` directives |
-| 2 | `commands/root/root.go` | Root Cobra command; `AddCommand`, `Start`, `Cobra` exports |
-| 3 | `sources/sources.go` | `Sources` struct — the data aggregator everything depends on |
-| 4 | `unicode/unicode.go` | `CharInfo`, `Unicode`, `Load`, `LoadSearch` |
-| 5 | `unicode/blocks.go` | `BlockInfo`, `Blocks`, `LookupInfo`, `FindByName` |
-| 6 | `unicode/category.go` | `GeneralCategory(r rune) string` |
-| 7 | `unicode/emoji.go` | `PresentationVariants`, `Emojiable` |
-| 8 | `internal/uformat/uformat.go` | Pure byte-formatting helpers shared by CLI and MCP output |
-| 9 | `resultset/resultset.go` | `ResultSet`, `JItem`, JSON rendering — CLI output backbone |
-| 10 | `resultset/cmdrender.go` | `ResultCmdFlags`, flag registration, `RenderPerCmdline` |
-| 11 | `commands/name/name.go` | A simple command — shows the typical command pattern |
-| 12 | `internal/mcpstdio/mcpstdio.go` | MCP stdio server (~200 lines, hand-rolled) |
-| 13 | `commands/agent/mcpserver/charprops.go` | `CharProps`, `CharPropsFromRune` |
-| 14 | `commands/agent/mcpserver/tools.go` | Eight MCP tool handlers |
-| 15 | `commands/agent/mcpserver/server.go` | MCP server wiring |
-| 16 | `commands/agent/agentmcp.go` | `agent mcp` command — ties it all together |
+|  # | File(s)                                 | Why                                                                 |
+| --:| --------------------------------------- | ------------------------------------------------------------------- |
+|  1 | `main.go`                               | Entry point; shows all command imports and `go:generate` directives |
+|  2 | `commands/root/root.go`                 | Root Cobra command; `AddCommand`, `Start`, `Cobra` exports          |
+|  3 | `sources/sources.go`                    | `Sources` struct — the data aggregator everything depends on        |
+|  4 | `unicode/unicode.go`                    | `CharInfo`, `Unicode`, `Load`, `LoadSearch`                         |
+|  5 | `unicode/blocks.go`                     | `BlockInfo`, `Blocks`, `LookupInfo`, `FindByName`                   |
+|  6 | `unicode/category.go`                   | `GeneralCategory(r rune) string`                                    |
+|  7 | `unicode/emoji.go`                      | `PresentationVariants`, `Emojiable`                                 |
+|  8 | `internal/uformat/uformat.go`           | Pure byte-formatting helpers shared by CLI and MCP output           |
+|  9 | `resultset/resultset.go`                | `ResultSet`, `JItem`, JSON rendering — CLI output backbone          |
+| 10 | `resultset/cmdrender.go`                | `ResultCmdFlags`, flag registration, `RenderPerCmdline`             |
+| 11 | `commands/name/name.go`                 | A simple command — shows the typical command pattern                |
+| 12 | `internal/mcpstdio/mcpstdio.go`         | MCP stdio server (~200 lines, hand-rolled)                          |
+| 13 | `commands/agent/mcpserver/charprops.go` | `CharProps`, `CharPropsFromRune`                                    |
+| 14 | `commands/agent/mcpserver/tools.go`     | Eight MCP tool handlers                                             |
+| 15 | `commands/agent/mcpserver/server.go`    | MCP server wiring                                                   |
+| 16 | `commands/agent/agentmcp.go`            | `agent mcp` command — ties it all together                          |
 
 After reading these 16 files you will understand every major subsystem.
 
@@ -277,10 +279,10 @@ Run `go generate ./...` from the repo root to regenerate all static data.
 
 | Generator | Input | Output |
 |-----------|-------|--------|
-| `util/update_unicode.go` | `unicode/UnicodeData.txt`, `unicode/Blocks.txt`, `unicode/emoji-variation-sequences.txt` | `unicode/generated_data.go`, `unicode/generated_blocks.go`, `unicode/generated_emoji.go` |
-| `util/update_entities.go` | HTML/XML entity specs | `entities/generated_html.go`, `entities/generated_xml.go` |
-| `util/update_x11_compose.go` | `sources/Compose.en_US.UTF-8.txt` | `sources/generated_x11_compose.go` |
-| `util/update_static_vim` (bash) | Runs `vim` | `sources/generated_static_vim.go` |
+| `util/update_unicode.go`        | `unicode/UnicodeData.txt`, `unicode/Blocks.txt`, `unicode/emoji-variation-sequences.txt` | `unicode/generated_data.go`, `unicode/generated_blocks.go`, `unicode/generated_emoji.go` |
+| `util/update_entities.go`       | HTML/XML entity specs             | `entities/generated_html.go`, `entities/generated_xml.go` |
+| `util/update_x11_compose.go`    | `sources/Compose.en_US.UTF-8.txt` | `sources/generated_x11_compose.go` |
+| `util/update_static_vim` (bash) | Runs `vim`                        | `sources/generated_static_vim.go`  |
 
 Generated files are committed to the repository and should not be
 hand-edited.  After modifying a generator, re-run `go generate` and commit
@@ -358,18 +360,16 @@ contain embedded newlines.
 ← {"jsonrpc":"2.0","id":1,"result":{...}}\n
 ```
 
-**This is NOT the same as LSP framing** (see below).  An earlier version of
-this codebase incorrectly used `Content-Length` headers; it was corrected to
-match the MCP spec.
+**This is NOT the same as LSP framing** (see below).
 
 #### Required methods (tool-only server)
 
-| Method | Direction | Response |
-|--------|-----------|----------|
-| `initialize` | client → server | `InitializeResult` (capabilities, serverInfo, protocolVersion) |
-| `notifications/initialized` | client → server | None (notification, no `id`) |
-| `tools/list` | client → server | `{"tools": [...]}` |
-| `tools/call` | client → server | `{"content": [...], "isError": bool}` |
+| Method                      | Direction       | Response                                                       |
+| --------------------------- | --------------- | -------------------------------------------------------------- |
+| `initialize`                | client → server | `InitializeResult` (capabilities, serverInfo, protocolVersion) |
+| `notifications/initialized` | client → server | None (notification, no `id`)                                   |
+| `tools/list`                | client → server | `{"tools": [...]}`                                             |
+| `tools/call`                | client → server | `{"content": [...], "isError": bool}`                          |
 
 #### References
 
@@ -426,18 +426,18 @@ Both MCP and LSP build on JSON-RPC 2.0.
 
 ## External Dependencies
 
-| Module | Purpose | Why |
-|--------|---------|-----|
-| `github.com/spf13/cobra` | CLI framework | Command tree, flag parsing, help generation |
-| `github.com/spf13/pflag` | POSIX flag parsing | Cobra dependency; also used directly for flag introspection |
-| `github.com/argusdusty/Ferret` | Inverted-suffix index | Substring search over ~35k Unicode character names |
-| `github.com/atotto/clipboard` | Clipboard I/O | `-c` flag: copy result to clipboard |
-| `github.com/mattn/go-runewidth` | Terminal cell width | Correct column alignment in table output |
-| `github.com/mattn/go-shellwords` | Shell word splitting | `--argv` flag: re-parse arguments |
-| `go.pennock.tech/tabular` | Table rendering | `-v` verbose table output |
-| `golang.org/x/net` | IDN / punycode | `x-puny` command |
-| `golang.org/x/text` | Unicode normalisation | NFC/NFD handling |
-| `github.com/liquidgecka/testlib` | Test assertion helpers | Test-only |
+| Module                           | Purpose                | Why                                                         |
+| -------------------------------- | ---------------------- | ----------------------------------------------------------- |
+| `github.com/spf13/cobra`         | CLI framework          | Command tree, flag parsing, help generation                 |
+| `github.com/spf13/pflag`         | POSIX flag parsing     | Cobra dependency; also used directly for flag introspection |
+| `github.com/argusdusty/Ferret`   | Inverted-suffix index  | Substring search over ~35k Unicode character names          |
+| `github.com/atotto/clipboard`    | Clipboard I/O          | `-c` flag: copy result to clipboard                         |
+| `github.com/mattn/go-runewidth`  | Terminal cell width    | Correct column alignment in table output                    |
+| `github.com/mattn/go-shellwords` | Shell word splitting   | `--argv` flag: re-parse arguments                           |
+| `go.pennock.tech/tabular`        | Table rendering        | `-v` verbose table output                                   |
+| `golang.org/x/net`               | IDN / punycode         | `x-puny` command                                            |
+| `golang.org/x/text`              | Unicode normalisation  | NFC/NFD handling                                            |
+| `github.com/liquidgecka/testlib` | Test assertion helpers | Test-only                                                   |
 
 No MCP SDK is used; `internal/mcpstdio` is ~200 lines of hand-rolled code.
 
