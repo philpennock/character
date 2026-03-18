@@ -11,8 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -61,11 +59,8 @@ func testClient(t *testing.T, srv *mcpstdio.Server) (
 			"method":  method,
 			"params":  paramsRaw,
 		})
-		if _, err := fmt.Fprintf(clientW, "Content-Length: %d\r\n\r\n", len(req)); err != nil {
-			t.Fatalf("write header: %v", err)
-		}
-		if _, err := clientW.Write(req); err != nil {
-			t.Fatalf("write body: %v", err)
+		if _, err := fmt.Fprintf(clientW, "%s\n", req); err != nil {
+			t.Fatalf("write request: %v", err)
 		}
 		resp, err := readFrame(clientBuf)
 		if err != nil {
@@ -90,35 +85,20 @@ func testClient(t *testing.T, srv *mcpstdio.Server) (
 	return send, closeFunc
 }
 
-// readFrame reads one Content-Length-framed message from r.
+// readFrame reads one newline-terminated JSON-RPC message from r.
 func readFrame(r *bufio.Reader) (json.RawMessage, error) {
-	contentLength := -1
-	for {
-		line, err := r.ReadString('\n')
-		if err != nil {
-			return nil, err
-		}
-		line = strings.TrimRight(line, "\r\n")
-		if line == "" {
-			break
-		}
-		if after, ok := strings.CutPrefix(line, "Content-Length:"); ok {
-			val := strings.TrimSpace(after)
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, fmt.Errorf("invalid Content-Length: %q", val)
-			}
-			contentLength = n
-		}
-	}
-	if contentLength < 0 {
-		return nil, errors.New("missing Content-Length")
-	}
-	body := make([]byte, contentLength)
-	if _, err := io.ReadFull(r, body); err != nil {
+	line, err := r.ReadBytes('\n')
+	if err != nil {
 		return nil, err
 	}
-	return body, nil
+	// Trim trailing newline/CR.
+	for len(line) > 0 && (line[len(line)-1] == '\n' || line[len(line)-1] == '\r') {
+		line = line[:len(line)-1]
+	}
+	if len(line) == 0 {
+		return nil, errors.New("empty frame")
+	}
+	return line, nil
 }
 
 func TestInitializeHandshake(t *testing.T) {
@@ -337,8 +317,7 @@ func TestNotificationsInitialized(t *testing.T) {
 
 	writeRaw := func(v any) {
 		body, _ := json.Marshal(v)
-		fmt.Fprintf(clientW, "Content-Length: %d\r\n\r\n", len(body))
-		clientW.Write(body) //nolint:errcheck
+		fmt.Fprintf(clientW, "%s\n", body)
 	}
 
 	// Send notifications/initialized — no "id" field means it is a notification.

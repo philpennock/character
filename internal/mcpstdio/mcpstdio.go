@@ -3,7 +3,9 @@
 // Licensed per file LICENSE.txt
 
 // Package mcpstdio implements a minimal MCP (Model Context Protocol) stdio
-// server.  MCP over stdio is JSON-RPC 2.0 with Content-Length framing.
+// server.  MCP over stdio is JSON-RPC 2.0 with newline-delimited framing:
+// each message is a single JSON object terminated by "\n", and messages
+// MUST NOT contain embedded newlines.
 //
 // For a tool-only server, only four methods are required:
 //
@@ -20,8 +22,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"strings"
 )
 
 // Handler processes a single tool call.  It receives the tool arguments as
@@ -117,42 +117,23 @@ func (s *Server) ServeConn(ctx context.Context, r io.Reader, w io.Writer) error 
 	}
 }
 
-// readFrame reads one Content-Length-framed JSON-RPC message from r.
+// readFrame reads one newline-terminated JSON-RPC message from r.
 func readFrame(r *bufio.Reader) ([]byte, error) {
-	contentLength := -1
-	for {
-		line, err := r.ReadString('\n')
-		if err != nil {
-			return nil, err
-		}
-		line = strings.TrimRight(line, "\r\n")
-		if line == "" {
-			break
-		}
-		if after, ok := strings.CutPrefix(line, "Content-Length:"); ok {
-			val := strings.TrimSpace(after)
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, fmt.Errorf("mcpstdio: invalid Content-Length: %q", val)
-			}
-			contentLength = n
-		}
-		// Other headers (e.g. Content-Type) are accepted and ignored.
+	line, err := r.ReadBytes('\n')
+	if err != nil {
+		return nil, err
 	}
-	if contentLength < 0 {
-		return nil, fmt.Errorf("mcpstdio: missing Content-Length header")
+	// Trim the trailing newline (and any \r before it).
+	for len(line) > 0 && (line[len(line)-1] == '\n' || line[len(line)-1] == '\r') {
+		line = line[:len(line)-1]
 	}
-	buf := make([]byte, contentLength)
-	if _, err := io.ReadFull(r, buf); err != nil {
-		return nil, fmt.Errorf("mcpstdio: read body: %w", err)
-	}
-	return buf, nil
+	return line, nil
 }
 
-// writeFrame writes one Content-Length-framed message to w.
+// writeFrame writes one newline-terminated JSON message to w.
 func writeFrame(w io.Writer, body []byte) {
-	fmt.Fprintf(w, "Content-Length: %d\r\n\r\n", len(body))
-	w.Write(body) //nolint:errcheck
+	w.Write(body)          //nolint:errcheck
+	fmt.Fprintln(w)        //nolint:errcheck
 }
 
 func writeResponse(w io.Writer, id json.RawMessage, result any) {

@@ -75,8 +75,10 @@ Table-driven tests covering at minimum:
 
 ## Pre.2 — `internal/mcpstdio`: hand-rolled MCP stdio server
 
-MCP over stdio is JSON-RPC 2.0 with `Content-Length` framing.  For a
-tool-only server the required protocol surface is:
+MCP over stdio is JSON-RPC 2.0 with newline-delimited framing: each message
+is a single JSON object on one line terminated by `\n`; messages MUST NOT
+contain embedded newlines.  For a tool-only server the required protocol
+surface is:
 
 ```
 ← initialize                → InitializeResult (with capabilities.tools)
@@ -108,9 +110,8 @@ func (s *Server) ServeConn(ctx context.Context, r io.Reader, w io.Writer) error
 `ServeConn` is the testable entry point.
 
 Internal implementation of `ServeConn`:
-- [ ] Framing reader: scan `Content-Length: N\r\n\r\n` header; read exactly N
-  bytes for the body.
-- [ ] Framing writer: write `Content-Length: N\r\n\r\n` then the JSON body.
+- [ ] Framing reader: read one `\n`-terminated line; the line is the JSON body.
+- [ ] Framing writer: write the JSON body followed by `\n`.
 - [ ] Dispatcher: unmarshal JSON-RPC 2.0 `{"jsonrpc","id","method","params"}`.
   Dispatch on `method`:
   - `"initialize"` → respond with `InitializeResult` (capabilities,

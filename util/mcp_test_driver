@@ -65,8 +65,7 @@ def _next_id() -> int:
 
 
 def _frame(obj: dict) -> bytes:
-    body = json.dumps(obj).encode()
-    return b"Content-Length: " + str(len(body)).encode() + b"\r\n\r\n" + body
+    return json.dumps(obj, separators=(",", ":")).encode() + b"\n"
 
 
 def send(proc, obj: dict):
@@ -76,24 +75,10 @@ def send(proc, obj: dict):
 
 
 def recv(proc) -> dict | None:
-    headers = b""
-    while True:
-        ch = proc.stdout.read(1)
-        if not ch:
-            return None
-        headers += ch
-        if headers.endswith(b"\r\n\r\n"):
-            break
-
-    n = -1
-    for line in headers.split(b"\r\n"):
-        if line.lower().startswith(b"content-length:"):
-            n = int(line.split(b":")[1].strip())
-    if n < 0:
-        raise RuntimeError("MCP response missing Content-Length")
-
-    body = proc.stdout.read(n)
-    obj = json.loads(body)
+    line = proc.stdout.readline()
+    if not line:
+        return None
+    obj = json.loads(line)
     eprint(yellow(f"<<< {json.dumps(obj)}"))
     return obj
 

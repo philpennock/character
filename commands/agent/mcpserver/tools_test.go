@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -84,8 +83,7 @@ func (tc *toolClient) send(method string, params any) json.RawMessage {
 		"method":  method,
 		"params":  json.RawMessage(paramsRaw),
 	})
-	fmt.Fprintf(tc.write, "Content-Length: %d\r\n\r\n", len(req))
-	tc.write.Write(req) //nolint:errcheck
+	fmt.Fprintf(tc.write, "%s\n", req)
 	resp, err := readClientFrame(tc.buf)
 	if err != nil {
 		tc.t.Fatalf("read response: %v", err)
@@ -110,33 +108,14 @@ func (tc *toolClient) callTool(toolName string, args any) json.RawMessage {
 }
 
 func readClientFrame(r *bufio.Reader) (json.RawMessage, error) {
-	contentLength := -1
-	for {
-		line, err := r.ReadString('\n')
-		if err != nil {
-			return nil, err
-		}
-		line = strings.TrimRight(line, "\r\n")
-		if line == "" {
-			break
-		}
-		if after, ok := strings.CutPrefix(line, "Content-Length:"); ok {
-			val := strings.TrimSpace(after)
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, fmt.Errorf("invalid Content-Length: %q", val)
-			}
-			contentLength = n
-		}
-	}
-	if contentLength < 0 {
-		return nil, fmt.Errorf("missing Content-Length")
-	}
-	body := make([]byte, contentLength)
-	if _, err := io.ReadFull(r, body); err != nil {
+	line, err := r.ReadBytes('\n')
+	if err != nil {
 		return nil, err
 	}
-	return body, nil
+	for len(line) > 0 && (line[len(line)-1] == '\n' || line[len(line)-1] == '\r') {
+		line = line[:len(line)-1]
+	}
+	return line, nil
 }
 
 // callViaServeConn is a one-shot helper that creates a new client per call.
