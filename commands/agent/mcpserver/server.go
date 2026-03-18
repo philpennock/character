@@ -6,6 +6,7 @@ package mcpserver
 
 import (
 	"context"
+	"time"
 
 	"github.com/philpennock/character/commands/version"
 	"github.com/philpennock/character/internal/mcpstdio"
@@ -15,6 +16,7 @@ import (
 // Server wraps the mcpstdio.Server and holds the data sources.
 type Server struct {
 	inner *mcpstdio.Server
+	cache *resultCache
 }
 
 // NewServer creates a Server, registers all tools, and returns it.
@@ -26,8 +28,9 @@ type Server struct {
 // (e.g. in tests that pre-load everything synchronously).
 func NewServer(srcs *sources.Sources, searchReady <-chan struct{}) *Server {
 	inner := mcpstdio.NewServer("character", version.VersionString)
-	registerTools(inner, srcs, searchReady)
-	return &Server{inner: inner}
+	cache := newResultCache(5 * time.Minute)
+	registerTools(inner, srcs, searchReady, cache)
+	return &Server{inner: inner, cache: cache}
 }
 
 // ServeStdio starts the MCP server on os.Stdin / os.Stdout.

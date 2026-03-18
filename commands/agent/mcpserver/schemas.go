@@ -26,12 +26,28 @@ var schemaLookupName = json.RawMessage(`{
   "properties": {
     "name": {
       "type": "string",
-      "description": "The Unicode character name to look up"
+      "description": "The Unicode character name to look up",
+      "maxLength": 200
     },
     "exact": {
       "type": "boolean",
       "description": "If true, require an exact name match; if false, perform substring search",
       "default": false
+    },
+    "detail": {
+      "type": "string",
+      "description": "Detail level: \"full\" (default) returns complete properties; \"summary\" returns compact columnar [character, codepoint, name, category]. Use summary for broad searches, then look up individual characters for full details.",
+      "enum": ["full", "summary"],
+      "default": "full"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum results per page (default 200). Response includes a cursor for next page if more results exist.",
+      "default": 200
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Continuation cursor from a previous response to fetch the next page"
     }
   },
   "required": ["name"],
@@ -43,7 +59,23 @@ var schemaSearch = json.RawMessage(`{
   "properties": {
     "query": {
       "type": "string",
-      "description": "Substring to search for in Unicode character names"
+      "description": "Substring to search for in Unicode character names",
+      "maxLength": 200
+    },
+    "detail": {
+      "type": "string",
+      "description": "Detail level: \"full\" (default) returns complete properties; \"summary\" returns compact columnar [character, codepoint, name, category]. Use summary for broad searches, then look up individual characters for full details.",
+      "enum": ["full", "summary"],
+      "default": "full"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum results per page (default 200). Response includes a cursor for next page if more results exist.",
+      "default": 200
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Continuation cursor from a previous response to fetch the next page"
     }
   },
   "required": ["query"],
@@ -67,7 +99,23 @@ var schemaBrowseBlock = json.RawMessage(`{
   "properties": {
     "block": {
       "type": "string",
-      "description": "Unicode block name (case-insensitive, partial match accepted)"
+      "description": "Unicode block name (case-insensitive, partial match accepted)",
+      "maxLength": 200
+    },
+    "detail": {
+      "type": "string",
+      "description": "Detail level: \"full\" (default) returns complete properties; \"summary\" returns compact columnar [character, codepoint, name, category]. Use summary for broad searches, then look up individual characters for full details.",
+      "enum": ["full", "summary"],
+      "default": "full"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum results per page (default 200). Response includes a cursor for next page if more results exist.",
+      "default": 200
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Continuation cursor from a previous response to fetch the next page"
     }
   },
   "required": ["block"],

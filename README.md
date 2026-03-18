@@ -86,6 +86,12 @@ knowledge.
 
 (Added in v0.10.0)
 
+**Schema stability:** The MCP tool schemas (parameter names, types, and
+response shapes) may change incompatibly across any release, including patch
+versions.  Clients must discover schemas at runtime via the MCP `tools/list`
+method rather than hard-coding parameter knowledge.  The skill file
+(`extra/SKILL.md`) is updated alongside schema changes.
+
 ### Registering as an MCP server
 
 #### Claude Code

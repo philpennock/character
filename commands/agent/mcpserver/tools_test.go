@@ -177,7 +177,7 @@ func extractCharProps(t *testing.T, result json.RawMessage) mcpserver.CharProps 
 	return cp
 }
 
-func extractCharPropsSlice(t *testing.T, result json.RawMessage) []mcpserver.CharProps {
+func extractPageResponse(t *testing.T, result json.RawMessage) mcpserver.PageResponse {
 	t.Helper()
 	var r struct {
 		Content []struct {
@@ -190,11 +190,11 @@ func extractCharPropsSlice(t *testing.T, result json.RawMessage) []mcpserver.Cha
 	if len(r.Content) == 0 {
 		t.Fatal("no content")
 	}
-	var cps []mcpserver.CharProps
-	if err := json.Unmarshal([]byte(r.Content[0].Text), &cps); err != nil {
-		t.Fatalf("unmarshal []CharProps: %v\ntext: %s", err, r.Content[0].Text)
+	var pr mcpserver.PageResponse
+	if err := json.Unmarshal([]byte(r.Content[0].Text), &pr); err != nil {
+		t.Fatalf("unmarshal PageResponse: %v\ntext: %s", err, r.Content[0].Text)
 	}
-	return cps
+	return pr
 }
 
 func extractBlockSlice(t *testing.T, result json.RawMessage) []mcpserver.BlockObj {
@@ -318,9 +318,12 @@ func TestToolLookupNameExact(t *testing.T) {
 	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_lookup_name",
 		map[string]any{"name": "CHECK MARK", "exact": true})
-	cps := extractCharPropsSlice(t, result)
-	if len(cps) != 1 || cps[0].Name != "CHECK MARK" {
-		t.Errorf("got %v; want single CHECK MARK", cps)
+	pr := extractPageResponse(t, result)
+	if pr.Count != 1 || pr.Total != 1 {
+		t.Errorf("count=%d total=%d; want 1/1", pr.Count, pr.Total)
+	}
+	if len(pr.Results) != 1 || pr.Results[0].Name != "CHECK MARK" {
+		t.Errorf("got %v; want single CHECK MARK", pr.Results)
 	}
 }
 
@@ -336,12 +339,12 @@ func TestToolSearch(t *testing.T) {
 	srcs := newTestSrcs(t)
 	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_search", map[string]any{"query": "snowman"})
-	cps := extractCharPropsSlice(t, result)
-	if len(cps) == 0 {
+	pr := extractPageResponse(t, result)
+	if pr.Count == 0 {
 		t.Fatal("expected search results for 'snowman'")
 	}
 	var found bool
-	for _, cp := range cps {
+	for _, cp := range pr.Results {
 		if cp.Name == "SNOWMAN" {
 			found = true
 		}
@@ -373,8 +376,8 @@ func TestToolBrowseBlock(t *testing.T) {
 	srcs := newTestSrcs(t)
 	inner := mcpserver.NewServer(srcs, nil).Inner()
 	result, _ := callViaServeConn(t, inner, "unicode_browse_block", map[string]any{"block": "Dingbats"})
-	cps := extractCharPropsSlice(t, result)
-	if len(cps) == 0 {
+	pr := extractPageResponse(t, result)
+	if pr.Count == 0 {
 		t.Fatal("expected non-empty Dingbats block")
 	}
 }
@@ -474,4 +477,199 @@ func TestToolTransformInvalidType(t *testing.T) {
 	result, _ := callViaServeConn(t, inner, "unicode_transform",
 		map[string]any{"type": "invalid", "text": "hello"})
 	assertIsError(t, result, "unknown transform type")
+}
+
+// --- pagination and summary tests ---
+
+func TestSearchPagination(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	tc := newToolClient(t, inner)
+
+	// "arrow" should return many results.
+	result := tc.callTool("unicode_search", map[string]any{"query": "arrow", "limit": 5})
+	pr := extractPageResponse(t, result)
+
+	if pr.Count != 5 {
+		t.Errorf("page 1 count = %d; want 5", pr.Count)
+	}
+	if pr.Total <= 5 {
+		t.Errorf("total = %d; want > 5", pr.Total)
+	}
+	if pr.Cursor == "" {
+		t.Fatal("expected cursor for more pages")
+	}
+
+	// Fetch page 2.
+	result2 := tc.callTool("unicode_search", map[string]any{"query": "arrow", "limit": 5, "cursor": pr.Cursor})
+	pr2 := extractPageResponse(t, result2)
+
+	if pr2.Count == 0 {
+		t.Fatal("page 2 should have results")
+	}
+	if pr2.Total != pr.Total {
+		t.Errorf("page 2 total = %d; want %d", pr2.Total, pr.Total)
+	}
+	// Verify different results.
+	if len(pr.Results) > 0 && len(pr2.Results) > 0 && pr.Results[0].Name == pr2.Results[0].Name {
+		t.Error("page 2 first result should differ from page 1")
+	}
+}
+
+func TestSearchSummary(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	result, _ := callViaServeConn(t, inner, "unicode_search",
+		map[string]any{"query": "snowman", "detail": "summary"})
+	pr := extractPageResponse(t, result)
+
+	if pr.Count == 0 {
+		t.Fatal("expected results")
+	}
+	if len(pr.Columns) != 4 {
+		t.Errorf("columns = %v; want 4 columns", pr.Columns)
+	}
+	if len(pr.Rows) != pr.Count {
+		t.Errorf("rows len = %d; want %d", len(pr.Rows), pr.Count)
+	}
+	if len(pr.Results) != 0 {
+		t.Error("summary mode should not populate Results")
+	}
+	// Check each row has 4 elements.
+	for i, row := range pr.Rows {
+		if len(row) != 4 {
+			t.Errorf("row[%d] has %d elements; want 4", i, len(row))
+		}
+	}
+}
+
+func TestSearchCursorRecovery(t *testing.T) {
+	srcs := newTestSrcs(t)
+
+	// First server: get a cursor.
+	inner1 := mcpserver.NewServer(srcs, nil).Inner()
+	tc1 := newToolClient(t, inner1)
+	result := tc1.callTool("unicode_search", map[string]any{"query": "arrow", "limit": 5})
+	pr := extractPageResponse(t, result)
+	if pr.Cursor == "" {
+		t.Fatal("expected cursor")
+	}
+
+	// Second server (fresh cache): send cursor — should recover by re-executing query.
+	inner2 := mcpserver.NewServer(srcs, nil).Inner()
+	tc2 := newToolClient(t, inner2)
+	result2 := tc2.callTool("unicode_search", map[string]any{"query": "arrow", "limit": 5, "cursor": pr.Cursor})
+	pr2 := extractPageResponse(t, result2)
+
+	if pr2.Count == 0 {
+		t.Fatal("recovery should return results")
+	}
+	if pr2.Total != pr.Total {
+		t.Errorf("recovery total = %d; want %d", pr2.Total, pr.Total)
+	}
+}
+
+func TestSearchCursorTypeMismatch(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	tc := newToolClient(t, inner)
+
+	// Get a cursor from search.
+	result := tc.callTool("unicode_search", map[string]any{"query": "arrow", "limit": 5})
+	pr := extractPageResponse(t, result)
+	if pr.Cursor == "" {
+		t.Fatal("expected cursor")
+	}
+
+	// Send search cursor to browse_block — should error.
+	result2 := tc.callTool("unicode_browse_block", map[string]any{"block": "Dingbats", "cursor": pr.Cursor})
+	assertIsError(t, result2, "cursor type")
+}
+
+func TestBrowseBlockPagination(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	tc := newToolClient(t, inner)
+
+	result := tc.callTool("unicode_browse_block", map[string]any{"block": "Dingbats", "limit": 10})
+	pr := extractPageResponse(t, result)
+
+	if pr.Count != 10 {
+		t.Errorf("page 1 count = %d; want 10", pr.Count)
+	}
+	if pr.Total <= 10 {
+		t.Errorf("total = %d; want > 10 for Dingbats", pr.Total)
+	}
+	if pr.Cursor == "" {
+		t.Fatal("expected cursor for more pages")
+	}
+
+	// Fetch page 2.
+	result2 := tc.callTool("unicode_browse_block", map[string]any{"block": "Dingbats", "limit": 10, "cursor": pr.Cursor})
+	pr2 := extractPageResponse(t, result2)
+	if pr2.Count == 0 {
+		t.Fatal("page 2 should have results")
+	}
+}
+
+func TestBrowseBlockLargeBlock(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+
+	// "CJK Unified Ideographs" previously would error at 3000; now it should
+	// paginate.  In test data the block may have fewer entries, so just verify
+	// it doesn't error and returns a valid envelope.
+	result, _ := callViaServeConn(t, inner, "unicode_browse_block",
+		map[string]any{"block": "CJK Unified Ideographs", "limit": 50, "detail": "summary"})
+	pr := extractPageResponse(t, result)
+
+	// The key invariant: no error, returns a valid page response.
+	if pr.Total < 0 {
+		t.Fatal("expected non-negative total")
+	}
+}
+
+func TestLookupNameSubstringPagination(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	tc := newToolClient(t, inner)
+
+	result := tc.callTool("unicode_lookup_name",
+		map[string]any{"name": "arrow", "exact": false, "limit": 5})
+	pr := extractPageResponse(t, result)
+
+	if pr.Count == 0 {
+		t.Fatal("expected results")
+	}
+	if pr.Total <= 5 {
+		t.Errorf("total = %d; want > 5 for 'arrow' substring", pr.Total)
+	}
+	if pr.Cursor == "" {
+		t.Error("expected cursor")
+	}
+}
+
+func TestSearchQueryTooLong(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	longQuery := strings.Repeat("a", 300)
+	result, _ := callViaServeConn(t, inner, "unicode_search", map[string]any{"query": longQuery})
+	assertIsError(t, result, "too long")
+}
+
+func TestBrowseBlockNameTooLong(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	longName := strings.Repeat("x", 300)
+	result, _ := callViaServeConn(t, inner, "unicode_browse_block", map[string]any{"block": longName})
+	assertIsError(t, result, "too long")
+}
+
+func TestLookupNameTooLong(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	longName := strings.Repeat("a", 300)
+	result, _ := callViaServeConn(t, inner, "unicode_lookup_name",
+		map[string]any{"name": longName, "exact": true})
+	assertIsError(t, result, "too long")
 }

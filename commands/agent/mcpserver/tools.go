@@ -29,7 +29,7 @@ func jsonResult(v any) (string, error) {
 }
 
 // registerTools registers all eight MCP tools on srv.
-func registerTools(srv *mcpstdio.Server, srcs *sources.Sources, searchReady <-chan struct{}) {
+func registerTools(srv *mcpstdio.Server, srcs *sources.Sources, searchReady <-chan struct{}, cache *resultCache) {
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_lookup_char",
 		Description: "Look up a single Unicode character and return its full property object",
@@ -38,15 +38,15 @@ func registerTools(srv *mcpstdio.Server, srcs *sources.Sources, searchReady <-ch
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_lookup_name",
-		Description: "Look up a Unicode character by name (exact or substring search)",
+		Description: "Look up a Unicode character by name (exact or substring search); paginated with detail/limit/cursor support",
 		InputSchema: schemaLookupName,
-	}, handleLookupName(srcs, searchReady))
+	}, handleLookupName(srcs, searchReady, cache))
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_search",
-		Description: "Search for Unicode characters whose names contain the query string",
+		Description: "Search for Unicode characters whose names contain the query string; returns paginated results with optional summary mode",
 		InputSchema: schemaSearch,
-	}, handleSearch(srcs, searchReady))
+	}, handleSearch(srcs, searchReady, cache))
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_lookup_codepoint",
@@ -56,9 +56,9 @@ func registerTools(srv *mcpstdio.Server, srcs *sources.Sources, searchReady <-ch
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_browse_block",
-		Description: "Return all characters in the named Unicode block (max 3000)",
+		Description: "Return all characters in the named Unicode block; paginated with detail/limit/cursor support",
 		InputSchema: schemaBrowseBlock,
-	}, handleBrowseBlock(srcs))
+	}, handleBrowseBlock(srcs, cache))
 
 	srv.AddTool(mcpstdio.ToolDef{
 		Name:        "unicode_list_blocks",
@@ -98,17 +98,21 @@ func handleLookupChar(srcs *sources.Sources) mcpstdio.Handler {
 	}
 }
 
-func handleLookupName(srcs *sources.Sources, searchReady <-chan struct{}) mcpstdio.Handler {
+func handleLookupName(srcs *sources.Sources, searchReady <-chan struct{}, cache *resultCache) mcpstdio.Handler {
 	return func(ctx context.Context, args json.RawMessage) (string, error) {
 		var p struct {
 			Name  string `json:"name"`
 			Exact bool   `json:"exact"`
+			pageFields
 		}
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
 		}
 		if strings.TrimSpace(p.Name) == "" {
 			return "", fmt.Errorf("missing required parameter \"name\"")
+		}
+		if len(p.Name) > maxQueryLen {
+			return "", fmt.Errorf("name too long (%d bytes; max %d)", len(p.Name), maxQueryLen)
 		}
 
 		if p.Exact {
@@ -117,30 +121,59 @@ func handleLookupName(srcs *sources.Sources, searchReady <-chan struct{}) mcpstd
 			if !ok {
 				return "", fmt.Errorf("no character named %q", p.Name)
 			}
-			return jsonResult([]CharProps{CharPropsFromRune(ci.Number, srcs)})
+			// Wrap single result in envelope for consistency.
+			resp := PageResponse{
+				Results: []CharProps{CharPropsFromRune(ci.Number, srcs)},
+				Count:   1,
+				Total:   1,
+			}
+			return jsonResult(resp)
 		}
 
-		// Substring search: wait for the search index to be ready.
-		if searchReady != nil {
-			select {
-			case <-searchReady:
-			case <-ctx.Done():
-				return "", ctx.Err()
+		pp := p.pageFields.normalized()
+		query := p.Name
+
+		// Cursor recovery: use cursor's query if request omits it.
+		if pp.Cursor != "" {
+			cd, err := decodeCursor(pp.Cursor)
+			if err != nil {
+				return "", err
+			}
+			if query != "" && cd.Query != "" && !strings.EqualFold(query, cd.Query) {
+				return "", fmt.Errorf("cursor does not match query; start a new search")
+			}
+			if query == "" && cd.Query != "" {
+				query = cd.Query
 			}
 		}
-		_, found := srcs.Unicode.Search.Query(p.Name, -1)
-		if len(found) == 0 {
-			return jsonResult([]CharProps{})
+
+		cacheKey := "name|" + strings.ToLower(query)
+		runes, ok := cache.get(cacheKey)
+		if !ok {
+			// Substring search: wait for the search index to be ready.
+			if searchReady != nil {
+				select {
+				case <-searchReady:
+				case <-ctx.Done():
+					return "", ctx.Err()
+				}
+			}
+			_, found := srcs.Unicode.Search.Query(query, -1)
+			if len(found) == 0 {
+				return jsonResult(PageResponse{Total: 0})
+			}
+			runes = runesFromSearch(found)
+			cache.put(cacheKey, runes)
 		}
-		cis := charInfoSlice(found)
-		return jsonResult(charPropsSlice(cis, srcs))
+		return paginateRunes(runes, pp, cursorData{Type: "name", Query: strings.ToLower(query)}, srcs)
 	}
 }
 
-func handleSearch(srcs *sources.Sources, searchReady <-chan struct{}) mcpstdio.Handler {
+func handleSearch(srcs *sources.Sources, searchReady <-chan struct{}, cache *resultCache) mcpstdio.Handler {
 	return func(ctx context.Context, args json.RawMessage) (string, error) {
 		var p struct {
 			Query string `json:"query"`
+			pageFields
 		}
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
@@ -148,18 +181,45 @@ func handleSearch(srcs *sources.Sources, searchReady <-chan struct{}) mcpstdio.H
 		if strings.TrimSpace(p.Query) == "" {
 			return "", fmt.Errorf("missing required parameter \"query\"")
 		}
-		if searchReady != nil {
-			select {
-			case <-searchReady:
-			case <-ctx.Done():
-				return "", ctx.Err()
+		if len(p.Query) > maxQueryLen {
+			return "", fmt.Errorf("query too long (%d bytes; max %d)", len(p.Query), maxQueryLen)
+		}
+
+		pp := p.pageFields.normalized()
+		query := p.Query
+
+		// Cursor recovery: use cursor's query if request omits it.
+		if pp.Cursor != "" {
+			cd, err := decodeCursor(pp.Cursor)
+			if err != nil {
+				return "", err
+			}
+			if query != "" && cd.Query != "" && !strings.EqualFold(query, cd.Query) {
+				return "", fmt.Errorf("cursor does not match query; start a new search")
+			}
+			if query == "" && cd.Query != "" {
+				query = cd.Query
 			}
 		}
-		_, found := srcs.Unicode.Search.Query(p.Query, -1)
-		if len(found) == 0 {
-			return jsonResult([]CharProps{})
+
+		cacheKey := "search|" + strings.ToLower(query)
+		runes, ok := cache.get(cacheKey)
+		if !ok {
+			if searchReady != nil {
+				select {
+				case <-searchReady:
+				case <-ctx.Done():
+					return "", ctx.Err()
+				}
+			}
+			_, found := srcs.Unicode.Search.Query(query, -1)
+			if len(found) == 0 {
+				return jsonResult(PageResponse{Total: 0})
+			}
+			runes = runesFromSearch(found)
+			cache.put(cacheKey, runes)
 		}
-		return jsonResult(charPropsSlice(charInfoSlice(found), srcs))
+		return paginateRunes(runes, pp, cursorData{Type: "search", Query: strings.ToLower(query)}, srcs)
 	}
 }
 
@@ -201,10 +261,11 @@ func parseCodepoint(s string) (rune, error) {
 	return rune(n), nil
 }
 
-func handleBrowseBlock(srcs *sources.Sources) mcpstdio.Handler {
+func handleBrowseBlock(srcs *sources.Sources, cache *resultCache) mcpstdio.Handler {
 	return func(ctx context.Context, args json.RawMessage) (string, error) {
 		var p struct {
 			Block string `json:"block"`
+			pageFields
 		}
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
@@ -213,28 +274,55 @@ func handleBrowseBlock(srcs *sources.Sources) mcpstdio.Handler {
 		if p.Block == "" {
 			return "", fmt.Errorf("missing required parameter \"block\"")
 		}
+		if len(p.Block) > maxQueryLen {
+			return "", fmt.Errorf("block name too long (%d bytes; max %d)", len(p.Block), maxQueryLen)
+		}
 
-		min, max, candidates := srcs.UBlocks.FindByName(p.Block)
-		if min == 0 && max == 0 {
+		pp := p.pageFields.normalized()
+		blockName := p.Block
+
+		bMin, bMax, candidates := srcs.UBlocks.FindByName(blockName)
+		if bMin == 0 && bMax == 0 {
 			if len(candidates) > 0 {
 				return "", fmt.Errorf("ambiguous block name %q; candidates: %s",
-					p.Block, strings.Join(candidates, ", "))
+					blockName, strings.Join(candidates, ", "))
 			}
-			return "", fmt.Errorf("unknown block name %q; use unicode_list_blocks to see all block names", p.Block)
+			return "", fmt.Errorf("unknown block name %q; use unicode_list_blocks to see all block names", blockName)
 		}
 
-		const limit = 3000
-		var results []CharProps
-		for r := min; r <= max; r++ {
-			if _, ok := srcs.Unicode.ByRune[r]; !ok {
-				continue
+		// Use the canonical block name from the resolved range for cache key.
+		canonicalName := blockName
+		if bi := srcs.UBlocks.LookupInfo(bMin); bi != nil {
+			canonicalName = bi.Name
+		}
+
+		// Cursor recovery: validate block name matches.
+		if pp.Cursor != "" {
+			cd, err := decodeCursor(pp.Cursor)
+			if err != nil {
+				return "", err
 			}
-			results = append(results, CharPropsFromRune(r, srcs))
-			if len(results) > limit {
-				return "", fmt.Errorf("block %q contains more than %d characters; use codepoint range directly", p.Block, limit)
+			if blockName != "" && cd.Block != "" && !strings.EqualFold(canonicalName, cd.Block) {
+				return "", fmt.Errorf("cursor does not match block; start a new search")
+			}
+			if canonicalName == "" && cd.Block != "" {
+				canonicalName = cd.Block
 			}
 		}
-		return jsonResult(results)
+
+		cacheKey := "block|" + canonicalName
+		runes, ok := cache.get(cacheKey)
+		if !ok {
+			runes = nil
+			for r := bMin; r <= bMax; r++ {
+				if _, exists := srcs.Unicode.ByRune[r]; !exists {
+					continue
+				}
+				runes = append(runes, r)
+			}
+			cache.put(cacheKey, runes)
+		}
+		return paginateRunes(runes, pp, cursorData{Type: "block", Block: canonicalName}, srcs)
 	}
 }
 
@@ -336,13 +424,4 @@ func charInfoSlice(found []any) unicode.CharInfoList {
 	}
 	cis.Sort()
 	return cis
-}
-
-// charPropsSlice converts a sorted list of CharInfo into []CharProps.
-func charPropsSlice(cis unicode.CharInfoList, srcs *sources.Sources) []CharProps {
-	result := make([]CharProps, len(cis))
-	for i, ci := range cis {
-		result[i] = CharPropsFromRune(ci.Number, srcs)
-	}
-	return result
 }

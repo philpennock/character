@@ -223,18 +223,34 @@ Starts an MCP (Model Context Protocol) server on stdio, implementing the
 JSON-RPC 2.0 protocol.  MCP-aware coding tools (editors, agents) can connect
 and call Unicode lookups as structured tool calls without subprocess management.
 
+**Schema stability:** The MCP tool schemas (parameter names, types, and
+response shapes) may change incompatibly across any release, including patch
+versions.  Clients must discover schemas at runtime via the MCP `tools/list`
+method rather than hard-coding parameter knowledge.
+
 #### Exposed MCP tools
 
 | Tool | Parameters | Returns |
 |---|---|---|
 | `unicode_lookup_char` | `char: string` | Full property object for one codepoint |
-| `unicode_lookup_name` | `name: string`, `exact: bool` | Array of matching character objects |
-| `unicode_search` | `query: string` | Array of name-matched character objects |
+| `unicode_lookup_name` | `name: string`, `exact: bool`, `detail?`, `limit?`, `cursor?` | Paginated envelope of matching character objects |
+| `unicode_search` | `query: string`, `detail?`, `limit?`, `cursor?` | Paginated envelope of name-matched character objects |
 | `unicode_lookup_codepoint` | `codepoint: string` (`"U+2713"` or `"10003"`) | Full property object |
-| `unicode_browse_block` | `block: string` | Array of characters in the named block |
+| `unicode_browse_block` | `block: string`, `detail?`, `limit?`, `cursor?` | Paginated envelope of characters in the named block |
 | `unicode_list_blocks` | _(none)_ | Array of `{name, start, end}` objects |
 | `unicode_emoji_flag` | `country_code: string` | Regional indicator pair + combined glyph |
 | `unicode_transform` | `type: string`, `text: string` | Transformed string |
+
+#### Pagination parameters (search, lookup-name, browse-block)
+
+- `detail`: `"full"` (default) or `"summary"` — summary returns compact
+  columnar data `[character, codepoint, name, category]` for discovery.
+- `limit`: integer, default 200 — maximum results per page.
+- `cursor`: opaque string from a previous response to fetch the next page.
+
+Paginated tools return an envelope: `{results, columns, rows, count, total, cursor}`.
+In full mode `results` contains `CharProps` objects; in summary mode `columns`
+and `rows` replace it.  `cursor` is present only when more pages remain.
 
 #### Character property object (returned by lookup tools)
 

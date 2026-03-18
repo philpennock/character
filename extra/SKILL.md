@@ -32,13 +32,17 @@ Look up characters by their Unicode name.
 
 ```json
 { "name": "CHECK MARK", "exact": true }
-{ "name": "check", "exact": false }
+{ "name": "check", "exact": false, "detail": "summary", "limit": 50 }
 ```
 
-- `name` (string, required): the name to look up.
+- `name` (string, required, max 200 bytes): the name to look up.
 - `exact` (boolean, optional, default false): if true, match the full official
   Unicode name exactly (case-insensitive); if false, perform substring search.
-- Returns: array of character property objects.
+- `detail` (string, optional): `"full"` (default) or `"summary"` — summary
+  returns compact columnar `[character, codepoint, name, category]`.
+- `limit` (integer, optional, default 200): max results per page.
+- `cursor` (string, optional): continuation cursor from a previous response.
+- Returns: paginated envelope `{results, columns, rows, count, total, cursor}`.
 
 ### unicode_search
 
@@ -46,10 +50,14 @@ Search for characters whose names contain a substring.
 
 ```json
 { "query": "snowman" }
+{ "query": "arrow", "detail": "summary", "limit": 50 }
 ```
 
-- `query` (string, required): substring to match against character names.
-- Returns: array of character property objects.
+- `query` (string, required, max 200 bytes): substring to match against character names.
+- `detail` (string, optional): `"full"` (default) or `"summary"`.
+- `limit` (integer, optional, default 200): max results per page.
+- `cursor` (string, optional): continuation cursor from a previous response.
+- Returns: paginated envelope `{results, columns, rows, count, total, cursor}`.
 
 ### unicode_lookup_codepoint
 
@@ -70,15 +78,18 @@ List all characters in a Unicode block.
 
 ```json
 { "block": "Dingbats" }
-{ "block": "Miscellaneous Symbols" }
+{ "block": "Miscellaneous Symbols", "detail": "summary", "limit": 100 }
 ```
 
-- `block` (string, required): block name, case-insensitive, partial match
-  accepted.  Use `unicode_list_blocks` to discover exact block names.
-- Returns: array of character property objects (max 3000).
-- Blocks with more than 3000 assigned characters (e.g. CJK Unified
-  Ideographs) will return an error — use `unicode_lookup_codepoint` for
-  individual characters in large blocks.
+- `block` (string, required, max 200 bytes): block name, case-insensitive,
+  partial match accepted.  Use `unicode_list_blocks` to discover exact block
+  names.
+- `detail` (string, optional): `"full"` (default) or `"summary"`.
+- `limit` (integer, optional, default 200): max results per page.
+- `cursor` (string, optional): continuation cursor from a previous response.
+- Returns: paginated envelope `{results, columns, rows, count, total, cursor}`.
+  Large blocks (e.g. CJK Unified Ideographs) are paginated rather than
+  rejected.
 
 ### unicode_list_blocks
 
@@ -167,8 +178,15 @@ Every lookup tool returns objects with these fields:
   `unicode_lookup_name` with `exact: true` when you know the full name.
 - **Block names** are the official Unicode block names.  Call
   `unicode_list_blocks` first if you are unsure of the exact spelling.
-- **CJK blocks are large**: `unicode_browse_block` enforces a 3000-character
-  limit.  For CJK Unified Ideographs, look up individual codepoints instead.
+- **Large blocks are paginated**: `unicode_browse_block` paginates results.
+  Use `detail: "summary"` for an overview, then look up individual characters.
+- **Use summary mode for broad searches**: `{"query":"arrow","detail":"summary"}`
+  returns compact columnar data.  Once you find the character you need, look it
+  up individually with `unicode_lookup_char` or `unicode_lookup_codepoint` for
+  full details.
+- **Pagination**: search, lookup-name (substring), and browse-block return at
+  most `limit` results (default 200).  If more exist, the response includes a
+  `cursor` — pass it back in the next call to get the next page.
 - **Escape fields are insertion-ready**: `json_escaped`, `unicode_escaped`,
   `rust_escaped`, and `utf8_escaped` can be pasted directly into source code
   strings in their respective languages.
