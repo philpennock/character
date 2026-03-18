@@ -19,7 +19,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+try:
+    REPO_ROOT = [d for d in Path(__file__).absolute().parents if (d / '.git').exists()][0]
+except IndexError as e:
+    raise Exception(f'script {__file__} is not inside a git repository') from e
 BINARY = REPO_ROOT / "character"
 
 _id_seq = 0
