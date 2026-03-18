@@ -6,9 +6,9 @@ package main
 
 import "github.com/philpennock/character/commands/version"
 
-// This should be "latest release + 0.0.1 with -devel suffix"
+// This should be "latest release + 0.0.1 with -dev suffix"
 // OR if at the point where we're tagging, then that explicit tag.
-const HARDCODED_VERSION = "v0.10.0"
+const HARDCODED_VERSION = "v0.10.1-dev"
 
 func init() {
 	if version.VersionString == "" {
