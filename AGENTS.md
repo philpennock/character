@@ -5,6 +5,10 @@ assistants, LLM-based agents, and automated tooling.  The tool answers
 questions about Unicode codepoints, character properties, emoji, and related
 transformations.
 
+For understanding the **source code** — package structure, data flow, reading
+order, protocols, and architectural invariants — see
+[`CODE_GUIDE.md`](CODE_GUIDE.md).
+
 
 ## What this tool does
 
@@ -263,19 +267,6 @@ The `utf8_escaped`, `unicode_escaped`, `rust_escaped`, and `json_escaped`
 fields are ready for direct insertion into source code strings in their
 respective languages without further transformation.
 
-#### Implementation approach
-
-`character agent mcp` will be a new sub-command under `commands/agent/` that
-imports the existing `sources`, `unicode`, and `resultset` packages.  It
-reuses `sources.NewFast()` (same data, no extra overhead) and speaks MCP over
-os.Stdin / os.Stdout.
-
-The `resultset.JItem` struct already contains most needed fields; additional
-fields (`utf8_escaped`, `unicode_escaped`, `rust_escaped`, `category`,
-`block` as object, `presentation_variants`) require modest additions to the
-JSON serialisation layer.
-
-
 ## Recommended patterns for agents
 
 ### "I have a character glyph; what is it?"
@@ -322,8 +313,8 @@ character region FR
 ```sh
 character code -J U+1F600
 # → .characters[0].utf8        = "%F0%9F%98%80"
-# → .characters[0].utf8_bytes  = "f0 9f 98 80"  (planned field)
-# → .characters[0].utf8_escaped = "\\xf0\\x9f\\x98\\x80"  (planned field)
+# → .characters[0].utf8_bytes  = "f0 9f 98 80"
+# → .characters[0].utf8_escaped = "\\xf0\\x9f\\x98\\x80"
 ```
 
 ### "I need to combine an emoji with a skin-tone modifier"
@@ -346,9 +337,10 @@ character named -1j 'RAISED HAND' 'EMOJI MODIFIER FITZPATRICK TYPE-4'
 - **Regional indicators**: flag emoji are encoded as pairs of Regional
   Indicator letters.  Use `character region <CC>` for flag lookup; use
   `character name` on existing glyphs to decompose them.
-- **Planned fields** marked above (`utf8_bytes`, `utf8_escaped`,
-  `unicode_escaped`, `rust_escaped`, `category`, block as object,
-  `presentation_variants`) are not yet present in the current release.
+- The CLI JSON output (`-J`) includes `utf8_bytes`, `utf8_escaped`,
+  `unicode_escaped`, `rust_escaped`, `category`, `block_info` (object), and
+  `presentation_variants`.  The MCP `CharProps` output includes all of these
+  plus additional fields; see the property object table above.
 
 
 ## Concise invocation examples for copy-paste
