@@ -379,6 +379,27 @@ func TestToolBrowseBlock(t *testing.T) {
 	}
 }
 
+// TestToolBrowseBlockWrongKey is a regression test: an AI client sent
+// {"block_name": "Dingbats"} instead of {"block": "Dingbats"}.  Go's
+// json.Unmarshal silently ignores unknown keys, leaving p.Block empty.
+// The handler must detect the missing required field rather than passing
+// an empty string to FindByName.
+func TestToolBrowseBlockWrongKey(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	result, _ := callViaServeConn(t, inner, "unicode_browse_block",
+		map[string]any{"block_name": "Dingbats"})
+	assertIsError(t, result, "missing required parameter")
+}
+
+func TestToolBrowseBlockEmpty(t *testing.T) {
+	srcs := newTestSrcs(t)
+	inner := mcpserver.NewServer(srcs, nil).Inner()
+	result, _ := callViaServeConn(t, inner, "unicode_browse_block",
+		map[string]any{"block": ""})
+	assertIsError(t, result, "missing required parameter")
+}
+
 func TestToolBrowseBlockNotFound(t *testing.T) {
 	srcs := newTestSrcs(t)
 	inner := mcpserver.NewServer(srcs, nil).Inner()

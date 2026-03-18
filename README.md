@@ -90,7 +90,7 @@ knowledge.
 
 #### Claude Code
 
-Via the CLI:
+Register the MCP server:
 
 ```sh
 claude mcp add --scope user --transport stdio character -- character agent mcp
@@ -98,6 +98,21 @@ claude mcp add --scope user --transport stdio character -- character agent mcp
 
 This registers the agent as available for all Projects;
 drop the `--scope user` to only make available to this specific project.
+
+**Installing the skill file** (recommended): the file
+[`extra/SKILL.md`](extra/SKILL.md) teaches Claude the exact parameter names,
+types, and usage patterns for every tool.  Install it as a custom slash
+command so Claude can reference it when using the MCP tools:
+
+```sh
+# from the character source tree
+mkdir -p ~/.claude/commands
+cp extra/SKILL.md ~/.claude/commands/character-unicode.md
+```
+
+Once installed, type `/character-unicode` in a Claude Code session to load the
+skill into context.  This is optional but significantly reduces parameter
+errors.
 
 #### Other MCP clients
 
@@ -108,10 +123,11 @@ framing (one JSON object per `\n`-terminated line).
 
 ## Documentation
 
-| File                             | Audience                                                      |
-| -------------------------------- | ------------------------------------------------------------- |
-| [`AGENTS.md`](AGENTS.md)         | AI agents — tool schemas, example invocations, output formats |
-| [`CODE_GUIDE.md`](CODE_GUIDE.md) | Developers — package map, reading order, data flow, protocols |
+| File                               | Audience                                                                     |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| [`AGENTS.md`](AGENTS.md)           | AI agents — tool schemas, example invocations, output formats                |
+| [`CODE_GUIDE.md`](CODE_GUIDE.md)   | Developers — package map, reading order, data flow, protocols                |
+| [`extra/SKILL.md`](extra/SKILL.md) | AI agents — MCP tool parameter reference, installable as a Claude Code skill |
 
 
 ## Building

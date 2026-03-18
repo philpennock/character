@@ -107,6 +107,9 @@ func handleLookupName(srcs *sources.Sources, searchReady <-chan struct{}) mcpstd
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
 		}
+		if strings.TrimSpace(p.Name) == "" {
+			return "", fmt.Errorf("missing required parameter \"name\"")
+		}
 
 		if p.Exact {
 			upper := strings.ToUpper(p.Name)
@@ -142,6 +145,9 @@ func handleSearch(srcs *sources.Sources, searchReady <-chan struct{}) mcpstdio.H
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
 		}
+		if strings.TrimSpace(p.Query) == "" {
+			return "", fmt.Errorf("missing required parameter \"query\"")
+		}
 		if searchReady != nil {
 			select {
 			case <-searchReady:
@@ -164,6 +170,9 @@ func handleLookupCodepoint(srcs *sources.Sources) mcpstdio.Handler {
 		}
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		if strings.TrimSpace(p.Codepoint) == "" {
+			return "", fmt.Errorf("missing required parameter \"codepoint\"")
 		}
 		r, err := parseCodepoint(p.Codepoint)
 		if err != nil {
@@ -199,6 +208,10 @@ func handleBrowseBlock(srcs *sources.Sources) mcpstdio.Handler {
 		}
 		if err := json.Unmarshal(args, &p); err != nil {
 			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		p.Block = strings.TrimSpace(p.Block)
+		if p.Block == "" {
+			return "", fmt.Errorf("missing required parameter \"block\"")
 		}
 
 		min, max, candidates := srcs.UBlocks.FindByName(p.Block)
