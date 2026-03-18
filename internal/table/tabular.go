@@ -1,4 +1,4 @@
-// Copyright © 2016,2025,2026 Phil Pennock.
+// Copyright © 2016,2025 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -109,5 +109,4 @@ func (t *Table) SetOmitColumnName(name string) error {
 func init() {
 	AvailableStyles = tb.ListStyles()
 	RenderStyle = defaultRenderStyle
-	MarkdownStyle = "markdown"
 }

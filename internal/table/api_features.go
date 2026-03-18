@@ -1,4 +1,4 @@
-// Copyright © 2015,2016,2026 Phil Pennock.
+// Copyright © 2015,2016 Phil Pennock.
 // All rights reserved, except as granted under license.
 // Licensed per file LICENSE.txt
 
@@ -19,9 +19,6 @@ const (
 
 // RenderStyle represents how the table should be styled.
 var RenderStyle string
-
-// MarkdownStyle is set non-empty if it is an available style for Markdown
-var MarkdownStyle string
 
 // AvailableStyles when non-nil, indicates that we can set style options, and
 // lists those styles.  Should be sorted.
