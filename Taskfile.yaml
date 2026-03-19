@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+#
+# <https://taskfile.dev/>
+# <https://taskfile.dev/styleguide/>
+# <https://github.com/go-task/task>
+# go install github.com/go-task/task/v3/cmd/task@latest
+---
+version: '3'
+
+tasks:
+  default:
+    deps: [help]
+
+  help:
+    silent: true
+    env:
+      exe: "{{.TASK_EXE}}"
+    cmd: |-2
+      bt='`'
+      echo "There are various commands available, see ${bt}${exe} -l${bt} for more details"
+
+  report:versions:
+    desc: report versions of tools and dependencies
+    cmd: ./util/show_versions.sh
+
+  install:
+    desc: install the binary
+    silent: true   # we will 'set -x' before the install step
+    deps:
+      - make:build
+    env:
+      list_sep: '{{ if eq OS "windows" }};{{ else }}:{{end}}'
+    cmd: |-2
+      gobin="${GOBIN:-$(go env GOBIN)}"
+      if [[ -z "$gobin" ]]; then
+        gopath="${GOPATH:-$(go env GOPATH)}"
+        gobin="${gopath%%${list_sep}*}/bin"
+      fi
+      : "${gobin:?unable to find an install dir}"
+      set -x
+      install -m 0755 ./character "$gobin/character"
+
+  make:build:
+    desc: compile the binary
+    sources:
+      - '**/*.go'
+      - go.mod
+      - go.sum
+    generates:
+      - character
+    # This shim still buys us a direct git-derived version string as the primary version,
+    # rather than the `-dev` recorded in repo_version.go.
+    # The tabular version is probably no longer really needed, thanks to runtime/debug support.
+    cmd: ./util/make_oldstyle.sh
+
+# FIXME: Need to figure out what happened to wasm_exec.js and what's needed today.
+#  make:wasm:
+#    desc: create a WASM binary
+#    cmd: ./util/make_wasm.sh
+
+  next-version:show:
+    desc: Show the next version to use
+    silent: true
+    deps: [_have_cargo_tool:convco]
+    env:
+      task_exe: "{{.TASK_EXE}}"
+      task_name: "{{.TASK_NAME}}"
+    cmd: |-2
+      old="$(convco version --pp)"
+      pure="$(convco version --pp --bump)"
+      if [[ "$old" != "$pure" ]]; then
+        printf '%s\n' "$pure"
+        exit 0
+      fi
+      if convco check "${old}..HEAD" >/dev/null; then
+        # all commits were conventional
+        current="$(git describe)"
+        if [[ "$current" == "$old" ]]; then
+          # We are at the release, we bump to -dev
+          echo "$(convco version --pp --patch)-dev"
+        else
+          echo >&2 "${task_exe}: ${task_name}: error: ${old@Q}..${current@Q} has commits and were all conventional but failed to get a version bump"
+          exit 1
+        fi
+      else
+        # I have not been behaving
+        convco version --pp --patch
+      fi
+
+  next-version:write:
+    desc: update repo_version.go with the next version
+    deps: [_have_cargo_tool:convco]
+    cmd: |-2
+      nv="$(task next-version:show)"
+      sed -i.bak -Ee s'/^(const[[:space:]]+HARDCODED_VERSION[[:space:]]+=[[:space:]]+")[^"]+"/\1'"$nv"'"/' repo_version.go
+      rm -f repo_version.go.bak
+
+  release:commits-and-tag:
+    # Deliberately DOES NOT PUSH: a human must review for sanity
+    desc: commit a version bump, tag, commit version bump
+    deps: [_have_cargo_tool:convco]
+    env:
+      release_version:
+        sh: task next-version:show
+    cmds:
+      - task: next-version:write
+      - 'git commit -o repo_version.go -m "chore: bump hard-coded version to ${release_version}"'
+      - 'git tag -s -m "github.com/philpennock/character Version ${release_version#v}" -e "$release_version"'
+      - task: next-version:write
+      - 'git commit -o repo_version.go -m "chore: bump hard-coded version to $(task next-version:show)"'
+
+  _have_cargo_tool:*:  # shim for when the binary name == crate name
+    internal: true
+    silent: true
+    cmds:
+      - task: "_have_cargo_tool_crate:{{index .MATCH 0}}:{{index .MATCH 0}}"
+
+  _have_cargo_tool_crate:*:*:  # wildcards are: binary name, then crate
+    internal: true
+    silent: true
+    # if: block seems to not succeed when there's a templated index in there
+    env:
+      task_exe: "{{.TASK_EXE}}"
+      want_bin: "{{index .MATCH 0}}"
+      crate: "{{index .MATCH 1}}"
+    cmd: |-2
+      if command -v "$want_bin" >/dev/null 2>&1; then
+        exit 0  # we have it
+      fi
+      echo >&2 "${task_exe}: missing tool '${want_bin}', consider:  cargo install --locked ${crate@Q}"
+      exit 69 # EX_UNAVAILABLE
+
