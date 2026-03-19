@@ -64,7 +64,7 @@ tasks:
     deps: [_have_cargo_tool:convco]
     env:
       task_exe: "{{.TASK_EXE}}"
-      task_name: "{{.TASK_NAME}}"
+      task_name: "{{.TASK}}"
     cmd: |-2
       old="$(convco version --pp)"
       pure="$(convco version --pp --bump)"
