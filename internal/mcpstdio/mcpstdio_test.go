@@ -113,6 +113,7 @@ func TestInitializeHandshake(t *testing.T) {
 				Tools any `json:"tools"`
 			} `json:"capabilities"`
 			ProtocolVersion string `json:"protocolVersion"`
+			Instructions    string `json:"instructions"`
 		} `json:"result"`
 	}
 	if err := json.Unmarshal(resp, &result); err != nil {
@@ -123,6 +124,30 @@ func TestInitializeHandshake(t *testing.T) {
 	}
 	if result.Result.ProtocolVersion == "" {
 		t.Error("expected protocolVersion in result")
+	}
+	// No instructions set → omitted from JSON.
+	if result.Result.Instructions != "" {
+		t.Errorf("expected empty instructions when not set, got %q", result.Result.Instructions)
+	}
+}
+
+func TestInitializeWithInstructions(t *testing.T) {
+	srv := mcpstdio.NewServer("test-server", "0.1.0")
+	srv.SetInstructions("Use these tools for testing.")
+	send, close := testClient(t, srv)
+	defer close()
+
+	resp := send("initialize", map[string]any{"protocolVersion": "2024-11-05"})
+	var result struct {
+		Result struct {
+			Instructions string `json:"instructions"`
+		} `json:"result"`
+	}
+	if err := json.Unmarshal(resp, &result); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if result.Result.Instructions != "Use these tools for testing." {
+		t.Errorf("instructions: got %q, want %q", result.Result.Instructions, "Use these tools for testing.")
 	}
 }
 

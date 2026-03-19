@@ -42,10 +42,11 @@ type toolEntry struct {
 
 // Server is a tool-only MCP stdio server.
 type Server struct {
-	name    string
-	version string
-	tools   []toolEntry
-	byName  map[string]int
+	name         string
+	version      string
+	instructions string
+	tools        []toolEntry
+	byName       map[string]int
 }
 
 // NewServer creates a Server with the given name and version strings (used in
@@ -56,6 +57,13 @@ func NewServer(name, version string) *Server {
 		version: version,
 		byName:  make(map[string]int),
 	}
+}
+
+// SetInstructions sets the instructions string returned in the InitializeResult.
+// Per MCP 2025-03-26 §Lifecycle, clients MAY surface this to the model to guide
+// tool discovery and usage.
+func (s *Server) SetInstructions(text string) {
+	s.instructions = text
 }
 
 // AddTool registers a tool.  Registration order is preserved in tools/list.
@@ -176,11 +184,13 @@ func (s *Server) handleInitialize(w io.Writer, id json.RawMessage) {
 		ProtocolVersion string       `json:"protocolVersion"`
 		Capabilities    capabilities `json:"capabilities"`
 		ServerInfo      serverInfo   `json:"serverInfo"`
+		Instructions    string       `json:"instructions,omitempty"`
 	}
 	writeResponse(w, id, result{
 		ProtocolVersion: "2024-11-05",
 		Capabilities:    capabilities{Tools: map[string]any{}},
 		ServerInfo:      serverInfo{Name: s.name, Version: s.version},
+		Instructions:    s.instructions,
 	})
 }
 
