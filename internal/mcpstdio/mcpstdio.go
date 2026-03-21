@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 )
 
 // Handler processes a single tool call.  It receives the tool arguments as
@@ -35,9 +36,11 @@ type ToolDef struct {
 	InputSchema json.RawMessage // hand-written JSON Schema object
 }
 
-type toolEntry struct {
-	def     ToolDef
-	handler Handler
+// ToolEntry exposes a registered tool's definition and handler for use by
+// the public mcpserver bridge package.
+type ToolEntry struct {
+	Def     ToolDef
+	Handler Handler
 }
 
 // Server is a tool-only MCP stdio server.
@@ -45,7 +48,7 @@ type Server struct {
 	name         string
 	version      string
 	instructions string
-	tools        []toolEntry
+	tools        []ToolEntry
 	byName       map[string]int
 }
 
@@ -69,8 +72,24 @@ func (s *Server) SetInstructions(text string) {
 // AddTool registers a tool.  Registration order is preserved in tools/list.
 func (s *Server) AddTool(def ToolDef, h Handler) {
 	s.byName[def.Name] = len(s.tools)
-	s.tools = append(s.tools, toolEntry{def: def, handler: h})
+	s.tools = append(s.tools, ToolEntry{Def: def, Handler: h})
 }
+
+// Tools returns a snapshot of all registered tools in registration order.
+func (s *Server) Tools() []ToolEntry {
+	return slices.Clone(s.tools)
+}
+
+// Instructions returns the instructions string, or "" if none was set.
+func (s *Server) Instructions() string {
+	return s.instructions
+}
+
+// Name returns the server name.
+func (s *Server) Name() string { return s.name }
+
+// Version returns the server version.
+func (s *Server) Version() string { return s.version }
 
 // ServeStdio runs the MCP server on os.Stdin / os.Stdout.
 func (s *Server) ServeStdio(ctx context.Context) error {
@@ -206,9 +225,9 @@ func (s *Server) handleToolsList(w io.Writer, id json.RawMessage) {
 	items := make([]toolItem, len(s.tools))
 	for i, t := range s.tools {
 		items[i] = toolItem{
-			Name:        t.def.Name,
-			Description: t.def.Description,
-			InputSchema: t.def.InputSchema,
+			Name:        t.Def.Name,
+			Description: t.Def.Description,
+			InputSchema: t.Def.InputSchema,
 		}
 	}
 	writeResponse(w, id, result{Tools: items})
@@ -239,7 +258,7 @@ func (s *Server) handleToolsCall(ctx context.Context, w io.Writer, id json.RawMe
 		IsError bool          `json:"isError,omitempty"`
 	}
 
-	text, err := s.tools[idx].handler(ctx, p.Arguments)
+	text, err := s.tools[idx].Handler(ctx, p.Arguments)
 	if err != nil {
 		writeResponse(w, id, callResult{
 			Content: []contentItem{{Type: "text", Text: err.Error()}},
