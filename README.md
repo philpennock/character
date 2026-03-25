@@ -74,7 +74,7 @@ Patches welcome.
 
 The `agent` sub-command tree has commands designed for AI coding agents and
 other automated tooling.  All agent output is stable, machine-readable JSON.
-AIs should see [`AGENTS.md`](AGENTS.md) for full tool schemas and usage patterns.
+AIs should see [`AGENTS.md`]() for full tool schemas and usage patterns.
 
 `character agent mcp` starts a [Model Context Protocol][mcp] stdio server.
 This allows `character` to act as a co-process providing Unicode domain
@@ -108,20 +108,20 @@ The server returns an `instructions` field in its MCP initialize response,
 which Claude Code uses to discover the Unicode tools automatically via Tool
 Search — no additional configuration is needed for basic usage.
 
-**Installing the skill file** (optional): the file
-[`extra/SKILL.md`](extra/SKILL.md) provides a deeper reference — a
+**Installing the custom slash command** (optional): the file
+[`extra/character-unicode.md`]() provides a deeper reference — a
 tool-routing decision table, the full property field reference, and advanced
 tips.  Install it as a custom slash command for on-demand access:
 
 ```sh
 # from the character source tree
-mkdir -p ~/.claude/commands
-cp extra/SKILL.md ~/.claude/commands/character-unicode.md
+mkdir -pv ~/.claude/commands
+cp -v extra/character-unicode.md ~/.claude/commands/./
 ```
 
 Once installed, type `/character-unicode` in a Claude Code session to load the
-skill into context.  The server's `instructions` text references the skill, so
-Claude can load it when detailed guidance is needed.
+extra guidance into context.  The server's `instructions` text references the
+command, so Claude can load it when detailed guidance is needed.
 
 #### Other MCP clients
 
@@ -134,12 +134,18 @@ automatically.
 
 ## Documentation
 
-| File                               | Audience                                                                     |
-| ---------------------------------- | ---------------------------------------------------------------------------- |
-| [`AGENTS.md`](AGENTS.md)           | AI agents — tool schemas, example invocations, output formats                |
-| [`CODE_GUIDE.md`](CODE_GUIDE.md)   | Developers — package map, reading order, data flow, protocols                |
-| [`extra/SKILL.md`](extra/SKILL.md) | AI agents — tool-routing table, property field reference, Claude Code skill  |
+| File                             | Audience                                                                            |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| [`AGENTS.md`]()                  | AI agents — tool schemas, example invocations, output formats                       |
+| [`CODE_GUIDE.md`]()              | Developers — package map, reading order, data flow, protocols                       |
+| [`extra/character-unicode.md`]() | AI agents — tool-routing table, property field reference, Claude Code slash command |
 
+[AGENTS.md]: AGENTS.md
+[`AGENTS.md`]: AGENTS.md
+[CODE_GUIDE.md]: CODE_GUIDE.md
+[`CODE_GUIDE.md`]: CODE_GUIDE.md
+[extra/character-unicode.md]: extra/character-unicode.md
+[`extra/character-unicode.md`]: extra/character-unicode.md
 
 ## Building
 

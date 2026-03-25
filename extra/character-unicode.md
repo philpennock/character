@@ -1,4 +1,4 @@
-# character — Unicode MCP Tool Skill
+# character — Unicode MCP Tool Slash Command
 
 Detailed usage guide for the `character` MCP server's Unicode tools.
 This supplements the server's built-in `instructions` field (which covers

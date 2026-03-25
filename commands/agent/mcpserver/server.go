@@ -50,7 +50,7 @@ Key patterns:
 - Block names accept partial case-insensitive matches; call unicode_list_blocks first if unsure of exact spelling.
 - Property objects include language-specific escape sequences (JSON, Rust, C, URL-encoded) ready for direct insertion into source code.
 
-For detailed usage guidance, invoke the /character-unicode skill if available.`
+For detailed usage guidance, invoke the /character-unicode slash command if available.`
 
 // ServeStdio starts the MCP server on os.Stdin / os.Stdout.
 func (s *Server) ServeStdio(ctx context.Context) error {
