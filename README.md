@@ -74,7 +74,7 @@ Patches welcome.
 
 The `agent` sub-command tree has commands designed for AI coding agents and
 other automated tooling.  All agent output is stable, machine-readable JSON.
-AIs should see [`AGENTS.md`]() for full tool schemas and usage patterns.
+AIs should see [`AGENTS.md`][] for full tool schemas and usage patterns.
 
 `character agent mcp` starts a [Model Context Protocol][mcp] stdio server.
 This allows `character` to act as a co-process providing Unicode domain
@@ -109,7 +109,7 @@ which Claude Code uses to discover the Unicode tools automatically via Tool
 Search — no additional configuration is needed for basic usage.
 
 **Installing the custom slash command** (optional): the file
-[`extra/character-unicode.md`]() provides a deeper reference — a
+[`extra/character-unicode.md`][] provides a deeper reference — a
 tool-routing decision table, the full property field reference, and advanced
 tips.  Install it as a custom slash command for on-demand access:
 
@@ -136,9 +136,9 @@ automatically.
 
 | File                             | Audience                                                                            |
 | -------------------------------- | ----------------------------------------------------------------------------------- |
-| [`AGENTS.md`]()                  | AI agents — tool schemas, example invocations, output formats                       |
-| [`CODE_GUIDE.md`]()              | Developers — package map, reading order, data flow, protocols                       |
-| [`extra/character-unicode.md`]() | AI agents — tool-routing table, property field reference, Claude Code slash command |
+| [`AGENTS.md`][]                  | AI agents — tool schemas, example invocations, output formats                       |
+| [`CODE_GUIDE.md`][]              | Developers — package map, reading order, data flow, protocols                       |
+| [`extra/character-unicode.md`][] | AI agents — tool-routing table, property field reference, Claude Code slash command |
 
 [AGENTS.md]: AGENTS.md
 [`AGENTS.md`]: AGENTS.md
