@@ -30,13 +30,13 @@ jobs:
 
       - id: repo-checkout
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - id: setup-go
         name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 'stable'
           check-latest: true
@@ -74,7 +74,7 @@ jobs:
 
       - id: coverage-send
         name: Send coverage
-        uses: shogo82148/actions-goveralls@25f5320d970fb565100cf1993ada29be1bb196a1 # v1.10.0
+        uses: shogo82148/actions-goveralls@548a2a7896df420c38df648845a5525a33f82585 # v1.11.5
         with:
           path-to-profile: ${{ runner.temp }}/profile.cov
           flag-name: ${{ steps.go-settings.outputs.go-version }}
