@@ -43,7 +43,7 @@ func runAgentMCP(cmd *cobra.Command, args []string) {
 		close(searchReady)
 	}()
 
-	srv := mcpserver.NewServer(srcs, searchReady)
+	srv := mcpserver.NewStdioServer(srcs, searchReady)
 	if err := srv.ServeStdio(context.Background()); err != nil {
 		fmt.Fprintf(os.Stderr, "agent mcp: %v\n", err)
 		root.Errored()

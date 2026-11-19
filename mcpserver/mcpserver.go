@@ -15,6 +15,9 @@ import (
 	"io"
 
 	"github.com/philpennock/character/internal/mcpstdio"
+
+	unicodetools "github.com/philpennock/character/commands/agent/mcpserver"
+	"github.com/philpennock/character/sources"
 )
 
 // Handler processes a single tool call.  It receives the tool arguments as
@@ -105,4 +108,14 @@ func (s *Server) ServeConn(ctx context.Context, r io.Reader, w io.Writer) error 
 // should use [Server.Tools] instead.
 func (s *Server) Inner() *mcpstdio.Server {
 	return s.inner
+}
+
+// NewUnicodeServer returns a Server with character's Unicode tools
+// registered and transport-neutral instructions, for re-hosting on another
+// MCP transport: iterate [Server.Tools] and use [Server.Instructions].
+//
+// searchReady is as for the tools' own server: closed once
+// srcs.Unicode.Search is populated, or nil if it already is.
+func NewUnicodeServer(srcs *sources.Sources, searchReady <-chan struct{}) *Server {
+	return &Server{inner: unicodetools.NewServer(srcs, searchReady).Inner()}
 }
