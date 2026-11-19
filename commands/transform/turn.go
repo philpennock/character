@@ -5,14 +5,16 @@
 package transform
 
 // $ character named -v/ letter\ turned
-// `LATIN CAPITAL LETTER TURNED H` is lower-case turned, in my fontl `K` and `T` are blocks
+// `LATIN CAPITAL LETTER TURNED H` is lower-case turned, in my font; `K` and `T` are blocks
 // pick appropriate near-matches otherwise, sometimes being the same letter
 // # character browse -b IPA
+// Updated 2026-11 and now 'B' and 'R' use Lisu/Fraser alphabet turns, which might have font issues.
+// Also using a much better 'T'.
 
 // <http://www.upsidedowntext.com/unicode> has more ☺
 
-const turnReplacementsA string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!&()[]{}<>"
-const turnReplacementsB string = "ɐqɔpəɟᵷɥᴉɾʞꞁɯuodbɹsʇnʌʍxʎzⱯ Ɔ ƎℲפHIſ ꞀƜNOԀ  S┴∩Ʌ X⅄Z0     9 86¿¡⅋)(][}{><"
+const turnReplacementsA string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!&()[]{}<>.,';\"_"
+const turnReplacementsB string = "ɐqɔpǝɟᵷɥᴉɾʞꞁɯuodbɹsʇnʌʍxʎzⱯꓭƆᗡƎℲ⅁HIſꞰꞀƜNOԀ ꓤSꞱ∩ɅMX⅄Z0Ɩ↊↋ ϛ9 86¿¡⅋)(][}{><˙ʻ,⸵„‾"
 
 var turnTable map[rune]rune
 
